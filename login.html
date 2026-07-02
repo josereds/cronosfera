@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14161c">
+  <meta name="description" content="Inicia sesión en Cronosfera — cliente, mayorista o administrador.">
+  <title>Iniciar sesión · Cronosfera</title>
+  <link rel="canonical" href="https://cronosfera-five.vercel.app/login.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ====== Dark luxe tokens (estándar Cronosfera) ====== */
+    :root {
+      --bg:           oklch(14% 0.008 250);
+      --bg-warm:      oklch(17% 0.010 250);
+      --surface:      oklch(20% 0.010 250);
+      --surface-2:    oklch(24% 0.012 250);
+      --fg:           oklch(96% 0.005 80);
+      --fg-soft:      oklch(82% 0.005 80);
+      --muted:        oklch(60% 0.008 80);
+      --muted-2:      oklch(48% 0.008 80);
+      --border:       oklch(30% 0.008 250);
+      --border-soft:  oklch(24% 0.006 250);
+      --accent:       oklch(78% 0.10 75);
+      --accent-deep:  oklch(68% 0.12 70);
+      --accent-soft:  oklch(28% 0.06 70);
+      --danger:       oklch(64% 0.18 25);
+      --success:      oklch(70% 0.12 155);
+      --info:         oklch(70% 0.10 230);
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+      --shadow:    0 8px 30px rgba(0,0,0,.4);
+      --shadow-lg: 0 30px 80px rgba(0,0,0,.55);
+      --r-sm: 4px;
+      --r:    8px;
+      --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    /* ====== Layout ====== */
+    .login-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      position: relative;
+    }
+    @media (max-width: 980px) {
+      .login-shell { grid-template-columns: 1fr; }
+      .login-aside { display: none; }
+    }
+
+    .login-aside {
+      position: relative;
+      background: linear-gradient(135deg, oklch(17% 0.010 250), oklch(11% 0.008 250));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 56px 64px;
+      border-right: 1px solid var(--border);
+    }
+    .login-aside::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 80%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 55%);
+      pointer-events: none;
+    }
+    .login-aside::after {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 18% 24%, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 1.5px),
+        radial-gradient(circle at 78% 64%, color-mix(in oklab, var(--accent) 8%, transparent) 0, transparent 1.5px),
+        radial-gradient(circle at 50% 90%, color-mix(in oklab, var(--accent) 6%, transparent) 0, transparent 1.5px);
+      background-size: 80px 80px, 120px 120px, 100px 100px;
+      opacity: .6;
+      pointer-events: none;
+    }
+    .aside-logo {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .aside-logo .dot { color: var(--accent); }
+    .aside-hero { position: relative; z-index: 2; max-width: 480px; }
+    .aside-eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 24px;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .aside-eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); }
+    .aside-title {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 4vw, 58px);
+      font-weight: 500;
+      line-height: 1.02;
+      letter-spacing: -0.012em;
+      margin-bottom: 22px;
+    }
+    .aside-title em { font-style: italic; color: var(--accent); }
+    .aside-lead { color: var(--fg-soft); font-size: 16px; line-height: 1.65; }
+    .aside-stats {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 600; color: var(--accent); }
+    .stat-lbl { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+    /* ====== Main card ====== */
+    .login-main {
+      display: flex; align-items: center; justify-content: center;
+      padding: 56px 28px;
+      position: relative;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 44px 40px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .login-card::before {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: var(--r-lg);
+      padding: 1px;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 30%, transparent), transparent 60%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      pointer-events: none;
+    }
+    .card-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted);
+      margin-bottom: 24px; transition: color .2s;
+    }
+    .card-back:hover { color: var(--fg); }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 32px; font-weight: 500; letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .card-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* ====== Tabs ====== */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--bg-warm);
+      padding: 4px; border-radius: var(--r);
+      margin-bottom: 26px;
+      border: 1px solid var(--border-soft);
+    }
+    .tab {
+      flex: 1; padding: 9px 12px;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted);
+      border-radius: 6px;
+      transition: all .2s;
+    }
+    .tab:hover { color: var(--fg-soft); }
+    .tab.active {
+      background: var(--surface-2);
+      color: var(--fg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ====== Form ====== */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 12px 14px;
+      border-radius: var(--r);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .field input::placeholder { color: var(--muted-2); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-error {
+      background: color-mix(in oklab, var(--danger) 12%, transparent);
+      color: oklch(82% 0.14 25);
+      border: 1px solid color-mix(in oklab, var(--danger) 35%, transparent);
+      padding: 10px 12px;
+      border-radius: var(--r);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .form-error.show { display: block; }
+    .form-success {
+      background: color-mix(in oklab, var(--success) 14%, transparent);
+      color: oklch(85% 0.10 155);
+      border: 1px solid color-mix(in oklab, var(--success) 35%, transparent);
+      padding: 10px 12px;
+      border-radius: var(--r);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .form-success.show { display: block; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px 18px;
+      background: var(--accent);
+      color: oklch(14% 0.008 250);
+      font-weight: 600;
+      border-radius: var(--r);
+      letter-spacing: 0.01em;
+      transition: all .2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 6px 24px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .card-foot {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .card-foot a { color: var(--accent); font-weight: 500; }
+    .card-foot a:hover { text-decoration: underline; }
+
+    /* ====== Demo hint ====== */
+    .demo-hint {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: color-mix(in oklab, var(--info) 8%, transparent);
+      border: 1px dashed color-mix(in oklab, var(--info) 35%, transparent);
+      border-radius: var(--r);
+      font-size: 12px;
+      color: var(--fg-soft);
+      line-height: 1.55;
+    }
+    .demo-hint code {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-size: 11px;
+      background: var(--bg-warm);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin: 0 2px;
+    }
+    .demo-hint button {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body>
+  <main class="login-shell">
+    <!-- Aside -->
+    <aside class="login-aside">
+      <div class="aside-logo">Cronosfera<span class="dot">.</span></div>
+      <div class="aside-hero">
+        <span class="aside-eyebrow">Acceso a tu cuenta</span>
+        <h1 class="aside-title">Tu tiempo,<br>tus <em>piezas.</em></h1>
+        <p class="aside-lead">Inicia sesión para acceder a tus pedidos, favoritos y, si eres mayorista aprobado, a tarifas especiales por volumen.</p>
+      </div>
+      <div class="aside-stats">
+        <div><div class="stat-num">12+</div><div class="stat-lbl">Referencias</div></div>
+        <div><div class="stat-num">7d</div><div class="stat-lbl">Garantía</div></div>
+        <div><div class="stat-num">24h</div><div class="stat-lbl">Despacho</div></div>
+      </div>
+    </aside>
+
+    <!-- Card -->
+    <section class="login-main">
+      <div class="login-card">
+        <a href="index.html" class="card-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Volver a la tienda
+        </a>
+
+        <h2 class="card-title">Bienvenido</h2>
+        <p class="card-sub">Accede a tu cuenta Cronosfera</p>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab active" data-mode="login" role="tab">Iniciar sesión</button>
+          <button type="button" class="tab" data-mode="register" role="tab">Crear cuenta</button>
+        </div>
+
+        <div class="form-error" id="formError"></div>
+        <div class="form-success" id="formSuccess"></div>
+
+        <!-- LOGIN -->
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="loginEmail">Correo electrónico</label>
+            <input type="email" id="loginEmail" name="email" autocomplete="email" required placeholder="tu@correo.com">
+          </div>
+          <div class="field">
+            <label for="loginPassword">Contraseña</label>
+            <input type="password" id="loginPassword" name="password" autocomplete="current-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn-primary">
+            Entrar
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/><polyline points="13,6 19,12 13,18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+
+        <!-- REGISTER -->
+        <form id="registerForm" novalidate style="display:none">
+          <div class="field">
+            <label for="regName">Nombre completo</label>
+            <input type="text" id="regName" name="name" required placeholder="Tu nombre">
+          </div>
+          <div class="field">
+            <label for="regEmail">Correo electrónico</label>
+            <input type="email" id="regEmail" name="email" autocomplete="email" required placeholder="tu@correo.com">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="regPassword">Contraseña</label>
+              <input type="password" id="regPassword" name="password" autocomplete="new-password" required placeholder="Mín. 6 caracteres" minlength="6">
+            </div>
+            <div class="field">
+              <label for="regRole">Tipo de cuenta</label>
+              <select id="regRole" name="role">
+                <option value="retail">Cliente</option>
+                <option value="wholesale">Mayorista (requiere aprobación)</option>
+              </select>
+            </div>
+          </div>
+          <div id="wholesaleFields" style="display:none">
+            <div class="field-row">
+              <div class="field">
+                <label for="regCompany">Empresa</label>
+                <input type="text" id="regCompany" name="company" placeholder="Nombre comercial">
+              </div>
+              <div class="field">
+                <label for="regTaxId">NIT</label>
+                <input type="text" id="regTaxId" name="taxId" placeholder="00000000-0">
+              </div>
+            </div>
+            <div class="field">
+              <label for="regCity">Ciudad</label>
+              <input type="text" id="regCity" name="city" placeholder="Bogotá, Medellín, Cali…">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary">
+            Crear cuenta
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+
+        <div class="card-foot">
+          ¿Olvidaste tu contraseña? <a href="#">Recupérala</a><br>
+          <span style="opacity:.7">o vuelve al <a href="index.html">inicio</a></span>
+        </div>
+
+        <div class="demo-hint">
+          <strong>Acceso demo:</strong> admin <code>admin@cronosfera.co</code> / <code>admin</code>
+          ·
+          <button type="button" id="autofillAdmin">autollenar</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="cronos-store.js"></script>
+  <script src="cronos-auth.js"></script>
+  <script src="cronos-ui.js"></script>
+  <script>
+    (function () {
+      var tabs = document.querySelectorAll('.tab');
+      var loginForm = document.getElementById('loginForm');
+      var registerForm = document.getElementById('registerForm');
+      var err = document.getElementById('formError');
+      var ok = document.getElementById('formSuccess');
+      var wholesaleFields = document.getElementById('wholesaleFields');
+      var regRole = document.getElementById('regRole');
+      var next = new URLSearchParams(window.location.search).get('next') || 'index.html';
+
+      // Si ya hay sesión, ir al next
+      var cur = Store.currentUser();
+      if (cur) {
+        var target = cur.role === 'admin' ? 'admin.html' : next;
+        window.location.href = target;
+        return;
+      }
+
+      function showErr(msg) { err.textContent = msg; err.classList.add('show'); ok.classList.remove('show'); }
+      function showOk(msg) { ok.textContent = msg; ok.classList.add('show'); err.classList.remove('show'); }
+      function clearMsgs() { err.classList.remove('show'); ok.classList.remove('show'); }
+
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () {
+          tabs.forEach(function (x) { x.classList.remove('active'); });
+          t.classList.add('active');
+          var mode = t.getAttribute('data-mode');
+          loginForm.style.display = mode === 'login' ? '' : 'none';
+          registerForm.style.display = mode === 'register' ? '' : 'none';
+          clearMsgs();
+        });
+      });
+
+      regRole.addEventListener('change', function () {
+        wholesaleFields.style.display = regRole.value === 'wholesale' ? '' : 'none';
+      });
+
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearMsgs();
+        var email = document.getElementById('loginEmail').value;
+        var pwd = document.getElementById('loginPassword').value;
+        try {
+          var u = Store.login(email, pwd);
+          showOk('Bienvenido, ' + u.name + '. Redirigiendo…');
+          setTimeout(function () {
+            var target = u.role === 'admin' ? 'admin.html' : next;
+            window.location.href = target;
+          }, 700);
+        } catch (ex) {
+          showErr(ex.message);
+        }
+      });
+
+      registerForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearMsgs();
+        var data = {
+          name: document.getElementById('regName').value,
+          email: document.getElementById('regEmail').value,
+          password: document.getElementById('regPassword').value,
+          role: document.getElementById('regRole').value,
+          company: document.getElementById('regCompany').value,
+          taxId: document.getElementById('regTaxId').value,
+          city: document.getElementById('regCity').value
+        };
+        if (!data.email || !data.password) { showErr('Completa correo y contraseña'); return; }
+        if (data.password.length < 6) { showErr('La contraseña debe tener al menos 6 caracteres'); return; }
+        if (data.role === 'wholesale' && (!data.company || !data.taxId)) {
+          showErr('Para cuenta mayorista necesitamos empresa y NIT');
+          return;
+        }
+        try {
+          var u = Store.register(data);
+          if (u.role === 'wholesale' && u.status === 'pending') {
+            showOk('Solicitud registrada · referencia ' + (Store.getWholesaleRequests().find(function (r) { return r.userId === u.id; }) || {}).reference + '. Queda pendiente de aprobación manual.');
+            registerForm.reset();
+            wholesaleFields.style.display = 'none';
+          } else {
+            showOk('Cuenta creada. Inicia sesión para continuar.');
+            setTimeout(function () {
+              tabs[0].click();
+              document.getElementById('loginEmail').value = data.email;
+            }, 1200);
+          }
+        } catch (ex) {
+          showErr(ex.message);
+        }
+      });
+
+      document.getElementById('autofillAdmin').addEventListener('click', function () {
+        tabs[0].click();
+        document.getElementById('loginEmail').value = 'admin@cronosfera.co';
+        document.getElementById('loginPassword').value = 'admin';
+        clearMsgs();
+      });
+    })();
+  </script>
+</body>
+</html>

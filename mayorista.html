@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Cuenta mayorista Cronosfera — tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia." />
+  <title>Cuenta mayorista · Cronosfera</title>
+  <link rel="canonical" href="https://cronosfera-five.vercel.app/mayorista.html">
+  <meta property="og:site_name" content="Cronosfera">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cronosfera-five.vercel.app/mayorista.html">
+  <meta property="og:title" content="Cuenta mayorista · Cronosfera">
+  <meta property="og:description" content="Tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia.">
+  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Cronosfera — programa mayorista para revendedores y tiendas en Colombia.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cuenta mayorista · Cronosfera">
+  <meta name="twitter:description" content="Tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia.">
+  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           oklch(97% 0.008 80);
+      --bg-warm:      oklch(95% 0.012 80);
+      --surface:      oklch(100% 0 0);
+      --surface-2:    oklch(98% 0.006 80);
+      --fg:           oklch(22% 0.005 250);
+      --fg-soft:      oklch(34% 0.005 250);
+      --muted:        oklch(52% 0.006 250);
+      --muted-2:      oklch(64% 0.006 250);
+      --border:       oklch(88% 0.006 250);
+      --border-soft:  oklch(93% 0.006 250);
+      --accent:       oklch(52% 0.08 60);
+      --accent-deep:  oklch(42% 0.08 60);
+      --accent-soft:  oklch(90% 0.05 65);
+      --success:      oklch(48% 0.10 155);
+      --warning:      oklch(62% 0.12 75);
+      --danger:       oklch(52% 0.13 25);
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.04);
+      --shadow:    0 4px 16px rgba(20, 22, 28, 0.05);
+      --shadow-lg: 0 18px 50px rgba(20, 22, 28, 0.10);
+      --r: 8px; --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; }
+    svg { display: block; max-width: 100%; }
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent-deep);
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); }
+    .eyebrow.center::before { display: none; }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .demo-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10.5px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 10px; border-radius: 999px;
+      background: var(--surface-2); border: 1px solid var(--border-soft);
+    }
+    .demo-tag::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--muted-2); }
+
+    /* ---------- HEADER ---------- */
+    .site-header {
+      position: sticky; top: 0; z-index: 80;
+      background: rgba(246, 241, 231, 0.92);
+      backdrop-filter: blur(20px) saturate(1.1);
+      -webkit-backdrop-filter: blur(20px) saturate(1.1);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 32px; height: 76px;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 600; letter-spacing: 0.02em;
+      color: var(--fg);
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .logo svg { width: 26px; height: 26px; }
+    .logo .dot { color: var(--accent); }
+    .nav-primary { display: flex; align-items: center; gap: 28px; flex: 1; }
+    .nav-primary a {
+      font-size: 14px; color: var(--fg-soft);
+      padding: 8px 0; position: relative; transition: color 0.2s;
+    }
+    .nav-primary a.current { color: var(--fg); }
+    .nav-primary a.current::after {
+      content: ""; position: absolute; bottom: 4px; left: 0; right: 0;
+      height: 1px; background: var(--accent);
+    }
+    .nav-primary a:hover { color: var(--fg); }
+    .header-actions { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center; border-radius: 50%;
+      color: var(--fg-soft); transition: all 0.2s; position: relative;
+    }
+    .icon-btn:hover { background: var(--surface); color: var(--fg); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .icon-btn .badge {
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: var(--accent); color: var(--surface); border-radius: 999px;
+      font-size: 10px; font-weight: 600; font-family: var(--font-mono);
+      display: grid; place-items: center;
+    }
+    .wholesale-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: var(--accent-soft); color: var(--accent-deep);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-right: 8px;
+    }
+    .wholesale-pill::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .menu-toggle { display: none; }
+
+    /* ---------- HERO ---------- */
+    .hero {
+      position: relative;
+      padding: 80px 0 64px;
+      background:
+        radial-gradient(1100px 480px at 12% 18%, color-mix(in oklab, var(--accent-soft) 60%, transparent), transparent 70%),
+        linear-gradient(180deg, var(--bg-warm), var(--bg) 80%);
+      border-bottom: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--fg) 4%, transparent) 1px, transparent 0);
+      background-size: 26px 26px;
+      opacity: 0.6;
+      pointer-events: none;
+      mask-image: linear-gradient(180deg, black, transparent 80%);
+      -webkit-mask-image: linear-gradient(180deg, black, transparent 80%);
+    }
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 4.6vw, 60px);
+      font-weight: 500;
+      line-height: 1.04;
+      letter-spacing: -0.014em;
+      margin: 22px 0 22px;
+    }
+    .hero h1 em {
+      font-style: italic; color: var(--accent-deep);
+      font-weight: 400;
+    }
+    .hero .lede {
+      font-size: 17px; line-height: 1.6; color: var(--fg-soft);
+      max-width: 540px;
+    }
+    .hero-cta-row {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 14px 22px;
+      font-size: 14px; font-weight: 600;
+      letter-spacing: 0.04em;
+      border-radius: var(--r);
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--fg); color: var(--surface);
+    }
+    .btn-primary:hover { background: var(--accent-deep); }
+    .btn-ghost {
+      background: transparent; color: var(--fg);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--fg); }
+    .btn-lg { padding: 17px 28px; font-size: 15px; }
+
+    /* hero side card — factura demo */
+    .invoice-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      transform: rotate(-1.4deg);
+    }
+    .invoice-card::after {
+      content: ""; position: absolute; inset: -8px -8px auto -8px;
+      height: 36px;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--accent-soft) 60%, transparent), transparent);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      z-index: -1;
+      filter: blur(6px);
+    }
+    .invoice-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 18px; border-bottom: 1px solid var(--border-soft);
+    }
+    .invoice-head .lbl {
+      font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .invoice-head .val { font-family: var(--font-mono); font-size: 13px; color: var(--fg); }
+    .invoice-head .brand {
+      font-family: var(--font-display); font-size: 18px; font-weight: 600;
+      color: var(--fg); letter-spacing: 0.01em;
+    }
+    .invoice-head .brand .dot { color: var(--accent); }
+    .invoice-rows { padding: 18px 0; }
+    .invoice-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 18px; align-items: center;
+      padding: 11px 0;
+      font-size: 13px;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .invoice-row:last-child { border-bottom: 0; }
+    .invoice-row .sku { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+    .invoice-row .name { color: var(--fg); font-weight: 500; }
+    .invoice-row .qty { font-family: var(--font-mono); color: var(--muted); font-size: 12px; }
+    .invoice-row .price {
+      font-family: var(--font-mono); font-weight: 500; color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .invoice-row .price .unit {
+      display: block; font-size: 10.5px; color: var(--muted-2);
+      font-weight: 400; letter-spacing: 0.04em;
+    }
+    .invoice-foot {
+      padding-top: 16px; border-top: 1px solid var(--border);
+      display: grid; gap: 8px;
+    }
+    .invoice-totrow {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--fg-soft);
+    }
+    .invoice-totrow .v { font-family: var(--font-mono); }
+    .invoice-totrow.grand {
+      padding-top: 12px; border-top: 1px solid var(--border-soft);
+      color: var(--fg); font-size: 16px; font-weight: 600;
+    }
+    .invoice-totrow.grand .v { color: var(--accent-deep); font-size: 18px; }
+    .invoice-flag {
+      position: absolute; top: -14px; right: -14px;
+      background: var(--accent-deep); color: var(--surface);
+      padding: 6px 12px; border-radius: 999px;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transform: rotate(6deg);
+      box-shadow: var(--shadow);
+    }
+
+    /* ---------- BENEFITS ---------- */
+    .section { padding: 84px 0; }
+    .section-head {
+      max-width: 720px; margin-bottom: 52px;
+    }
+    .section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 3.6vw, 46px);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-top: 14px;
+    }
+    .section-head p {
+      color: var(--muted); font-size: 16px; margin-top: 14px;
+      max-width: 600px;
+    }
+    .section-head.center p { margin-left: auto; margin-right: auto; }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--border-soft);
+      border-left: 1px solid var(--border-soft);
+    }
+    .benefit {
+      padding: 36px 32px;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--surface);
+      transition: background 0.2s;
+    }
+    .benefit:hover { background: var(--surface-2); }
+    .benefit .ic {
+      width: 38px; height: 38px;
+      color: var(--accent-deep);
+      margin-bottom: 18px;
+    }
+    .benefit h3 {
+      font-family: var(--font-display);
+      font-size: 22px; font-weight: 500;
+      margin-bottom: 8px;
+      letter-spacing: -0.005em;
+    }
+    .benefit p {
+      color: var(--fg-soft); font-size: 14.5px; line-height: 1.6;
+    }
+
+    /* ---------- VOLUME TABLE SECTION ---------- */
+    .volume-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .volume-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .volume-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .volume-table thead {
+      background: var(--bg-warm);
+    }
+    .volume-table th, .volume-table td {
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .volume-table th {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .volume-table tbody tr:last-child td { border-bottom: 0; }
+    .volume-table .tier {
+      font-family: var(--font-display); font-size: 18px;
+      font-weight: 500; color: var(--fg);
+    }
+    .volume-table .tier .un { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .volume-table .price {
+      font-family: var(--font-mono); font-weight: 500;
+      font-variant-numeric: tabular-nums; color: var(--fg);
+    }
+    .volume-table .save {
+      font-family: var(--font-mono); font-size: 13px;
+      color: var(--success); font-weight: 500;
+    }
+    .volume-table .save.base { color: var(--muted); }
+    .volume-table tbody tr.featured {
+      background: color-mix(in oklab, var(--accent-soft) 35%, transparent);
+    }
+    .volume-table tbody tr.featured td:first-child {
+      border-left: 3px solid var(--accent);
+    }
+
+    /* ---------- HOW IT WORKS ---------- */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      counter-reset: step;
+    }
+    .step {
+      position: relative;
+      padding: 28px 24px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      counter-increment: step;
+    }
+    .step::before {
+      content: "0" counter(step);
+      font-family: var(--font-mono);
+      font-size: 13px; font-weight: 500;
+      color: var(--accent-deep);
+      letter-spacing: 0.1em;
+      display: block; margin-bottom: 18px;
+    }
+    .step h4 {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .step p {
+      font-size: 14px; color: var(--fg-soft); line-height: 1.6;
+    }
+    .step .arrow {
+      position: absolute; top: 36px; right: -16px;
+      color: var(--border); width: 16px; height: 16px;
+    }
+
+    /* ---------- FORM SECTION ---------- */
+    .form-section {
+      background:
+        radial-gradient(900px 380px at 85% 0%, color-mix(in oklab, var(--accent-soft) 50%, transparent), transparent 60%),
+        var(--bg);
+      padding: 84px 0 100px;
+    }
+    .form-shell {
+      display: grid;
+      grid-template-columns: 0.85fr 1.6fr;
+      gap: 56px;
+      align-items: start;
+    }
+    .form-aside {
+      position: sticky; top: 100px;
+    }
+    .form-aside h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 3.4vw, 42px);
+      font-weight: 500;
+      line-height: 1.08;
+      margin: 14px 0 18px;
+      letter-spacing: -0.01em;
+    }
+    .form-aside p {
+      color: var(--fg-soft); font-size: 15.5px; line-height: 1.65;
+      margin-bottom: 28px;
+    }
+    .aside-notes {
+      border-top: 1px solid var(--border-soft);
+      padding-top: 24px;
+      display: grid; gap: 16px;
+    }
+    .aside-note {
+      display: grid; grid-template-columns: 24px 1fr; gap: 12px;
+      font-size: 13.5px; color: var(--fg-soft);
+    }
+    .aside-note .ic {
+      width: 20px; height: 20px;
+      color: var(--accent-deep);
+    }
+    .aside-note strong { color: var(--fg); font-weight: 600; display: block; margin-bottom: 2px; }
+
+    /* form */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 36px;
+      box-shadow: var(--shadow);
+    }
+    .form-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border-soft);
+      margin-bottom: 28px;
+    }
+    .form-head h3 {
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 500;
+      letter-spacing: -0.005em;
+    }
+    .form-head .sub {
+      font-size: 12.5px; color: var(--muted); margin-top: 4px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 20px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.06em; color: var(--fg-soft);
+      display: flex; gap: 6px;
+    }
+    .field label .req { color: var(--accent-deep); }
+    .field label .opt { color: var(--muted-2); font-weight: 400; font-size: 11px; }
+    .field input, .field select, .field textarea {
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 14px;
+      color: var(--fg);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+    .field textarea { resize: vertical; min-height: 96px; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .field .hint {
+      font-size: 11.5px; color: var(--muted-2);
+    }
+    .field.error input, .field.error select, .field.error textarea {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--danger) 15%, transparent);
+    }
+    .field-error {
+      font-size: 11.5px; color: var(--danger);
+      display: none;
+    }
+    .field.error .field-error { display: block; }
+
+    /* segmented control for volumen */
+    .segmented {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 4px;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label {
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 12.5px; font-weight: 500;
+      color: var(--muted); cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s;
+      letter-spacing: 0;
+    }
+    .segmented input:checked + label {
+      background: var(--surface); color: var(--fg);
+      box-shadow: var(--shadow-sm);
+    }
+    .segmented input:focus-visible + label {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+    }
+
+    /* consent + actions */
+    .form-consent {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 18px 0;
+      margin-top: 8px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .form-consent input[type=checkbox] {
+      width: 18px; height: 18px; accent-color: var(--accent-deep);
+      margin-top: 2px; flex-shrink: 0;
+    }
+    .form-consent label {
+      font-size: 13px; color: var(--fg-soft); line-height: 1.55;
+    }
+    .form-consent label a {
+      color: var(--accent-deep);
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .form-actions {
+      display: flex; gap: 12px; justify-content: flex-end;
+      align-items: center;
+    }
+    .form-actions .legal {
+      font-size: 12px; color: var(--muted); margin-right: auto;
+      max-width: 280px; line-height: 1.5;
+    }
+
+    /* ---------- STATUS BANNER (pendiente demo) ---------- */
+    .status-section {
+      padding: 60px 0 84px;
+      background: var(--bg-warm);
+      border-top: 1px solid var(--border-soft);
+    }
+    .status-card {
+      max-width: 880px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 36px 40px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 28px; align-items: center;
+    }
+    .status-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: color-mix(in oklab, var(--warning) 18%, var(--surface));
+      color: color-mix(in oklab, var(--warning) 85%, black);
+      flex-shrink: 0;
+    }
+    .status-icon svg { width: 26px; height: 26px; }
+    .status-card .lbl {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 4px;
+    }
+    .status-card h3 {
+      font-family: var(--font-display); font-size: 22px;
+      font-weight: 500; margin-bottom: 6px;
+    }
+    .status-card p { font-size: 14px; color: var(--fg-soft); }
+    .status-card p .mono { color: var(--fg); }
+    .status-tag {
+      padding: 7px 14px; border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .status-tag.pending {
+      background: color-mix(in oklab, var(--warning) 18%, transparent);
+      color: color-mix(in oklab, var(--warning) 75%, black);
+      border: 1px solid color-mix(in oklab, var(--warning) 30%, transparent);
+    }
+    .status-tag.approved {
+      background: color-mix(in oklab, var(--success) 14%, transparent);
+      color: color-mix(in oklab, var(--success) 70%, black);
+      border: 1px solid color-mix(in oklab, var(--success) 30%, transparent);
+    }
+    .status-tag.rejected {
+      background: color-mix(in oklab, var(--danger) 10%, transparent);
+      color: color-mix(in oklab, var(--danger) 75%, black);
+      border: 1px solid color-mix(in oklab, var(--danger) 25%, transparent);
+    }
+    .states-row {
+      display: flex; justify-content: center; gap: 16px;
+      margin-top: 28px; flex-wrap: wrap;
+    }
+    .states-row .state-toggle {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px; color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+      background: var(--surface);
+    }
+    .states-row .state-toggle.active {
+      border-color: var(--fg); color: var(--fg);
+    }
+    .states-row .state-toggle:hover { color: var(--fg); }
+
+    /* ---------- FAQ ---------- */
+    .faq {
+      max-width: 820px; margin: 0 auto;
+    }
+    .faq details {
+      border-bottom: 1px solid var(--border-soft);
+      padding: 22px 0;
+    }
+    .faq summary {
+      font-family: var(--font-display);
+      font-size: 19px; font-weight: 500;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 18px;
+      list-style: none;
+      color: var(--fg);
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+      content: "+";
+      font-family: var(--font-mono); font-size: 22px;
+      color: var(--accent-deep);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .faq details[open] summary::after { content: "−"; }
+    .faq .answer {
+      padding-top: 14px;
+      color: var(--fg-soft); font-size: 15px; line-height: 1.65;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .site-footer {
+      background: oklch(20% 0.005 250);
+      color: oklch(82% 0.005 250);
+      padding: 72px 0 28px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr 1.2fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid oklch(30% 0.005 250);
+    }
+    .footer-brand .logo { color: var(--surface); margin-bottom: 16px; }
+    .footer-brand p {
+      font-size: 13.5px; color: oklch(64% 0.005 250);
+      line-height: 1.7; max-width: 300px;
+    }
+    .footer-col h5 {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: oklch(58% 0.005 250);
+      margin-bottom: 18px;
+    }
+    .footer-col ul { display: grid; gap: 10px; }
+    .footer-col a {
+      font-size: 13.5px; color: oklch(78% 0.005 250);
+      transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--surface); }
+    .footer-news p { font-size: 13.5px; color: oklch(64% 0.005 250); margin-bottom: 14px; }
+    .footer-news .input-row {
+      display: flex; gap: 0;
+      border: 1px solid oklch(34% 0.005 250);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .footer-news input {
+      flex: 1; padding: 11px 14px;
+      background: transparent;
+      border: 0; color: var(--surface);
+      font-size: 13px;
+    }
+    .footer-news input::placeholder { color: oklch(58% 0.005 250); }
+    .footer-news button {
+      padding: 0 18px; background: var(--accent-deep); color: var(--surface);
+      font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 28px; gap: 24px;
+      font-size: 12px; color: oklch(58% 0.005 250);
+    }
+    .footer-bottom .pay-methods {
+      display: flex; gap: 8px; align-items: center;
+      font-family: var(--font-mono); font-size: 10.5px;
+      letter-spacing: 0.12em;
+    }
+    .footer-bottom .pay-methods span {
+      padding: 4px 8px;
+      border: 1px solid oklch(30% 0.005 250);
+      border-radius: 4px;
+      color: oklch(70% 0.005 250);
+    }
+    .footer-disclaimer {
+      padding: 16px 28px;
+      background: oklch(18% 0.005 250);
+      font-size: 11.5px; color: oklch(58% 0.005 250);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---------- SUCCESS MODAL ---------- */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: color-mix(in oklab, var(--fg) 55%, transparent);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      z-index: 200;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      max-width: 460px; width: 100%;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: 40px 36px 32px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      animation: modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 22px;
+      display: grid; place-items: center;
+      background: color-mix(in oklab, var(--success) 14%, var(--surface));
+      color: color-mix(in oklab, var(--success) 70%, black);
+      border: 1px solid color-mix(in oklab, var(--success) 28%, transparent);
+    }
+    .modal-icon svg { width: 30px; height: 30px; }
+    .modal h3 {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 500;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .modal p {
+      color: var(--fg-soft); font-size: 14.5px; line-height: 1.65;
+      margin-bottom: 22px;
+    }
+    .modal .ref {
+      font-family: var(--font-mono);
+      font-size: 12px; color: var(--muted);
+      padding: 10px 14px;
+      background: var(--bg-warm);
+      border-radius: var(--r);
+      margin-bottom: 24px;
+      letter-spacing: 0.04em;
+    }
+    .modal .ref strong { color: var(--fg); }
+    .modal-actions {
+      display: flex; gap: 10px; justify-content: center;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 1100px) {
+      .nav-primary { display: none; }
+      .menu-toggle {
+        display: grid; place-items: center;
+        width: 40px; height: 40px; border-radius: 50%;
+        color: var(--fg); margin-right: 4px;
+      }
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .invoice-card { transform: rotate(-0.8deg); max-width: 480px; }
+      .benefits { grid-template-columns: repeat(2, 1fr); }
+      .volume-grid { grid-template-columns: 1fr; gap: 36px; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .step .arrow { display: none; }
+      .form-shell { grid-template-columns: 1fr; gap: 36px; }
+      .form-aside { position: static; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+    @media (max-width: 700px) {
+      .container { padding: 0 18px; }
+      .header-inner { gap: 12px; }
+      .wholesale-pill { display: none; }
+      .hero { padding: 56px 0 48px; }
+      .section { padding: 60px 0; }
+      .benefits { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .form-card { padding: 24px 20px; }
+      .form-grid { grid-template-columns: 1fr; gap: 14px; }
+      .segmented { grid-template-columns: repeat(2, 1fr); }
+      .form-actions { flex-direction: column-reverse; }
+      .form-actions .btn { width: 100%; }
+      .form-actions .legal { margin-right: 0; text-align: center; }
+      .status-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 28px 24px;
+        gap: 14px;
+      }
+      .status-icon { margin: 0 auto; }
+      .status-card .actions-col { display: flex; justify-content: center; }
+      .footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .invoice-card { padding: 22px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+      .invoice-card { transform: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body>
+
+<!-- ============== HEADER ============== -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo" aria-label="Cronosfera — inicio">
+      <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="14" cy="14" r="12.5" stroke="currentColor" stroke-width="1.3"/>
+        <circle cx="14" cy="14" r="9" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
+        <line x1="14" y1="14" x2="14" y2="6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="14" y1="14" x2="20" y2="16" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="1.2" fill="currentColor"/>
+        <line x1="14" y1="0.5" x2="14" y2="2.2" stroke="currentColor" stroke-width="1"/>
+      </svg>
+      Cronosfera<span class="dot">.</span>
+    </a>
+    <nav class="nav-primary" aria-label="Principal">
+      <a href="catalogo.html">Catálogo</a>
+      <a href="index.html#colecciones">Colecciones</a>
+      <a href="index.html#marcas">Marcas</a>
+      <a href="mayorista.html" class="current">Mayorista</a>
+      <a href="index.html#historia">Historia</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wholesale-pill">Mayorista</span>
+      <button class="icon-btn" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.5s-7.5-4.7-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 3.3c0 5.5-7.5 10.2-7.5 10.2Z" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="session-slot" data-session-slot></span>
+      <button class="icon-btn" aria-label="Carrito">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7h14l-1.3 11.2A2 2 0 0 1 15.7 20H8.3a2 2 0 0 1-2-1.8L5 7Z" stroke-linejoin="round"/><path d="M9 7a3 3 0 0 1 6 0" stroke-linecap="round"/></svg>
+        <span class="badge">3</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Programa mayorista · Colombia</span>
+        <h1>Precios especiales para <em>hacer crecer</em> tu negocio.</h1>
+        <p class="lede">
+          Una cuenta mayorista Cronosfera desbloquea tarifas por volumen, acceso anticipado al inventario y atención comercial dedicada para tiendas, joyerías y revendedores en Colombia.
+        </p>
+        <div class="hero-cta-row">
+          <a href="#solicitud" class="btn btn-primary btn-lg">
+            Solicitar cuenta mayorista
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#beneficios" class="btn btn-ghost btn-lg">Ver condiciones</a>
+        </div>
+        <div style="display:flex; gap:24px; margin-top:28px; flex-wrap:wrap;">
+          <span class="demo-tag">Datos de demostración · precios referenciales</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="invoice-card">
+          <div class="invoice-flag">Mayorista</div>
+          <div class="invoice-head">
+            <div>
+              <div class="lbl">Cotización · demo</div>
+              <div class="brand">Cronosfera<span class="dot">.</span></div>
+            </div>
+            <div style="text-align:right;">
+              <div class="lbl">Referencia</div>
+              <div class="val">COT-2024-0847</div>
+            </div>
+          </div>
+          <div class="invoice-rows">
+            <div class="invoice-row">
+              <div>
+                <div class="name">Aurora 39 · Acero</div>
+                <div class="sku">CR-AUR39-AC</div>
+              </div>
+              <div class="qty">× 8</div>
+              <div class="price">$1.013.000<span class="unit">/ unidad</span></div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="name">Meridiano GMT</div>
+                <div class="sku">CR-MER-GMT</div>
+              </div>
+              <div class="qty">× 4</div>
+              <div class="price">$1.640.000<span class="unit">/ unidad</span></div>
+            </div>
+            <div class="invoice-row">
+              <div>
+                <div class="name">Estanque 300m</div>
+                <div class="sku">CR-EST-300</div>
+              </div>
+              <div class="qty">× 6</div>
+              <div class="price">$760.000<span class="unit">/ unidad</span></div>
+            </div>
+          </div>
+          <div class="invoice-foot">
+            <div class="invoice-totrow">
+              <span>Subtotal (18 unidades)</span>
+              <span class="v">$20.920.000</span>
+            </div>
+            <div class="invoice-totrow">
+              <span>Descuento por volumen</span>
+              <span class="v" style="color:var(--success);">− $2.660.000</span>
+            </div>
+            <div class="invoice-totrow grand">
+              <span>Total</span>
+              <span class="v">$18.260.000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== BENEFITS ============== -->
+<section class="section" id="beneficios">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Qué incluye</span>
+      <h2>Condiciones pensadas para revendedores y tiendas.</h2>
+      <p>Beneficios pensados para que operes con margen, previsiones confiables y soporte real.</p>
+    </div>
+
+    <div class="benefits">
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18M3 12h18M3 17h18" stroke-linecap="round"/></svg>
+        <h3>Tarifas especiales</h3>
+        <p>Acceso a una lista de precios diferenciada, separada de los precios minoristas que ve el consumidor final.</p>
+      </div>
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 17V7m4 14V4m4 17V10m4 11V7m4 14v-5" stroke-linecap="round"/></svg>
+        <h3>Precios por volumen</h3>
+        <p>Escala decreciente según unidades por referencia o por pedido. A más volumen, menor precio unitario.</p>
+      </div>
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="m15 9-3 3-3 3 3-3 3-3Z" fill="currentColor"/></svg>
+        <h3>Acceso anticipado al inventario</h3>
+        <p>Reservas y novedades disponibles para cuentas mayoristas antes de su publicación en el catálogo público.</p>
+      </div>
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4" stroke-linecap="round"/></svg>
+        <h3>Gestión rápida de pedidos</h3>
+        <p>Panel con reproducción rápida de pedidos recurrentes, listas guardadas y exportación a CSV.</p>
+      </div>
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 4h6a2 2 0 0 1 2 2v14l-5-3-5 3V6a2 2 0 0 1 2-2Z" stroke-linejoin="round"/></svg>
+        <h3>Historial y facturas</h3>
+        <p>Descarga de comprobantes, seguimiento de envíos por remesa y reporte anual de compras.</p>
+      </div>
+      <div class="benefit">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14l-7-4-7 4V5Z" stroke-linejoin="round"/><path d="M9 8h6M9 11h4" stroke-linecap="round"/></svg>
+        <h3>Soporte comercial</h3>
+        <p>Una asesora o asesor comercial dedicada, con horario hábil y respuesta en menos de un día hábil.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== VOLUME TABLE ============== -->
+<section class="section volume-section">
+  <div class="container">
+    <div class="volume-grid">
+      <div>
+        <span class="eyebrow">Escala de descuento</span>
+        <h2 style="font-family:var(--font-display); font-size:clamp(30px,3.2vw,42px); font-weight:500; line-height:1.1; margin:14px 0 18px; letter-spacing:-0.01em;">
+          Mientras más pides, más baja la tarifa unitaria.
+        </h2>
+        <p style="color:var(--fg-soft); font-size:15.5px; line-height:1.7; margin-bottom:20px;">
+          Los descuentos se calculan por referencia. Ejemplo mostrado sobre el <strong>Aurora 39 · Acero</strong> (precio minorista de referencia: $1.299.000).
+        </p>
+        <p style="font-size:12.5px; color:var(--muted);">
+          <span class="demo-tag">Precio de demostración</span>
+        </p>
+      </div>
+      <div>
+        <table class="volume-table" aria-label="Tabla de precios por volumen">
+          <thead>
+            <tr>
+              <th scope="col">Nivel</th>
+              <th scope="col">Unidades</th>
+              <th scope="col">Precio unitario</th>
+              <th scope="col">Ahorro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tier">Nivel 1<span class="un">pedido mínimo</span></td>
+              <td class="mono">1 – 5 un.</td>
+              <td class="price">$1.013.000</td>
+              <td class="save base">base mayorista</td>
+            </tr>
+            <tr class="featured">
+              <td class="tier">Nivel 2<span class="un">pedido frecuente</span></td>
+              <td class="mono">6 – 11 un.</td>
+              <td class="price">$949.000</td>
+              <td class="save">− $64.000 / un.</td>
+            </tr>
+            <tr>
+              <td class="tier">Nivel 3<span class="un">volumen alto</span></td>
+              <td class="mono">12 un. o más</td>
+              <td class="price">$884.000</td>
+              <td class="save">− $129.000 / un.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color:var(--muted); margin-top:14px; line-height:1.55;">
+          Los niveles se aplican por referencia y pueden combinarse dentro de un mismo pedido.
+          Los precios finales se validan en el servidor al crear la orden.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== HOW IT WORKS ============== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow center">Cómo funciona</span>
+      <h2>Cuatro pasos, aprobación en menos de 48 horas hábiles.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h4>Solicita</h4>
+        <p>Diligencias el formulario con los datos de tu negocio y adjuntas tu identificación tributaria.</p>
+        <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m6 3 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step">
+        <h4>Verificamos</h4>
+        <p>Validamos la información y confirmamos el tipo de negocio, ciudad y volumen estimado mensual.</p>
+        <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m6 3 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step">
+        <h4>Te aprobamos</h4>
+        <p>Si todo está en orden, activamos tu cuenta mayorista. Recibirás la confirmación por correo.</p>
+        <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m6 3 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step">
+        <h4>Compras a precio mayorista</h4>
+        <p>Al iniciar sesión, verás tarifas especiales, precios por volumen y opción de pedido rápido.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== STATUS (demo de estados) ============== -->
+<section class="status-section">
+  <div class="container">
+    <div class="section-head center" style="margin-bottom:36px;">
+      <span class="eyebrow center">Estados de la solicitud</span>
+      <h2>Tu cuenta queda pendiente hasta que un administrador la apruebe.</h2>
+      <p>Ninguna cuenta mayorista se activa automáticamente. La revisión es manual para proteger los precios y la operación.</p>
+    </div>
+
+    <div class="status-card" id="statusCard">
+      <div class="status-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="status-info">
+        <div class="lbl">Estado de la solicitud</div>
+        <h3 id="statusTitle">Solicitud recibida · en revisión</h3>
+        <p id="statusMsg">
+          Referencia <span class="mono">CR-MA-2024-0847</span> · enviada el 14 de junio de 2026.
+          Tiempo estimado de respuesta: <strong>48 horas hábiles</strong>.
+        </p>
+      </div>
+      <div class="actions-col">
+        <span class="status-tag pending" id="statusTag">Pendiente</span>
+      </div>
+    </div>
+
+    <div class="states-row" role="group" aria-label="Vista previa de estados">
+      <button class="state-toggle active" data-state="pending">Pendiente</button>
+      <button class="state-toggle" data-state="approved">Aprobada</button>
+      <button class="state-toggle" data-state="rejected">Rechazada</button>
+    </div>
+    <p style="text-align:center; color:var(--muted-2); font-size:12px; margin-top:14px;">
+      Vista previa para demostración. El cliente real solo ve su propio estado.
+    </p>
+  </div>
+</section>
+
+<!-- ============== FORM ============== -->
+<section class="section form-section" id="solicitud">
+  <div class="container">
+    <div class="form-shell">
+
+      <aside class="form-aside">
+        <span class="eyebrow">Formulario de solicitud</span>
+        <h2>Cuéntanos sobre tu negocio.</h2>
+        <p>
+          Diligencia el formulario con información real. La usaremos exclusivamente para evaluar tu solicitud mayorista. No compartimos estos datos con terceros.
+        </p>
+
+        <div class="aside-notes">
+          <div class="aside-note">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>
+              <strong>Validación manual</strong>
+              Cada solicitud es revisada por una persona, no por un algoritmo.
+            </div>
+          </div>
+          <div class="aside-note">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18" stroke-linecap="round"/></svg>
+            <div>
+              <strong>Datos sensibles</strong>
+              Nunca almacenamos datos completos de tarjetas ni claves tributarias en texto plano.
+            </div>
+          </div>
+          <div class="aside-note">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>
+              <strong>Respuesta en 48 h hábiles</strong>
+              Te contactaremos por correo con la decisión o para solicitar información adicional.
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <form class="form-card" id="wholesaleForm" novalidate>
+        <div class="form-head">
+          <div>
+            <h3>Solicitud de cuenta mayorista</h3>
+            <div class="sub">Todos los campos marcados con * son obligatorios.</div>
+          </div>
+          <span class="demo-tag">Demo</span>
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="f-name">Nombre completo <span class="req">*</span></label>
+            <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Ej. Daniela Restrepo Vargas" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-company">Empresa <span class="req">*</span></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Ej. Joyería El Puente" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-nit">NIT o identificación <span class="req">*</span></label>
+            <input id="f-nit" name="nit" type="text" inputmode="numeric" placeholder="Ej. 900.123.456-7" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-city">Ciudad <span class="req">*</span></label>
+            <input id="f-city" name="city" type="text" autocomplete="address-level2" placeholder="Ej. Bogotá" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-phone">Teléfono <span class="req">*</span></label>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Ej. +57 310 555 1234" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-email">Correo <span class="req">*</span></label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="tu@empresa.com" required>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field">
+            <label for="f-password">Contraseña para tu cuenta <span class="req">*</span></label>
+            <input id="f-password" name="password" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres" required>
+            <span class="field-error">Mínimo 6 caracteres</span>
+          </div>
+
+          <div class="field">
+            <label for="f-type">Tipo de negocio <span class="req">*</span></label>
+            <select id="f-type" name="business_type" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="joyeria">Joyería</option>
+              <option value="relojeria">Relojería</option>
+              <option value="tienda-de-moda">Tienda de moda</option>
+              <option value="almacen-de-regalos">Almacén de regalos</option>
+              <option value="ecommerce">E-commerce / marketplace</option>
+              <option value="distribuidor">Distribuidor</option>
+              <option value="otro">Otro</option>
+            </select>
+            <span class="field-error">Requerido</span>
+          </div>
+
+          <div class="field full">
+            <label>Volumen mensual estimado <span class="req">*</span></label>
+            <div class="segmented" role="radiogroup" aria-label="Volumen mensual estimado">
+              <input type="radio" id="v1" name="volume" value="5-15">
+              <label for="v1">5 – 15 un.</label>
+              <input type="radio" id="v2" name="volume" value="16-40" checked>
+              <label for="v2">16 – 40 un.</label>
+              <input type="radio" id="v3" name="volume" value="41-100">
+              <label for="v3">41 – 100 un.</label>
+              <input type="radio" id="v4" name="volume" value="100+">
+              <label for="v4">+100 un.</label>
+            </div>
+            <span class="hint">Estimación referencial. No te compromete a un mínimo.</span>
+          </div>
+
+          <div class="field full">
+            <label for="f-social">Redes sociales o página web <span class="opt">opcional</span></label>
+            <input id="f-social" name="social" type="text" placeholder="@tuempresa · www.tuempresa.co">
+            <span class="hint">Nos ayuda a conocer tu operación.</span>
+          </div>
+
+          <div class="field full">
+            <label for="f-message">Mensaje adicional <span class="opt">opcional</span></label>
+            <textarea id="f-message" name="message" placeholder="Cuéntanos sobre tu negocio, las referencias que te interesan, frecuencia de compra, condiciones especiales que necesites…"></textarea>
+          </div>
+
+          <div class="field full form-consent">
+            <input type="checkbox" id="f-consent" name="consent" required>
+            <label for="f-consent">
+              Autorizo el tratamiento de mis datos conforme a la <a href="#">Política de privacidad</a> y acepto los <a href="#">Términos del programa mayorista</a>. Entiendo que la solicitud queda pendiente hasta su aprobación manual.
+            </label>
+          </div>
+
+          <div class="form-actions full">
+            <span class="legal">
+              Al enviar, registraremos tu cuenta con estado "pendiente". Un administrador la revisará y, al aprobarla, podrás iniciar sesión y ver precios mayoristas en el catálogo.
+            </span>
+            <button type="reset" class="btn btn-ghost">Limpiar</button>
+            <button type="submit" class="btn btn-primary">
+              Enviar solicitud
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== FAQ ============== -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head center" style="margin-bottom:36px;">
+      <span class="eyebrow center">Preguntas frecuentes</span>
+      <h2>Antes de solicitar tu cuenta.</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>¿Hay un mínimo de compra para cuentas mayoristas?</summary>
+        <div class="answer">
+          Sí. El nivel inicial considera un mínimo por referencia. La tabla de precios por volumen detalla las unidades requeridas para cada nivel de descuento.
+        </div>
+      </details>
+      <details>
+        <summary>¿Cuánto tarda la aprobación?</summary>
+        <div class="answer">
+          La revisión toma hasta 48 horas hábiles. Si falta información, te contactamos por correo antes de decidir.
+        </div>
+      </details>
+      <details>
+        <summary>¿Qué métodos de pago aceptan para mayoristas?</summary>
+        <div class="answer">
+          Aceptamos transferencia bancaria, PSE y tarjetas de crédito corporativas. El pago contra entrega está sujeto a análisis de crédito y solo aplica para clientes aprobados con historial.
+        </div>
+      </details>
+      <details>
+        <summary>¿Puedo revender en marketplaces externos?</summary>
+        <div class="answer">
+          Depende del acuerdo comercial. Algunas marcas representadas tienen restricciones de canal que se revisan caso por caso en el proceso de aprobación.
+        </div>
+      </details>
+      <details>
+        <summary>¿El precio mayorista incluye IVA?</summary>
+        <div class="answer">
+          Los precios mostrados en el entorno mayorista son netos sin IVA, salvo que se indique lo contrario en la cotización o factura.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">Cronosfera<span class="dot">.</span></div>
+        <p>Curaduría de relojes para el mercado colombiano. Plataforma de comercio preparada para integrarse con una pasarela de pagos y un backend reales.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Tienda</h5>
+        <ul>
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="index.html#colecciones">Colecciones</a></li>
+          <li><a href="index.html#marcas">Marcas</a></li>
+          <li><a href="mayorista.html">Mayorista</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Cuenta</h5>
+        <ul>
+          <li><a href="#">Iniciar sesión</a></li>
+          <li><a href="#">Crear cuenta</a></li>
+          <li><a href="#">Mis pedidos</a></li>
+          <li><a href="#">Favoritos</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Ayuda</h5>
+        <ul>
+          <li><a href="#">Envíos y devoluciones</a></li>
+          <li><a href="#">Garantía</a></li>
+          <li><a href="#">Métodos de pago</a></li>
+          <li><a href="#">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col footer-news">
+        <h5>Novedades</h5>
+        <p>Suscríbete para recibir lanzamientos y oportunidades, sin spam.</p>
+        <div class="input-row">
+          <input type="email" placeholder="tu@correo.com" aria-label="Correo electrónico">
+          <button type="button">Unirme</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Cronosfera · Prototipo de demostración · Colombia</div>
+      <div class="pay-methods">
+        <span>VISA</span><span>MASTERCARD</span><span>AMEX</span><span>PSE</span><span>WOMPI</span>
+      </div>
+      <div>
+        <a href="#" style="margin-right:14px;">Privacidad</a>
+        <a href="#" style="margin-right:14px;">Términos</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-disclaimer">
+    Los precios, testimonios y métricas mostrados en este entorno son de demostración. Cronosfera no afirma ser distribuidor oficial de ninguna marca hasta que se confirme por escrito. Integración de pagos y backend son referenciales.
+  </div>
+</footer>
+
+<!-- ============== SUCCESS MODAL ============== -->
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h3 id="modalTitle">¡Solicitud recibida!</h3>
+    <p>
+      Gracias por tu interés en el programa mayorista de Cronosfera. Tu solicitud quedó registrada y <strong>está pendiente de aprobación manual</strong>. Te contactaremos por correo en un máximo de 48 horas hábiles.
+    </p>
+    <div class="ref">
+      Referencia · <strong id="modalRef">CR-MA-2024-0000</strong>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalClose">Cerrar</button>
+      <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
+    </div>
+  </div>
+</div>
+
+<script src="cronos-store.js"></script>
+<script src="cronos-auth.js"></script>
+<script src="cronos-ui.js"></script>
+<script>
+  // ---------- form validation + Store integration ----------
+  const form = document.getElementById('wholesaleForm');
+  const modal = document.getElementById('modal');
+  const modalRef = document.getElementById('modalRef');
+  const modalClose = document.getElementById('modalClose');
+
+  function genRef() {
+    const n = Math.floor(1000 + Math.random() * 8999);
+    return 'CR-MA-2024-' + n;
+  }
+
+  function showInlineError(msg) {
+    let banner = document.getElementById('inlineError');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'inlineError';
+      banner.style.cssText = 'background:color-mix(in oklab, var(--danger, #c44) 12%, transparent);color:var(--danger, #c44);border:1px solid color-mix(in oklab, var(--danger, #c44) 35%, transparent);padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;';
+      form.parentNode.insertBefore(banner, form);
+    }
+    banner.textContent = msg;
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function clearInlineError() {
+    const banner = document.getElementById('inlineError');
+    if (banner) banner.remove();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearInlineError();
+    let valid = true;
+    form.querySelectorAll('[required]').forEach((el) => {
+      const field = el.closest('.field');
+      if (!field) return;
+      if (el.type === 'checkbox') {
+        if (!el.checked) { field.classList.add('error'); valid = false; }
+        else { field.classList.remove('error'); }
+      } else if (!el.value.trim()) {
+        field.classList.add('error'); valid = false;
+      } else {
+        field.classList.remove('error');
+      }
+    });
+    const pwd = document.getElementById('f-password');
+    if (pwd && pwd.value.length < 6) {
+      pwd.closest('.field').classList.add('error');
+      showInlineError('La contraseña debe tener al menos 6 caracteres.');
+      pwd.focus();
+      return;
+    }
+    if (!valid) {
+      form.querySelector('.field.error input, .field.error select, .field.error textarea')?.focus();
+      return;
+    }
+
+    try {
+      const data = {
+        name: form.name.value,
+        email: form.email.value,
+        password: form.password.value,
+        role: 'wholesale',
+        status: 'pending',
+        company: form.company.value,
+        taxId: form.nit.value,
+        city: form.city.value,
+        phone: form.phone.value,
+        channel: form.business_type ? form.business_type.value : null,
+        message: form.message ? form.message.value : null
+      };
+      const user = Store.register(data);
+      const req = Store.getWholesaleRequests().find((r) => r.userId === user.id);
+      modalRef.textContent = req ? req.reference : genRef();
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } catch (err) {
+      showInlineError(err.message || 'No pudimos procesar la solicitud.');
+    }
+  });
+
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    form.reset();
+  }
+
+  // live error clear
+  form.querySelectorAll('input, select, textarea').forEach((el) => {
+    el.addEventListener('input', () => {
+      el.closest('.field')?.classList.remove('error');
+    });
+  });
+
+  // ---------- status demo toggle ----------
+  const statusTitle = document.getElementById('statusTitle');
+  const statusMsg   = document.getElementById('statusMsg');
+  const statusTag   = document.getElementById('statusTag');
+  const statusIcon  = document.querySelector('.status-icon');
+  const statusCard  = document.getElementById('statusCard');
+
+  const states = {
+    pending: {
+      tag: 'Pendiente', cls: 'pending',
+      title: 'Solicitud recibida · en revisión',
+      msg: 'Referencia <span class="mono">CR-MA-2024-0847</span> · enviada el 14 de junio de 2026. Tiempo estimado de respuesta: <strong>48 horas hábiles</strong>.',
+      iconBg: 'color-mix(in oklab, var(--warning) 18%, var(--surface))',
+      iconColor: 'color-mix(in oklab, var(--warning) 85%, black)',
+      iconSvg: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2" stroke-linecap="round" stroke-linejoin="round"/>',
+    },
+    approved: {
+      tag: 'Aprobada', cls: 'approved',
+      title: 'Cuenta mayorista activada',
+      msg: 'Bienvenido al programa mayorista. Ya puedes iniciar sesión y ver tarifas especiales en el catálogo. Tu asesora comercial te contactará pronto.',
+      iconBg: 'color-mix(in oklab, var(--success) 14%, var(--surface))',
+      iconColor: 'color-mix(in oklab, var(--success) 70%, black)',
+      iconSvg: '<path d="m5 12 5 5L19 7" stroke-linecap="round" stroke-linejoin="round"/>',
+    },
+    rejected: {
+      tag: 'Rechazada', cls: 'rejected',
+      title: 'Solicitud no aprobada',
+      msg: 'Tras revisar tu solicitud no podemos activar la cuenta en este momento. Si crees que es un error o cambiaron las condiciones, escríbenos a <span class="mono">comercial@cronosfera.co</span>.',
+      iconBg: 'color-mix(in oklab, var(--danger) 12%, var(--surface))',
+      iconColor: 'color-mix(in oklab, var(--danger) 70%, black)',
+      iconSvg: '<path d="m6 6 12 12M18 6 6 18" stroke-linecap="round"/>',
+    },
+  };
+
+  document.querySelectorAll('.state-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.state-toggle').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const s = states[btn.dataset.state];
+      statusTag.textContent = s.tag;
+      statusTag.className = 'status-tag ' + s.cls;
+      statusTitle.textContent = s.title;
+      statusMsg.innerHTML = s.msg;
+      statusIcon.style.background = s.iconBg;
+      statusIcon.style.color = s.iconColor;
+      statusIcon.querySelector('svg').innerHTML =
+        '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" fill="none"/>' +
+        '<path d="' + s.iconSvg + '" stroke="currentColor" stroke-width="1.6" fill="none"/>';
+    });
+  });
+
+  // ---------- phone & NIT light formatting ----------
+  const nit = document.getElementById('f-nit');
+  nit.addEventListener('input', () => {
+    let v = nit.value.replace(/[^\d-]/g, '');
+    nit.value = v;
+  });
+</script>
+
+</body>
+</html>

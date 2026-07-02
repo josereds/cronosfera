@@ -1,0 +1,823 @@
+/* ============================================================
+   Cronosfera · capa visual global dark luxe
+   ------------------------------------------------------------
+   Sobrescribe los estilos claros heredados en páginas públicas,
+   unifica navegación superior y agrega soporte para barra móvil.
+   ============================================================ */
+
+:root {
+  --bg:           oklch(14% 0.008 250) !important;
+  --bg-warm:      oklch(17% 0.010 250) !important;
+  --surface:      oklch(20% 0.010 250) !important;
+  --surface-2:    oklch(24% 0.012 250) !important;
+  --fg:           oklch(96% 0.005 80) !important;
+  --fg-soft:      oklch(82% 0.005 80) !important;
+  --muted:        oklch(60% 0.008 80) !important;
+  --muted-2:      oklch(48% 0.008 80) !important;
+  --border:       oklch(30% 0.008 250) !important;
+  --border-soft:  oklch(24% 0.006 250) !important;
+  --accent:       oklch(78% 0.10 75) !important;
+  --accent-deep:  oklch(68% 0.12 70) !important;
+  --accent-soft:  oklch(28% 0.06 70) !important;
+  --success:      oklch(70% 0.12 155) !important;
+  --warning:      oklch(80% 0.13 80) !important;
+  --danger:       oklch(64% 0.18 25) !important;
+  --shadow-sm:    0 1px 2px rgba(0,0,0,.3) !important;
+  --shadow:       0 8px 30px rgba(0,0,0,.4) !important;
+  --shadow-lg:    0 30px 80px rgba(0,0,0,.55) !important;
+}
+
+html,
+body {
+  background:
+    radial-gradient(900px 520px at 78% -10%, color-mix(in oklab, var(--accent) 8%, transparent), transparent 65%),
+    radial-gradient(700px 420px at 8% 18%, color-mix(in oklab, var(--info, oklch(70% 0.10 230)) 7%, transparent), transparent 65%),
+    var(--bg) !important;
+  color: var(--fg) !important;
+}
+
+body.has-mobile-nav {
+  --mobile-nav-h: 74px;
+}
+
+::selection {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+}
+
+/* ---------- Top Navigation ---------- */
+.site-header {
+  background: rgba(17, 19, 25, .78) !important;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border)) !important;
+  box-shadow: 0 18px 55px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.25) !important;
+}
+
+.site-header .header-inner {
+  min-height: 72px;
+  height: 72px;
+  gap: 14px !important;
+  justify-content: flex-start !important;
+}
+
+.site-header .logo {
+  order: 3;
+  margin-left: auto;
+  padding: 8px 0 8px 18px;
+  color: var(--fg) !important;
+  text-shadow: 0 0 24px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+.site-header .logo .dot,
+.site-header .logo svg {
+  color: var(--accent) !important;
+}
+
+body.hero-video .site-header:not(.solid) .logo,
+body.hero-video .site-header:not(.solid) .nav-primary a,
+body.hero-video .site-header:not(.solid) .icon-btn,
+body.hero-video .site-header:not(.solid) .session-slot .auth-link {
+  color: var(--fg-soft) !important;
+}
+
+body.hero-video .site-header:not(.solid) .logo,
+body.hero-video .site-header:not(.solid) .nav-primary a:hover,
+body.hero-video .site-header:not(.solid) .icon-btn:hover {
+  color: var(--fg) !important;
+}
+
+/* ---------- Index Hero Contrast Fix ---------- */
+body.hero-video .hero-content,
+body.hero-video .hero-content h1,
+body.hero-video .hero-content h1.display,
+body.hero-video .hero-content h1 em,
+body.hero-video .hero-content .lead,
+body.hero-video .hero-content .hero-trust,
+body.hero-video .hero-content .hero-trust span {
+  color: oklch(98% 0.004 80) !important;
+}
+
+body.hero-video .hero-content h1,
+body.hero-video .hero-content h1 em {
+  text-shadow: 0 22px 60px rgba(0,0,0,.78), 0 2px 16px rgba(0,0,0,.5);
+}
+
+body.hero-video .hero-content .lead {
+  color: oklch(90% 0.006 80) !important;
+  text-shadow: 0 10px 30px rgba(0,0,0,.65);
+}
+
+body.hero-video .hero .btn-outline,
+body.hero-video .hero a.btn-outline {
+  color: oklch(98% 0.004 80) !important;
+  border-color: color-mix(in oklab, oklch(98% 0.004 80) 46%, transparent) !important;
+  background: rgba(255,255,255,.08) !important;
+}
+
+body.hero-video .hero .btn-outline:hover,
+body.hero-video .hero a.btn-outline:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: color-mix(in oklab, var(--accent) 13%, rgba(255,255,255,.06)) !important;
+}
+
+.site-header .nav-primary {
+  order: 1;
+  flex: 0 1 auto !important;
+  gap: 4px !important;
+  padding: 5px !important;
+  background: color-mix(in oklab, var(--surface) 74%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.site-header .nav-primary a {
+  color: var(--fg-soft) !important;
+  padding: 8px 13px !important;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.site-header .nav-primary a::after {
+  display: none !important;
+}
+
+.site-header .nav-primary a:hover,
+.site-header .nav-primary a.current {
+  color: var(--fg) !important;
+  background: color-mix(in oklab, var(--accent) 14%, var(--surface-2));
+}
+
+.site-header .header-actions {
+  order: 2;
+  margin-left: 6px;
+  gap: 8px !important;
+}
+
+.site-header .icon-btn,
+.session-chip,
+.session-slot .auth-link,
+[data-session-slot] .auth-link {
+  background: color-mix(in oklab, var(--surface) 65%, transparent) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--fg-soft) !important;
+}
+
+.site-header .icon-btn:hover,
+.session-chip:hover,
+.session-chip.open,
+.session-slot .auth-link:hover,
+[data-session-slot] .auth-link:hover {
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface-2)) !important;
+  border-color: color-mix(in oklab, var(--accent) 48%, var(--border)) !important;
+  color: var(--fg) !important;
+}
+
+.session-menu {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.session-menu .mini-link:hover {
+  background: var(--surface-2) !important;
+}
+
+.wholesale-pill {
+  color: var(--accent) !important;
+  background: color-mix(in oklab, var(--accent) 12%, transparent) !important;
+  border-color: color-mix(in oklab, var(--accent) 34%, transparent) !important;
+}
+
+/* ---------- Dark Surfaces ---------- */
+.page-head,
+.catalog,
+.section,
+.bay,
+.hero,
+.story,
+.filters,
+.filter-group,
+.sort-bar,
+.product-card,
+.collection-card,
+.brand-card,
+.trust-cell,
+.form-card,
+.invoice-card,
+.aside-card,
+.tier-card,
+.step-card,
+.faq details,
+.main-shot,
+.thumb,
+.info-panel,
+.review-card,
+.mini-card,
+.auction-card,
+.auc-card,
+.auc-detail,
+.bid-form,
+.bid-guest,
+.empty-state {
+  border-color: var(--border) !important;
+}
+
+.filters,
+.sort-bar,
+.product-card,
+.collection-card,
+.brand-card,
+.trust-cell,
+.form-card,
+.invoice-card,
+.aside-card,
+.tier-card,
+.step-card,
+.faq details,
+.main-shot,
+.thumb,
+.info-panel,
+.review-card,
+.mini-card,
+.bid-form,
+.bid-guest,
+.empty-state {
+  background: color-mix(in oklab, var(--surface) 94%, transparent) !important;
+  color: var(--fg) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.product-media,
+.media,
+.gallery,
+.filters-backdrop,
+.hero::before {
+  border-color: var(--border-soft) !important;
+}
+
+input,
+select,
+textarea,
+.filters input,
+.footer-news .input-row,
+.footer-news input {
+  background: var(--bg-warm) !important;
+  color: var(--fg) !important;
+  border-color: var(--border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-2) !important;
+}
+
+.eyebrow,
+.current,
+.accent,
+.price,
+.product-price .now,
+.footer-col h5 {
+  color: var(--accent) !important;
+}
+
+.muted,
+.page-head .sub,
+.breadcrumbs,
+.product-stock,
+.field .hint,
+.legal,
+.footer-brand p,
+.footer-bottom,
+.footer-disclaimer {
+  color: var(--muted) !important;
+}
+
+/* ---------- Wholesale Band Contrast Fix ---------- */
+.wholesale-band {
+  background:
+    radial-gradient(900px 420px at 18% 0%, color-mix(in oklab, var(--accent) 15%, transparent), transparent 70%),
+    linear-gradient(135deg, oklch(17% 0.012 250), oklch(10% 0.008 250)) !important;
+  border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border)) !important;
+  color: var(--fg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.wholesale-band h2,
+.wholesale-band p,
+.wholesale-benefit .txt {
+  color: var(--fg) !important;
+}
+
+.wholesale-band h2 em,
+.wholesale-band .eyebrow,
+.wholesale-benefit .num {
+  color: var(--accent) !important;
+}
+
+.wholesale-benefits {
+  background: color-mix(in oklab, var(--surface) 42%, transparent) !important;
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border)) !important;
+  border-radius: var(--r-lg, 14px);
+  padding: 12px 18px;
+}
+
+.wholesale-benefit,
+.wholesale-benefit:last-child {
+  border-color: color-mix(in oklab, var(--fg) 10%, transparent) !important;
+}
+
+.wholesale-band .btn-primary {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+}
+
+.wholesale-band .btn-outline {
+  color: var(--fg) !important;
+  border-color: color-mix(in oklab, var(--fg) 24%, transparent) !important;
+}
+
+.wholesale-band .btn-outline:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: color-mix(in oklab, var(--accent) 10%, transparent) !important;
+}
+
+/* ---------- Footer Contrast Fix ---------- */
+.site-footer {
+  background:
+    radial-gradient(700px 360px at 82% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 70%),
+    oklch(10% 0.008 250) !important;
+  color: var(--fg-soft) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.site-footer .footer-brand .logo {
+  color: var(--fg) !important;
+}
+
+.site-footer .footer-col h5,
+.site-footer .footer-brand .logo .dot {
+  color: var(--accent) !important;
+}
+
+.site-footer a,
+.site-footer .footer-col a,
+.site-footer .footer-bottom,
+.site-footer p {
+  color: var(--fg-soft) !important;
+}
+
+.site-footer a:hover,
+.site-footer .footer-col a:hover {
+  color: var(--accent) !important;
+}
+
+.site-footer .footer-bottom,
+.site-footer .footer-top {
+  border-color: var(--border) !important;
+}
+
+/* ---------- Catalog Filter Readiness ---------- */
+.filters-note {
+  margin: 0 18px 16px;
+  color: var(--muted) !important;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.chip.muted-chip {
+  color: var(--muted) !important;
+  border-style: dashed !important;
+}
+
+.catalog-empty {
+  grid-column: 1 / -1;
+  padding: 54px 24px;
+  text-align: center;
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  border: 1px dashed var(--border);
+  border-radius: var(--r-lg, 14px);
+  color: var(--fg);
+}
+
+.catalog-empty h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.catalog-empty p {
+  color: var(--muted);
+  max-width: 430px;
+  margin: 0 auto 18px;
+}
+
+.catalog-empty .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--r, 8px);
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+/* ---------- Product Detail Cards ---------- */
+.mini-card .info-m {
+  display: grid !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+.mini-card .br {
+  color: var(--accent) !important;
+  line-height: 1.2 !important;
+}
+
+.mini-card .md {
+  color: var(--fg) !important;
+  line-height: 1.28 !important;
+  min-height: 2.5em;
+  overflow-wrap: anywhere !important;
+}
+
+.mini-card .pr {
+  color: var(--accent) !important;
+  line-height: 1.2 !important;
+}
+
+/* ---------- Mobile Bottom Navigation ---------- */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  body.has-mobile-nav {
+    padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-header .header-inner {
+    height: 62px !important;
+    min-height: 62px !important;
+    display: grid !important;
+    grid-template-columns: 46px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .site-header .logo {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    margin-left: auto;
+    padding-left: 10px;
+    font-size: 23px !important;
+    max-width: min(210px, calc(100vw - 86px)) !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+  }
+
+  .site-header .nav-primary {
+    display: none !important;
+  }
+
+  .site-header .header-actions {
+    grid-column: 1 !important;
+    margin-left: 0;
+    order: 1;
+    width: 42px !important;
+    min-width: 42px !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+  }
+
+  .site-header .header-actions .icon-btn,
+  .site-header .menu-toggle,
+  .site-header .session-slot .auth-link span,
+  .site-header [data-session-slot] .auth-link span,
+  .site-header .session-chip .meta,
+  .site-header .wholesale-pill,
+  .site-header .desktop-only,
+  .site-header .cart-btn,
+  .site-header .search-btn {
+    display: none !important;
+  }
+
+  .site-header .session-slot,
+  .site-header [data-session-slot] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+
+  .site-header .session-slot:empty,
+  .site-header [data-session-slot]:empty {
+    display: none !important;
+  }
+
+  .site-header .session-slot .auth-link,
+  .site-header [data-session-slot] .auth-link,
+  .site-header .session-chip {
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    justify-content: center;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 120;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 8px;
+    min-height: 58px;
+    background: rgba(17, 19, 25, .88);
+    border: 1px solid color-mix(in oklab, var(--accent) 20%, var(--border));
+    border-radius: 18px;
+    box-shadow: 0 22px 70px rgba(0,0,0,.55);
+    backdrop-filter: blur(22px) saturate(1.25);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  }
+
+  .mobile-bottom-nav a {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+    text-decoration: none;
+  }
+
+  .mobile-bottom-nav svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 1.8;
+  }
+
+  .mobile-bottom-nav a.active,
+  .mobile-bottom-nav a:hover {
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+  }
+
+  body.has-mobile-nav .site-footer {
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.has-mobile-nav main,
+  body.has-mobile-nav .catalog-main,
+  body.has-mobile-nav .related {
+    scroll-margin-bottom: calc(var(--mobile-nav-h) + 28px);
+  }
+
+  /* Product cards: keep badges away from favorite button on narrow cards. */
+  .product-media .product-tag {
+    top: 10px !important;
+    left: 10px !important;
+    right: 48px !important;
+    max-width: calc(100% - 58px) !important;
+    align-items: flex-start !important;
+  }
+
+  .product-media .product-tag span {
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 4px 7px !important;
+    font-size: 8.5px !important;
+    line-height: 1 !important;
+    letter-spacing: .08em !important;
+  }
+
+  .product-media .product-fav {
+    top: 9px !important;
+    right: 9px !important;
+    width: 32px !important;
+    height: 32px !important;
+    z-index: 4 !important;
+  }
+
+  /* Product detail related cards: prevent cramped or clipped text. */
+  .related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .mini-card {
+    min-width: 0 !important;
+  }
+
+  .mini-card .info-m {
+    display: grid !important;
+    gap: 5px !important;
+    padding: 12px !important;
+    min-width: 0 !important;
+  }
+
+  .mini-card .br,
+  .mini-card .md,
+  .mini-card .pr {
+    overflow-wrap: anywhere !important;
+    min-width: 0 !important;
+  }
+
+  .mini-card .br {
+    color: var(--accent) !important;
+    font-size: 8.5px !important;
+    line-height: 1.2 !important;
+    letter-spacing: .08em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .mini-card .md {
+    color: var(--fg) !important;
+    font-size: 12.5px !important;
+    line-height: 1.25 !important;
+    margin-top: 0 !important;
+  }
+
+  .mini-card .pr {
+    color: var(--accent) !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Wholesale page mobile: prevent clipped horizontal layout. */
+  body.is-wholesale-page {
+    overflow-x: hidden !important;
+  }
+
+  body.is-wholesale-page .container,
+  body.is-wholesale-page .container-wide {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  body.is-wholesale-page .hero,
+  body.is-wholesale-page .section,
+  body.is-wholesale-page .volume-section,
+  body.is-wholesale-page .form-section {
+    overflow-x: clip !important;
+  }
+
+  body.is-wholesale-page .hero-grid,
+  body.is-wholesale-page .hero-visual,
+  body.is-wholesale-page .volume-grid,
+  body.is-wholesale-page .form-shell {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 28px !important;
+    overflow-x: clip !important;
+  }
+
+  body.is-wholesale-page .invoice-card,
+  body.is-wholesale-page .form-card,
+  body.is-wholesale-page .aside-card,
+  body.is-wholesale-page .status-card,
+  body.is-wholesale-page .faq,
+  body.is-wholesale-page details {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    transform: none !important;
+    overflow-x: hidden !important;
+    contain: paint !important;
+  }
+
+  body.is-wholesale-page .invoice-card::after {
+    inset: 0 0 auto 0 !important;
+    width: 100% !important;
+  }
+
+  body.is-wholesale-page .form-grid,
+  body.is-wholesale-page .form-grid > *,
+  body.is-wholesale-page .field,
+  body.is-wholesale-page input,
+  body.is-wholesale-page select,
+  body.is-wholesale-page textarea,
+  body.is-wholesale-page .segmented,
+  body.is-wholesale-page .segmented label {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.is-wholesale-page .form-grid {
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.is-wholesale-page .invoice-head {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  body.is-wholesale-page .invoice-row,
+  body.is-wholesale-page .invoice-row > *,
+  body.is-wholesale-page .invoice-head *,
+  body.is-wholesale-page .invoice-card .name,
+  body.is-wholesale-page .invoice-card .sku,
+  body.is-wholesale-page .invoice-card .price {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body.is-wholesale-page .invoice-flag {
+    top: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+    max-width: calc(100% - 20px) !important;
+    white-space: nowrap !important;
+  }
+
+  body.is-wholesale-page .form-consent {
+    display: grid !important;
+    grid-template-columns: 18px minmax(0, 1fr) !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  body.is-wholesale-page .form-consent label {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body.is-wholesale-page .invoice-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px 12px !important;
+  }
+
+  body.is-wholesale-page .invoice-row .price {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  body.is-wholesale-page .volume-table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    border-radius: var(--r-lg, 14px) !important;
+  }
+
+  body.is-wholesale-page .volume-table thead {
+    display: none !important;
+  }
+
+  body.is-wholesale-page .volume-table tbody,
+  body.is-wholesale-page .volume-table tr,
+  body.is-wholesale-page .volume-table td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  body.is-wholesale-page .volume-table tr {
+    padding: 14px 16px !important;
+    border-bottom: 1px solid var(--border-soft) !important;
+  }
+
+  body.is-wholesale-page .volume-table tr:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.is-wholesale-page .volume-table th,
+  body.is-wholesale-page .volume-table td {
+    padding: 3px 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  body.is-wholesale-page .volume-table .price,
+  body.is-wholesale-page .volume-table .save {
+    font-size: 13px !important;
+  }
+
+  body.is-wholesale-page .segmented {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

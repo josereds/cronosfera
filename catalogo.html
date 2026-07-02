@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Catálogo Cronosfera — relojes originales filtrados por marca, movimiento, precio, género y más." />
+  <title>Relojes · Catálogo · Cronosfera</title>
+  <link rel="canonical" href="https://cronosfera-five.vercel.app/catalogo.html">
+  <meta property="og:site_name" content="Cronosfera">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cronosfera-five.vercel.app/catalogo.html">
+  <meta property="og:title" content="Catálogo · Cronosfera">
+  <meta property="og:description" content="Relojes originales filtrados por marca, movimiento, precio, género y más.">
+  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Cronosfera — marketplace de relojería. Reloj de lujo sobre fondo grafito con detalles en bronce.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Catálogo · Cronosfera">
+  <meta name="twitter:description" content="Relojes originales filtrados por marca, movimiento, precio, género y más.">
+  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           oklch(97% 0.008 80);
+      --bg-warm:      oklch(95% 0.012 80);
+      --surface:      oklch(100% 0 0);
+      --surface-2:    oklch(98% 0.006 80);
+      --fg:           oklch(22% 0.005 250);
+      --fg-soft:      oklch(34% 0.005 250);
+      --muted:        oklch(52% 0.006 250);
+      --muted-2:      oklch(64% 0.006 250);
+      --border:       oklch(88% 0.006 250);
+      --border-soft:  oklch(93% 0.006 250);
+      --accent:       oklch(52% 0.08 60);
+      --accent-deep:  oklch(42% 0.08 60);
+      --accent-soft:  oklch(90% 0.05 65);
+      --success:      oklch(48% 0.10 155);
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.04);
+      --shadow:    0 4px 16px rgba(20, 22, 28, 0.05);
+      --shadow-lg: 0 18px 50px rgba(20, 22, 28, 0.10);
+      --r: 8px; --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; }
+    svg { display: block; max-width: 100%; }
+    .container { max-width: 1480px; margin: 0 auto; padding: 0 28px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent-deep);
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    /* ---------- HEADER ---------- */
+    .site-header {
+      position: sticky; top: 0; z-index: 80;
+      background: rgba(246, 241, 231, 0.92);
+      backdrop-filter: blur(20px) saturate(1.1);
+      -webkit-backdrop-filter: blur(20px) saturate(1.1);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 32px; height: 76px;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 600; letter-spacing: 0.02em;
+      color: var(--fg);
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .logo svg { width: 26px; height: 26px; }
+    .logo .dot { color: var(--accent); }
+    .nav-primary { display: flex; align-items: center; gap: 28px; flex: 1; }
+    .nav-primary a {
+      font-size: 14px; color: var(--fg-soft);
+      padding: 8px 0; position: relative; transition: color 0.2s;
+    }
+    .nav-primary a.current { color: var(--fg); }
+    .nav-primary a.current::after {
+      content: ""; position: absolute; bottom: 4px; left: 0; right: 0;
+      height: 1px; background: var(--accent);
+    }
+    .nav-primary a:hover { color: var(--fg); }
+    .header-actions { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center; border-radius: 50%;
+      color: var(--fg-soft); transition: all 0.2s; position: relative;
+    }
+    .icon-btn:hover { background: var(--surface); color: var(--fg); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .icon-btn .badge {
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: var(--accent); color: var(--surface); border-radius: 999px;
+      font-size: 10px; font-weight: 600; font-family: var(--font-mono);
+      display: grid; place-items: center;
+    }
+    .wholesale-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: var(--accent-soft); color: var(--accent-deep);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-right: 8px;
+    }
+    .wholesale-pill::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .menu-toggle { display: none; }
+
+    /* ---------- SESSION SLOT (cronos-auth) ---------- */
+    .session-slot { display: inline-flex; align-items: center; margin-left: 8px; }
+    .session-slot .auth-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 13px; font-weight: 500;
+      color: var(--fg-soft);
+      transition: all .2s;
+    }
+    .session-slot .auth-link:hover { border-color: var(--accent); color: var(--accent-deep); }
+    .session-chip {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .session-chip:hover, .session-chip.open { border-color: var(--accent); }
+    .session-chip .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent-deep);
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+    }
+    .session-chip .meta { padding-right: 8px; }
+    .session-chip .name { font-size: 12px; font-weight: 500; line-height: 1.2; }
+    .session-chip .role { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .session-menu {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+      opacity: 0; visibility: hidden; transform: translateY(-4px);
+      transition: opacity .15s, transform .15s, visibility .15s;
+      z-index: 90;
+    }
+    .session-chip.open .session-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .session-menu .mini-link {
+      display: block; padding: 9px 12px; font-size: 13px;
+      border-radius: 6px; transition: background .15s; width: 100%; text-align: left;
+    }
+    .session-menu .mini-link:hover { background: var(--surface-2); }
+    .session-menu .mini-link.danger:hover { background: color-mix(in oklab, var(--danger) 12%, transparent); color: var(--danger); }
+
+    /* ---------- BREADCRUMB + TITLE ---------- */
+    .page-head {
+      padding: 36px 0 28px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .breadcrumbs {
+      display: flex; gap: 8px; align-items: center;
+      font-size: 12px; color: var(--muted);
+      letter-spacing: 0.06em;
+      margin-bottom: 18px;
+    }
+    .breadcrumbs a { color: var(--muted); }
+    .breadcrumbs a:hover { color: var(--fg); }
+    .breadcrumbs .sep { color: var(--muted-2); }
+    .breadcrumbs .current { color: var(--fg); }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4.4vw, 56px);
+      font-weight: 500;
+      line-height: 1.02;
+      letter-spacing: -0.012em;
+    }
+    .page-head .sub {
+      color: var(--muted); margin-top: 12px; font-size: 15px;
+      display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+    }
+    .page-head .sub .count { font-family: var(--font-mono); color: var(--fg); font-weight: 500; }
+
+    /* ---------- LAYOUT ---------- */
+    .catalog {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 40px;
+      padding: 36px 0 80px;
+      align-items: start;
+    }
+
+    /* ---------- FILTERS SIDEBAR ---------- */
+    .filters {
+      position: sticky; top: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      padding: 8px 0;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .filters-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .filters-head h3 {
+      font-family: var(--font-display);
+      font-size: 19px; font-weight: 500;
+    }
+    .filters-head button {
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .filters-head button:hover { color: var(--accent-deep); }
+    .filter-group { border-bottom: 1px solid var(--border-soft); }
+    .filter-group:last-child { border-bottom: 0; }
+    .filter-group summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--fg);
+    }
+    .filter-group summary::-webkit-details-marker { display: none; }
+    .filter-group summary::after {
+      content: "+";
+      font-family: var(--font-mono);
+      color: var(--muted-2);
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .filter-group[open] summary::after { content: "–"; }
+    .filter-group .body { padding: 0 20px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+    .check {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--fg-soft);
+      cursor: pointer; padding: 4px 0;
+    }
+    .check input { display: none; }
+    .check .box {
+      width: 16px; height: 16px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .check input:checked + .box {
+      background: var(--fg); border-color: var(--fg);
+    }
+    .check input:checked + .box::after {
+      content: ""; width: 8px; height: 4px;
+      border-left: 1.5px solid var(--surface);
+      border-bottom: 1.5px solid var(--surface);
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+    .check .count { margin-left: auto; color: var(--muted-2); font-family: var(--font-mono); font-size: 11px; }
+
+    .swatch-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .swatch {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.15s;
+      position: relative;
+    }
+    .swatch:hover { transform: scale(1.08); }
+    .swatch.active { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--accent); }
+
+    .range {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .range input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      background: var(--bg);
+    }
+    .range input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+    /* ---------- TOOLBAR ---------- */
+    .toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; gap: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar .left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .toolbar .left .result-info { font-size: 13px; color: var(--muted); }
+    .toolbar .left .result-info b { color: var(--fg); font-weight: 500; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 8px 5px 12px;
+      background: var(--accent-soft); color: var(--accent-deep);
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .chip button {
+      width: 16px; height: 16px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      color: var(--accent-deep);
+      opacity: 0.7;
+    }
+    .chip button:hover { opacity: 1; background: color-mix(in oklab, var(--accent) 18%, transparent); }
+
+    .sort {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: var(--surface);
+      font-size: 13px;
+    }
+    .sort label { color: var(--muted); font-size: 12px; }
+    .sort select {
+      border: 0; background: transparent;
+      font-size: 13px; font-weight: 500;
+      padding-right: 18px;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='%23777' fill='none' stroke-width='1.5'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right center;
+      cursor: pointer;
+    }
+    .sort select:focus { outline: none; }
+    .view-toggle { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: var(--r); padding: 3px; }
+    .view-toggle button {
+      width: 30px; height: 30px;
+      display: grid; place-items: center;
+      border-radius: 5px;
+      color: var(--muted);
+    }
+    .view-toggle button.active { background: var(--fg); color: var(--surface); }
+    .view-toggle svg { width: 16px; height: 16px; }
+
+    .filter-toggle-mobile { display: none; }
+
+    /* ---------- PRODUCT GRID ---------- */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .product-media {
+      position: relative; aspect-ratio: 1; background: var(--bg-warm); overflow: hidden;
+    }
+    .product-media .ph-img { position: absolute; inset: 0; display: grid; place-items: center; }
+    .product-media .ph-img svg { width: 60%; }
+    .product-tag { position: absolute; top: 14px; left: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }
+    .product-tag span {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 5px 9px; border-radius: 4px;
+      background: var(--surface); color: var(--fg);
+      box-shadow: var(--shadow-sm);
+    }
+    .product-tag .new { background: var(--fg); color: var(--surface); }
+    .product-tag .special { background: var(--accent); color: var(--surface); }
+    .product-tag .best { background: var(--surface); color: var(--accent-deep); border: 1px solid var(--accent); }
+    .product-fav {
+      position: absolute; top: 12px; right: 12px;
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      background: var(--surface); border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+      color: var(--fg-soft);
+      transition: all 0.2s;
+      z-index: 2;
+    }
+    .product-fav:hover { color: var(--accent-deep); transform: scale(1.05); }
+    .product-fav.active { color: var(--accent); }
+    .product-fav svg { width: 18px; height: 18px; }
+    .product-info { padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .product-brand { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .product-model { font-size: 16px; font-weight: 500; color: var(--fg); line-height: 1.3; }
+    .product-variants { display: flex; gap: 6px; margin-top: 4px; align-items: center; font-size: 11px; color: var(--muted-2); }
+    .product-variants .dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border); }
+    .product-price {
+      margin-top: 12px;
+      display: flex; align-items: baseline; gap: 10px;
+      font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    }
+    .product-price .now { font-size: 18px; font-weight: 500; }
+    .product-price .was { font-size: 13px; color: var(--muted-2); text-decoration: line-through; }
+    .product-price .off {
+      font-size: 11px; font-weight: 500;
+      color: var(--accent-deep); background: var(--accent-soft);
+      padding: 2px 6px; border-radius: 3px;
+    }
+    .product-stock { margin-top: 6px; font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 6px; }
+    .product-stock::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+    .product-stock.low::before { background: var(--accent); }
+    .product-stock.low { color: var(--accent-deep); }
+    .product-stock.out::before { background: var(--muted-2); }
+    .product-stock.out { color: var(--muted-2); }
+    .product-wholesale {
+      margin-top: 10px; padding: 10px 12px;
+      background: var(--accent-soft); border-radius: var(--r);
+      font-size: 11px; color: var(--accent-deep);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .product-wholesale .price { font-family: var(--font-mono); font-weight: 600; color: var(--fg); }
+    .product-cta {
+      margin-top: 14px;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px;
+    }
+    .product-cta .btn {
+      padding: 11px;
+      background: var(--fg); color: var(--surface);
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.04em;
+      border-radius: var(--r);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .product-cta .btn:hover { background: var(--fg-soft); }
+    .product-cta .icon-mini {
+      width: 42px;
+      background: var(--surface); color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: grid; place-items: center;
+    }
+    .product-cta .icon-mini:hover { border-color: var(--fg); }
+
+    /* ---------- PAGINATION ---------- */
+    .pagination {
+      display: flex; gap: 4px; justify-content: center;
+      margin-top: 56px;
+      align-items: center;
+    }
+    .pagination button, .pagination a {
+      min-width: 40px; height: 40px;
+      padding: 0 12px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r);
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--fg-soft);
+      transition: all 0.2s;
+    }
+    .pagination button:hover, .pagination a:hover {
+      border-color: var(--fg); color: var(--fg);
+    }
+    .pagination .current {
+      background: var(--fg); color: var(--surface); border-color: var(--fg);
+    }
+    .pagination .gap { color: var(--muted-2); border: 0; background: none; }
+
+    /* ---------- EMPTY ---------- */
+    .empty {
+      grid-column: 1 / -1;
+      padding: 80px 24px;
+      text-align: center;
+      border: 1px dashed var(--border);
+      border-radius: var(--r-lg);
+      background: var(--surface);
+    }
+    .empty svg { width: 56px; height: 56px; color: var(--muted-2); margin: 0 auto 18px; }
+    .empty h3 { font-family: var(--font-display); font-size: 28px; font-weight: 500; margin-bottom: 8px; }
+    .empty p { color: var(--muted); margin-bottom: 22px; }
+    .empty button {
+      padding: 12px 22px;
+      background: var(--fg); color: var(--surface);
+      border-radius: var(--r);
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    /* ---------- FOOTER ---------- */
+    .site-footer {
+      background: var(--fg); color: rgba(246,241,231,0.7);
+      padding: 60px 0 32px;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 36px;
+      padding-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-brand .logo { color: var(--surface); margin-bottom: 14px; }
+    .footer-brand p { font-size: 13px; line-height: 1.6; max-width: 280px; }
+    .footer-col h5 {
+      color: var(--surface); font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 14px; font-weight: 500;
+    }
+    .footer-col ul li { margin-bottom: 8px; }
+    .footer-col a { font-size: 13px; color: rgba(246,241,231,0.65); }
+    .footer-col a:hover { color: var(--surface); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; padding-top: 22px;
+      font-size: 12px; color: rgba(246,241,231,0.5); gap: 18px; flex-wrap: wrap;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 1100px) {
+      .nav-primary { display: none; }
+      .catalog { grid-template-columns: 220px 1fr; gap: 24px; }
+      .products { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+    @media (max-width: 820px) {
+      .catalog { grid-template-columns: 1fr; }
+      .filters {
+        position: fixed; inset: 0 0 0 auto; width: min(360px, 90vw);
+        top: 0; bottom: 0; max-height: none;
+        z-index: 100;
+        border-radius: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow-lg);
+      }
+      .filters.open { transform: none; }
+      .filter-toggle-mobile {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 14px;
+        background: var(--fg); color: var(--surface);
+        border-radius: var(--r);
+        font-size: 12px; font-weight: 500;
+        letter-spacing: 0.04em;
+      }
+      .filters-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+        z-index: 90; opacity: 0; pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .filters-backdrop.open { opacity: 1; pointer-events: auto; }
+    }
+    @media (max-width: 700px) {
+      .container { padding: 0 18px; }
+      .header-inner { height: 64px; gap: 8px; }
+      .header-actions .icon-btn:not(.menu-toggle):not(.cart-btn):not(.search-btn) { display: none; }
+      .header-actions .icon-btn { width: 36px; height: 36px; }
+      .menu-toggle { display: grid; }
+      .page-head { padding: 24px 0 20px; }
+      .toolbar { gap: 12px; }
+      .toolbar .sort { width: 100%; justify-content: space-between; }
+      .view-toggle { display: none; }
+      .products { grid-template-columns: 1fr 1fr; gap: 14px; }
+      .product-info { padding: 14px; }
+      .product-model { font-size: 14px; }
+      .product-price .now { font-size: 15px; }
+      .product-cta { grid-template-columns: 1fr; }
+      .product-cta .icon-mini { display: none; }
+      .footer-top { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Cronosfera, inicio">
+        <svg viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.2"/>
+          <circle cx="13" cy="13" r="1.4" fill="currentColor"/>
+          <line x1="13" y1="13" x2="13" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="13" y1="13" x2="19" y2="13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Cronosfera<span class="dot">.</span>
+      </a>
+      <nav class="nav-primary" aria-label="Principal">
+        <a href="index.html">Inicio</a>
+        <a href="catalogo.html" class="current">Relojes</a>
+        <a href="subastas.html">Subastas</a>
+        <a href="catalogo.html?f=coleccion">Colecciones</a>
+        <a href="mayorista.html">Mayoristas</a>
+        <a href="index.html#story">Nosotros</a>
+      </nav>
+      <div class="header-actions">
+        <span class="wholesale-pill" data-wholesale-flag style="display:none">Mayorista</span>
+        <button class="icon-btn search-btn" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Cuenta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Favoritos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn cart-btn" aria-label="Carrito">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
+          <span class="badge">2</span>
+        </button>
+        <button class="icon-btn menu-toggle" aria-label="Menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="8" x2="20" y2="8" stroke-linecap="round"/><line x1="4" y1="14" x2="20" y2="14" stroke-linecap="round"/></svg>
+        </button>
+        <span class="session-slot" data-session-slot></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="page-head">
+      <nav class="breadcrumbs" aria-label="Migas de pan">
+        <a href="index.html">Inicio</a>
+        <span class="sep">/</span>
+        <a href="catalogo.html">Catálogo</a>
+        <span class="sep">/</span>
+        <span class="current">Todos los relojes</span>
+      </nav>
+      <h1>Todos los relojes</h1>
+      <div class="sub">
+        <span><span class="count" data-catalog-total>12</span> referencias disponibles</span>
+        <span>Precios en COP · inventario local</span>
+      </div>
+    </div>
+
+    <div class="catalog">
+
+      <!-- ============ FILTERS ============ -->
+      <aside class="filters" id="filters" aria-label="Filtros">
+        <div class="filters-head">
+          <h3>Filtros</h3>
+          <button onclick="clearAll()">Limpiar todo</button>
+        </div>
+
+        <details class="filter-group" open>
+          <summary>Marca</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Casio <span class="count">34</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Citizen <span class="count">22</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" checked /><span class="box"></span> Cronosfera <span class="count">48</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Seiko <span class="count">28</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Orient <span class="count">19</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Tissot <span class="count">17</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Fossil <span class="count">21</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Invicta <span class="count">14</span></label>
+            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> G-Shock <span class="count">15</span></label>
+          </div>
+        </details>
+
+        <details class="filter-group" open>
+          <summary>Precio (COP)</summary>
+          <div class="body">
+            <div class="range">
+              <input type="text" inputmode="numeric" placeholder="$ 0" aria-label="Mínimo" />
+              <span style="color:var(--muted-2)">—</span>
+              <input type="text" inputmode="numeric" placeholder="$ 5.000.000" aria-label="Máximo" />
+            </div>
+            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> Menos de $ 500.000</label>
+            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 500.000 – $ 1.000.000</label>
+            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 1.000.000 – $ 2.500.000</label>
+            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 2.500.000 – $ 5.000.000</label>
+            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> Más de $ 5.000.000</label>
+          </div>
+        </details>
+
+        <details class="filter-group" open>
+          <summary>Tipo de movimiento</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> Automático</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Mecánico manual</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Cuarzo</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Solar</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Smart / Híbrido</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Género o estilo</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> Hombre</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Mujer</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Unisex</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Deportivo</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Clásico</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Tamaño de caja</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> 28 – 34 mm</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 36 – 40 mm</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 41 – 44 mm</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 45 mm o más</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Material</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> Acero inoxidable</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Acero 904L</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Bronce</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Titanio</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Oro / chapado en oro</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Resina / polímero</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Color de esfera</summary>
+          <div class="body">
+            <div class="swatch-row">
+              <span class="swatch active" style="background:#1d2026" title="Negro"></span>
+              <span class="swatch" style="background:#2a4030" title="Verde"></span>
+              <span class="swatch" style="background:#1a2a44" title="Azul"></span>
+              <span class="swatch" style="background:#7a1c1c" title="Vino"></span>
+              <span class="swatch" style="background:#c9a86a" title="Champán"></span>
+              <span class="swatch" style="background:#dcd6cc" title="Marfil"></span>
+              <span class="swatch" style="background:#6a5340" title="Bronce"></span>
+              <span class="swatch" style="background:#7a7468" title="Gris"></span>
+            </div>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Resistencia al agua</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> 30 m (3 ATM)</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 50 m (5 ATM)</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 100 m (10 ATM)</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> 200 m o más</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Tipo de correa</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> Acero</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Cuero</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Silicone / caucho</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Nailon / tela NATO</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Malla Milanés</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Disponibilidad</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" checked /><span class="box"></span> En inventario</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Bajo inventario</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Pre-venta</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Mostrar agotados</label>
+          </div>
+        </details>
+
+        <details class="filter-group">
+          <summary>Promociones</summary>
+          <div class="body">
+            <label class="check"><input type="checkbox" /><span class="box"></span> En descuento</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Edición especial</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Nuevos</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Más vendidos</label>
+          </div>
+        </details>
+
+      </aside>
+
+      <!-- ============ MAIN ============ -->
+      <div class="catalog-main">
+
+        <div class="toolbar">
+          <div class="left">
+            <button class="filter-toggle-mobile" onclick="openFilters()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round"/><line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round"/><line x1="9" y1="18" x2="15" y2="18" stroke-linecap="round"/></svg>
+              Filtros
+            </button>
+            <span class="result-info"><b>34</b> resultados · ordenados por <b>relevancia</b></span>
+            <div class="chips">
+              <span class="chip">Cronosfera <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+              <span class="chip">$ 1M – $ 2.5M <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+              <span class="chip">En inventario <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div class="sort">
+              <label for="sort">Ordenar:</label>
+              <select id="sort">
+                <option>Relevancia</option>
+                <option>Más vendidos</option>
+                <option>Precio: menor a mayor</option>
+                <option>Precio: mayor a menor</option>
+                <option>Más recientes</option>
+                <option>Mayor descuento</option>
+              </select>
+            </div>
+            <div class="view-toggle">
+              <button class="active" aria-label="Vista en grilla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg></button>
+              <button aria-label="Vista en lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/><line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/><line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="products" id="products"></div>
+
+        <nav class="pagination" aria-label="Paginación">
+          <a href="#" aria-label="Anterior"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15,6 9,12 15,18" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="#" class="current">1</a>
+          <a href="#">2</a>
+          <a href="#">3</a>
+          <a href="#">4</a>
+          <span class="gap">…</span>
+          <a href="#">12</a>
+          <a href="#" aria-label="Siguiente"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9,6 15,12 9,18" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="logo" style="color:var(--surface)">
+            <svg viewBox="0 0 26 26" fill="none">
+              <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.2"/>
+              <circle cx="13" cy="13" r="1.4" fill="currentColor"/>
+              <line x1="13" y1="13" x2="13" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="13" y1="13" x2="19" y2="13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Cronosfera<span style="color:oklch(80% 0.10 70)">.</span>
+          </div>
+          <p>Marketplace colombiano de relojes originales seleccionados.</p>
+        </div>
+        <div class="footer-col"><h5>Catálogo</h5><ul>
+          <li><a href="catalogo.html">Todos</a></li><li><a href="catalogo.html?f=automaticos">Automáticos</a></li>
+          <li><a href="catalogo.html?f=deportivos">Deportivos</a></li><li><a href="catalogo.html?f=clasicos">Clásicos</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Marcas</h5><ul>
+          <li><a href="catalogo.html?marca=casio">Casio</a></li><li><a href="catalogo.html?marca=seiko">Seiko</a></li>
+          <li><a href="catalogo.html?marca=tissot">Tissot</a></li><li><a href="catalogo.html">Ver todas</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Cuenta</h5><ul>
+          <li><a href="acceso.html">Iniciar sesión</a></li><li><a href="mayorista.html">Mayoristas</a></li>
+          <li><a href="admin.html">Panel admin</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Servicio</h5><ul>
+          <li><a href="#">Contacto</a></li><li><a href="#">Envíos</a></li>
+          <li><a href="#">Garantía</a></li><li><a href="#">Términos</a></li>
+        </ul></div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Cronosfera · Demostración</div>
+        <div>Colombia · COP</div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="filters-backdrop" id="backdrop" onclick="closeFilters()"></div>
+
+  <script src="cronos-store.js"></script>
+  <script src="cronos-auth.js"></script>
+  <script src="cronos-ui.js"></script>
+  <script>
+    var _legacy = [
+      { brand: 'Cronosfera', model: 'Aurora 39 · Acero', ref: 'CR-AU-39-ABL', price: 1299000, was: 1599000, off: 19, tone: 'ink', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#1d2026','#c9a86a','#7a7468'] },
+      { brand: 'Cronosfera', model: 'Atlas Sport · 42mm', ref: 'CR-AT-42-SBL', price: 1840000, was: 0, off: 0, tone: 'cool', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#323a42','#2c261c'] },
+      { brand: 'Cronosfera', model: 'Heritage Bronze', ref: 'CR-HE-40-BNL', price: 2690000, was: 2990000, off: 10, tone: 'bronze', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 4 un.', stockLow: true, variants: ['#6a5340','#3a342a'] },
+      { brand: 'Cronosfera', model: 'Lumen Oro', ref: 'CR-LU-39-GBL', price: 3450000, was: 0, off: 0, tone: 'bronze', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#c9a86a','#1d2026','#5a4632'] },
+      { brand: 'Cronosfera', model: 'Nimbus Smart', ref: 'CR-NI-44-KBL', price: 949000, was: 1099000, off: 14, tone: 'ink', tag: null, stock: 'Disponible', variants: ['#1c1e22','#7a7468'] },
+      { brand: 'Cronosfera', model: 'Meridian Clásico', ref: 'CR-ME-40-SCL', price: 1499000, was: 0, off: 0, tone: 'steel', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#a8a298','#1d2026','#c9a86a'] },
+      { brand: 'Cronosfera', model: 'Selva Verde 39', ref: 'CR-SV-39-GSL', price: 1999000, was: 2299000, off: 13, tone: 'green', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 2 un.', stockLow: true, variants: ['#344a3a','#1d2026'] },
+      { brand: 'Cronosfera', model: 'Aurora Mujer 33', ref: 'CR-AM-33-RSL', price: 1149000, was: 0, off: 0, tone: 'fog', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#dcd6cc','#c9a86a','#5a544a'] },
+      { brand: 'Cronosfera', model: 'Eclipse Negro', ref: 'CR-EC-41-KBL', price: 2199000, was: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', variants: ['#1d2026','#5a5853'] },
+      { brand: 'Cronosfera', model: 'Cumbre Andes 45', ref: 'CR-CU-45-BBL', price: 2890000, was: 3290000, off: 12, tone: 'cool', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#323a42','#1d2026'] },
+      { brand: 'Cronosfera', model: 'Aurora Oro Rosa', ref: 'CR-AU-39-RGL', price: 2349000, was: 0, off: 0, tone: 'bronze', tag: null, stock: 'Disponible', variants: ['#c9a86a','#1d2026'] },
+      { brand: 'Cronosfera', model: 'Vega Smart Active', ref: 'CR-VG-44-KSL', price: 1290000, was: 1499000, off: 14, tone: 'ink', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Agotado', stockOut: true, variants: ['#1c1e22','#7a7468'] }
+    ];
+    var products = (window.Store ? Store.getProducts() : _legacy).map(function(p){
+      return {
+        id: p.id,
+        brand: p.brand,
+        model: p.model,
+        ref: p.ref,
+        price: p.price,
+        was: p.wasPrice || p.was || 0,
+        off: p.off || 0,
+        tone: p.tone,
+        tag: p.tag,
+        stock: p.stock,
+        stockLow: p.stockStatus === 'low' || p.stockLow,
+        stockOut: p.stockStatus === 'out' || p.stockOut,
+        variants: p.variants || []
+      };
+    });
+    function cop(v){ return '$' + v.toLocaleString('es-CO'); }
+    function watchSVG(tone){
+      var bg = ({ink:'#1a1c20', cool:'#323a42', bronze:'#6a5340', fog:'#dcd6cc', steel:'#a8a298', green:'#344a3a'})[tone] || '#1a1c20';
+      var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
+      var accent = '#c9a86a';
+      return ''
+        + '<svg viewBox="-110 -110 220 220">'
+        +   '<circle r="105" fill="#5a5853"/>'
+        +   '<circle r="94" fill="#3d3b37"/>'
+        +   '<circle r="84" fill="' + bg + '"/>'
+        +   '<g stroke="' + accent + '" stroke-width="1.6" stroke-linecap="round">'
+        +     '<line x1="0" y1="-78" x2="0" y2="-68"/><line x1="78" y1="0" x2="68" y2="0"/><line x1="0" y1="78" x2="0" y2="68"/><line x1="-78" y1="0" x2="-68" y2="0"/>'
+        +   '</g>'
+        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">CRONOSFERA</text>'
+        +   '<line x1="0" y1="0" x2="0" y2="-50" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
+        +   '<line x1="0" y1="0" x2="36" y2="10" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
+        +   '<line x1="0" y1="0" x2="0" y2="58" stroke="' + accent + '" stroke-width="1" stroke-linecap="round"/>'
+        +   '<circle r="3.4" fill="' + fg + '"/>'
+        +   '<ellipse cx="-30" cy="-46" rx="48" ry="22" fill="#ffffff" opacity="0.05" transform="rotate(-25)"/>'
+        + '</svg>';
+    }
+    var isWholesale = !!(window.Auth && Auth.isWholesale());
+    var grid = document.getElementById('products');
+    function renderProductList(list){
+      grid.innerHTML = '';
+      list.forEach(function(p){
+      var off = p.off ? '<span class="off">-' + p.off + '%</span>' : '';
+      var was = p.was ? '<span class="was">' + cop(p.was) + '</span>' : '';
+      var tag = p.tag ? '<span class="' + p.tag.kind + '">' + p.tag.label + '</span>' : '';
+      var variants = p.variants.map(function(c){ return '<span class="dot" style="background:' + c + '"></span>'; }).join('');
+      var wholesale = '';
+      if (isWholesale && !p.stockOut) {
+        var wp = window.Store ? Store.wholesalePriceFor({price: p.price}) : Math.round(p.price * 0.78);
+        var save = p.price - wp;
+        wholesale = '<div class="product-wholesale"><span>Mayorista · mín. 6 un.</span><span class="price">' + cop(wp) + ' <span style="opacity:.6;font-weight:400">· ahorro ' + cop(save) + '</span></span></div>';
+      }
+      var stockClass = p.stockOut ? ' out' : (p.stockLow ? ' low' : '');
+      var card = document.createElement('a');
+      card.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : '');
+      card.className = 'product-card';
+      card.innerHTML = ''
+        + '<div class="product-media">'
+        +   '<div class="ph-img">' + watchSVG(p.tone) + '</div>'
+        +   '<div class="product-tag">' + tag + '</div>'
+        +   '<button class="product-fav" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg></button>'
+        + '</div>'
+        + '<div class="product-info">'
+        +   '<div class="product-brand">' + p.brand + ' · <span class="mono" style="color:var(--muted-2);text-transform:none;letter-spacing:0">' + p.ref + '</span></div>'
+        +   '<div class="product-model">' + p.model + '</div>'
+        +   '<div class="product-variants">' + variants + '<span style="margin-left:6px">' + p.variants.length + ' acabados</span></div>'
+        +   '<div class="product-price"><span class="now">' + cop(p.price) + '</span>' + was + off + '</div>'
+        +   '<div class="product-stock' + stockClass + '">' + p.stock + '</div>'
+        +   wholesale
+        +   '<div class="product-cta">'
+        +     '<button class="btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>' + (p.stockOut ? 'Agotado' : 'Agregar') + '</button>'
+        +     '<button class="icon-mini" aria-label="Vista rápida"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>'
+        +   '</div>'
+        + '</div>';
+      var fav = card.querySelector('.product-fav');
+      fav.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); fav.classList.toggle('active'); });
+      var cta = card.querySelector('.product-cta .btn');
+      cta.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); if (!p.stockOut) { cta.textContent = '✓ En el carrito'; setTimeout(function(){ cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg> Agregar'; }, 1600); } });
+      var quick = card.querySelector('.icon-mini');
+      quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });
+      grid.appendChild(card);
+      });
+      if (!list.length) {
+        grid.innerHTML = '<div class="catalog-empty"><h3>No hay relojes con esos filtros</h3><p>Ajusta los filtros activos o limpia la busqueda para volver a ver el catalogo.</p><button class="btn" type="button" onclick="clearAll()">Limpiar filtros</button></div>';
+      }
+      updateCatalogMeta(list);
+    }
+
+    function normalizeText(value) {
+      return (value || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function labelText(input) {
+      return (input.closest('label')?.textContent || '').replace(/\s+\d+$/, '').trim();
+    }
+    function filterGroup(name) {
+      return Array.from(document.querySelectorAll('.filter-group')).find(function(group) {
+        return normalizeText(group.querySelector('summary')?.textContent) === normalizeText(name);
+      });
+    }
+    function checkedLabels(name) {
+      var group = filterGroup(name);
+      if (!group) return [];
+      return Array.from(group.querySelectorAll('input[type=checkbox]:checked')).map(labelText);
+    }
+    function activeFilterInputs() {
+      var names = ['Marca', 'Precio (COP)', 'Disponibilidad', 'Promociones'];
+      return names.flatMap(function(name) {
+        var group = filterGroup(name);
+        if (!group) return [];
+        return Array.from(group.querySelectorAll('input[type=checkbox]:checked')).map(function(input) {
+          return { input: input, label: labelText(input) };
+        });
+      });
+    }
+    function numericValue(input) {
+      var raw = (input?.value || '').replace(/[^\d]/g, '');
+      return raw ? Number(raw) : null;
+    }
+    function selectedPriceRanges() {
+      return checkedLabels('Precio (COP)').map(function(label) {
+        var t = normalizeText(label);
+        if (t.includes('menos')) return [0, 500000];
+        if (t.includes('500.000') && t.includes('1.000.000')) return [500000, 1000000];
+        if (t.includes('1.000.000') && t.includes('2.500.000')) return [1000000, 2500000];
+        if (t.includes('2.500.000') && t.includes('5.000.000')) return [2500000, 5000000];
+        if (t.includes('mas') || t.includes('5.000.000')) return [5000000, Infinity];
+        return null;
+      }).filter(Boolean);
+    }
+    function priceMatches(p) {
+      var group = filterGroup('Precio (COP)');
+      var inputs = group ? group.querySelectorAll('.range input') : [];
+      var min = numericValue(inputs[0]);
+      var max = numericValue(inputs[1]);
+      var ranges = selectedPriceRanges();
+      var inManual = (min === null || p.price >= min) && (max === null || p.price <= max);
+      if (!ranges.length) return inManual;
+      return inManual && ranges.some(function(range) { return p.price >= range[0] && p.price <= range[1]; });
+    }
+    function availabilityMatches(p) {
+      var selected = checkedLabels('Disponibilidad').map(normalizeText);
+      if (!selected.length) return true;
+      return selected.some(function(label) {
+        if (label.includes('inventario') && !label.includes('bajo')) return !p.stockOut;
+        if (label.includes('bajo')) return !!p.stockLow;
+        if (label.includes('agotado')) return !!p.stockOut;
+        if (label.includes('pre')) return false;
+        return true;
+      });
+    }
+    function promoMatches(p) {
+      var selected = checkedLabels('Promociones').map(normalizeText);
+      if (!selected.length) return true;
+      return selected.some(function(label) {
+        if (label.includes('descuento')) return p.off > 0;
+        if (label.includes('especial')) return p.tag && p.tag.kind === 'special';
+        if (label.includes('nuevo')) return p.tag && p.tag.kind === 'new';
+        if (label.includes('vendido')) return p.tag && p.tag.kind === 'best';
+        return true;
+      });
+    }
+    function brandMatches(p) {
+      var selected = checkedLabels('Marca').map(normalizeText);
+      if (!selected.length) return true;
+      return selected.includes(normalizeText(p.brand));
+    }
+    function applyFilters(list) {
+      return list.filter(function(p) {
+        return brandMatches(p) && priceMatches(p) && availabilityMatches(p) && promoMatches(p);
+      });
+    }
+    function updateCatalogMeta(list) {
+      var info = document.querySelector('.result-info');
+      if (info) info.innerHTML = '<b>' + list.length + '</b> resultado' + (list.length === 1 ? '' : 's') + ' · filtros activos';
+      var chips = document.querySelector('.chips');
+      if (!chips) return;
+      chips.innerHTML = '';
+      activeFilterInputs().forEach(function(item) {
+        var chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = item.label + ' ';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Quitar ' + item.label);
+        btn.textContent = '×';
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          item.input.checked = false;
+          renderProductList(applyFilters(products));
+        });
+        chip.appendChild(btn);
+        chips.appendChild(chip);
+      });
+      if (!chips.children.length) {
+        var empty = document.createElement('span');
+        empty.className = 'chip muted-chip';
+        empty.textContent = 'Sin filtros';
+        chips.appendChild(empty);
+      }
+    }
+    function prepareFilterPanel() {
+      var supported = ['marca', 'precio (cop)', 'disponibilidad', 'promociones'];
+      document.querySelectorAll('.filter-group').forEach(function(group) {
+        var key = normalizeText(group.querySelector('summary')?.textContent);
+        if (!supported.includes(key)) group.hidden = true;
+      });
+      var total = document.querySelector('[data-catalog-total]');
+      if (total) total.textContent = products.length;
+      var productBrands = Array.from(new Set(products.map(function(p) { return normalizeText(p.brand); })));
+      var brandGroup = filterGroup('Marca');
+      if (brandGroup) {
+        brandGroup.querySelectorAll('label.check').forEach(function(label) {
+          var input = label.querySelector('input');
+          var brand = normalizeText(labelText(input));
+          var exists = productBrands.includes(brand);
+          label.hidden = !exists;
+          if (exists) {
+            var count = products.filter(function(p) { return normalizeText(p.brand) === brand; }).length;
+            var countEl = label.querySelector('.count');
+            if (countEl) countEl.textContent = count;
+          } else if (input) {
+            input.checked = false;
+          }
+        });
+      }
+      var availabilityGroup = filterGroup('Disponibilidad');
+      if (availabilityGroup) {
+        availabilityGroup.querySelectorAll('label.check').forEach(function(label) {
+          if (normalizeText(label.textContent).includes('pre-venta')) {
+            label.hidden = true;
+            var input = label.querySelector('input');
+            if (input) input.checked = false;
+          }
+        });
+      }
+      var head = document.querySelector('.filters-head');
+      if (head && !document.querySelector('.filters-note')) {
+        var note = document.createElement('p');
+        note.className = 'filters-note';
+        note.textContent = 'Filtros conectados al inventario actual.';
+        head.insertAdjacentElement('afterend', note);
+      }
+    }
+    prepareFilterPanel();
+    renderProductList(applyFilters(products));
+
+    function clearAll(){
+      document.querySelectorAll('.filters input[type=checkbox]').forEach(function(c){ c.checked = false; });
+      document.querySelectorAll('.swatch').forEach(function(s){ s.classList.remove('active'); });
+      document.querySelectorAll('.filters .range input').forEach(function(input){ input.value = ''; });
+      renderProductList(applyFilters(products));
+    }
+    document.querySelectorAll('.filters input').forEach(function(input){
+      input.addEventListener('change', function(){ renderProductList(applyFilters(products)); });
+      input.addEventListener('input', function(){ renderProductList(applyFilters(products)); });
+    });
+    document.querySelectorAll('.swatch').forEach(function(s){
+      s.addEventListener('click', function(){ s.classList.toggle('active'); });
+    });
+
+    function openFilters(){ document.getElementById('filters').classList.add('open'); document.getElementById('backdrop').classList.add('open'); }
+    function closeFilters(){ document.getElementById('filters').classList.remove('open'); document.getElementById('backdrop').classList.remove('open'); }
+    window.openFilters = openFilters; window.closeFilters = closeFilters; window.clearAll = clearAll;
+
+    // Mostrar el pill "Mayorista" si la sesión es de mayorista
+    function syncWholesaleFlag() {
+      var flag = document.querySelector('[data-wholesale-flag]');
+      if (!flag) return;
+      flag.style.display = (window.Auth && Auth.isWholesale()) ? '' : 'none';
+    }
+    syncWholesaleFlag();
+    if (window.Store && Store.subscribe) Store.subscribe(function(){
+      syncWholesaleFlag();
+      isWholesale = !!(window.Auth && Auth.isWholesale());
+      products = (window.Store ? Store.getProducts() : _legacy).map(function(p){
+        return { id: p.id, brand: p.brand, model: p.model, ref: p.ref, price: p.price, was: p.wasPrice || p.was || 0, off: p.off || 0, tone: p.tone, tag: p.tag, stock: p.stock, stockLow: p.stockStatus === 'low' || p.stockLow, stockOut: p.stockStatus === 'out' || p.stockOut, variants: p.variants || [] };
+      });
+      prepareFilterPanel();
+      renderProductList(applyFilters(products));
+    });
+  </script>
+</body>
+</html>

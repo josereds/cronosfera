@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es-CO"><head>
+<meta charset="utf-8">
+<title>Cronosfera OG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: #f6f1e7;
+    background:
+      radial-gradient(55% 65% at 78% 38%, rgba(201, 168, 106, 0.22), transparent 60%),
+      radial-gradient(50% 55% at 12% 78%, rgba(80, 96, 120, 0.18), transparent 60%),
+      linear-gradient(135deg, #1a1c22 0%, #14161c 55%, #0e0f13 100%);
+    position: relative;
+  }
+
+  /* Hairline frame */
+  .frame {
+    position: absolute; inset: 28px;
+    border: 1px solid rgba(246, 241, 231, 0.08);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  /* Crosshair tickmarks at corners */
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: rgba(201, 168, 106, 0.55);
+    border-style: solid;
+    border-width: 0;
+  }
+  .corner.tl { top: 22px; left: 22px; border-top-width: 1px; border-left-width: 1px; }
+  .corner.tr { top: 22px; right: 22px; border-top-width: 1px; border-right-width: 1px; }
+  .corner.bl { bottom: 22px; left: 22px; border-bottom-width: 1px; border-left-width: 1px; }
+  .corner.br { bottom: 22px; right: 22px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .stage {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    align-items: center;
+    padding: 70px 80px;
+    gap: 40px;
+  }
+
+  /* LEFT: brand + tagline */
+  .left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+    z-index: 2;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #c9a86a;
+  }
+  .eyebrow::before {
+    content: ""; width: 32px; height: 1px;
+    background: #c9a86a;
+  }
+  .wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 84px;
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.012em;
+    color: #f6f1e7;
+  }
+  .wordmark .dot { color: #c9a86a; }
+  .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2;
+    color: rgba(246, 241, 231, 0.86);
+    max-width: 380px;
+  }
+  .sub {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(246, 241, 231, 0.55);
+    margin-top: 6px;
+  }
+  .sub .dot-sep {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(246, 241, 231, 0.35);
+  }
+
+  /* RIGHT: large watch */
+  .right {
+    position: relative;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+  }
+  .right::before {
+    content: "";
+    position: absolute;
+    width: 70%; height: 70%;
+    background: radial-gradient(circle, rgba(201, 168, 106, 0.28), transparent 65%);
+    filter: blur(50px);
+    z-index: -1;
+  }
+  .watch-svg {
+    width: 460px;
+    height: 460px;
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+  }
+
+  /* Top-right meta tag */
+  .top-meta {
+    position: absolute;
+    top: 56px; right: 80px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(246, 241, 231, 0.45);
+    display: inline-flex; align-items: center; gap: 10px;
+    z-index: 3;
+  }
+  .top-meta .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #c9a86a;
+    box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.2);
+  }
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+  <span class="corner tl"></span>
+  <span class="corner tr"></span>
+  <span class="corner bl"></span>
+  <span class="corner br"></span>
+
+  <div class="top-meta">
+    <span class="dot"></span>
+    Vista explotada · Calibre Aurora
+  </div>
+
+  <div class="stage">
+    <div class="left">
+      <span class="eyebrow">Marketplace de relojería</span>
+      <div class="wordmark">Cronosfera<span class="dot">.</span></div>
+      <div class="tagline">El tiempo también define quién eres.</div>
+      <div class="sub">
+        <span>Relojes originales</span>
+        <span class="dot-sep"></span>
+        <span>Envíos a Colombia</span>
+        <span class="dot-sep"></span>
+        <span>Compra verificada</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <svg class="watch-svg" viewBox="-220 -220 440 440" role="img" aria-label="Reloj Cronosfera">
+        <defs>
+          <radialGradient id="og-dial" cx="50%" cy="42%" r="65%">
+            <stop offset="0%" stop-color="#3a3d44"></stop>
+            <stop offset="55%" stop-color="#1d2026"></stop>
+            <stop offset="100%" stop-color="#0c0e12"></stop>
+          </radialGradient>
+          <linearGradient id="og-bezel" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a78a5a"></stop>
+            <stop offset="35%" stop-color="#6e5a36"></stop>
+            <stop offset="60%" stop-color="#c9a86a"></stop>
+            <stop offset="100%" stop-color="#4d3f24"></stop>
+          </linearGradient>
+          <linearGradient id="og-case" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#a3a09a"></stop>
+            <stop offset="50%" stop-color="#7c7973"></stop>
+            <stop offset="100%" stop-color="#4d4b46"></stop>
+          </linearGradient>
+          <radialGradient id="og-crystal" cx="35%" cy="28%" r="70%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"></stop>
+            <stop offset="35%" stop-color="#ffffff" stop-opacity="0.06"></stop>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+          </radialGradient>
+          <linearGradient id="og-hand" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#e9e6df"></stop>
+            <stop offset="100%" stop-color="#bcb9b2"></stop>
+          </linearGradient>
+        </defs>
+
+        <!-- bracelet top -->
+        <path d="M -65,-205 L -88,-178 L -52,-160 L -32,-188 Z" fill="url(#og-case)" opacity="0.85"></path>
+        <path d="M 65,-205 L 88,-178 L 52,-160 L 32,-188 Z" fill="url(#og-case)" opacity="0.85"></path>
+        <!-- bracelet bottom -->
+        <path d="M -65,205 L -88,178 L -52,160 L -32,188 Z" fill="url(#og-case)" opacity="0.85"></path>
+        <path d="M 65,205 L 88,178 L 52,160 L 32,188 Z" fill="url(#og-case)" opacity="0.85"></path>
+
+        <!-- case -->
+        <circle r="200" fill="url(#og-case)"></circle>
+        <circle r="200" fill="none" stroke="#3d3b37" stroke-width="0.6"></circle>
+        <!-- bezel -->
+        <circle r="182" fill="url(#og-bezel)"></circle>
+        <circle r="182" fill="none" stroke="#6e5a36" stroke-width="0.5"></circle>
+        <!-- inner bezel ring -->
+        <circle r="170" fill="none" stroke="#2a2826" stroke-width="1"></circle>
+        <!-- dial -->
+        <circle r="168" fill="url(#og-dial)"></circle>
+
+        <!-- indices (60 ticks) -->
+        <g id="indices"></g>
+
+        <!-- brand on dial -->
+        <text y="-92" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-size="15" letter-spacing="6" fill="#c9a86a" font-weight="500">CRONOSFERA</text>
+        <text y="-72" text-anchor="middle" font-family="'Inter', sans-serif" font-size="6" letter-spacing="4" fill="#9c9a93" font-weight="500">CALIBRE AURORA · COLOMBIA</text>
+
+        <!-- subdial at 6 -->
+        <g transform="translate(0, 78)">
+          <circle r="42" fill="#15171b" stroke="#2a2c30" stroke-width="0.6"></circle>
+          <circle r="42" fill="none" stroke="#3a3d44" stroke-width="0.4" stroke-dasharray="1 3"></circle>
+          <text y="-22" text-anchor="middle" font-family="'Inter', sans-serif" font-size="5" letter-spacing="2" fill="#9c9a93">SMALL SECONDS</text>
+          <g transform="rotate(135)">
+            <line x1="0" y1="6" x2="0" y2="-34" stroke="#c9a86a" stroke-width="0.9" stroke-linecap="round"></line>
+          </g>
+          <circle r="2.2" fill="#c9a86a"></circle>
+        </g>
+
+        <!-- date window at 3 -->
+        <g transform="translate(122, 0)">
+          <rect x="-14" y="-14" width="28" height="28" fill="#e9e6df" stroke="#5a5853" stroke-width="0.6" rx="2"></rect>
+          <text y="5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="14" fill="#1d2026" font-weight="500">17</text>
+        </g>
+
+        <!-- hands at 10:10 -->
+        <g transform="rotate(305)">
+          <path d="M -4,8 L -2.5,82 L 0,92 L 2.5,82 L 4,8 Z" fill="url(#og-hand)" stroke="#3d3b37" stroke-width="0.3"></path>
+          <rect x="-1.2" y="-8" width="2.4" height="14" fill="#1d2026"></rect>
+        </g>
+        <g transform="rotate(60)">
+          <path d="M -3,8 L -1.8,128 L 0,140 L 1.8,128 L 3,8 Z" fill="url(#og-hand)" stroke="#3d3b37" stroke-width="0.3"></path>
+          <rect x="-1" y="-8" width="2" height="14" fill="#1d2026"></rect>
+        </g>
+        <g transform="rotate(180)">
+          <line x1="0" y1="34" x2="0" y2="-152" stroke="#c9a86a" stroke-width="1.1" stroke-linecap="round"></line>
+          <circle cy="34" r="5" fill="#c9a86a"></circle>
+          <circle cy="-152" r="2" fill="#c9a86a"></circle>
+        </g>
+
+        <!-- center cap -->
+        <circle r="5" fill="#1d2026" stroke="#c9a86a" stroke-width="0.5"></circle>
+
+        <!-- crown at 3 -->
+        <g transform="translate(186, 0)">
+          <rect x="-3" y="-12" width="14" height="24" fill="url(#og-case)" stroke="#3d3b37" stroke-width="0.4" rx="2"></rect>
+          <line x1="3" y1="-12" x2="3" y2="12" stroke="#3d3b37" stroke-width="0.4"></line>
+          <line x1="7" y1="-12" x2="7" y2="12" stroke="#3d3b37" stroke-width="0.4"></line>
+        </g>
+
+        <!-- crystal reflection -->
+        <ellipse cx="-50" cy="-80" rx="120" ry="50" fill="url(#og-crystal)" transform="rotate(-25)"></ellipse>
+        <path d="M -130,-30 Q -100,-130 0,-140" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.18"></path>
+
+        <!-- microtext -->
+        <text y="138" text-anchor="middle" font-family="'Inter', sans-serif" font-size="5" letter-spacing="3" fill="#9c9a93">SELECCIONADO · VERIFICADO</text>
+      </svg>
+    </div>
+  </div>
+
+<script>
+  // Draw 60 tick indices for the watch dial
+  var parent = document.getElementById('indices');
+  var NS = 'http://www.w3.org/2000/svg';
+  for (var i = 0; i < 60; i++) {
+    var angle = (i * 6 - 90) * Math.PI / 180;
+    var isMajor = i % 5 === 0;
+    var r1 = isMajor ? 142 : 146;
+    var r2 = 158;
+    var x1 = Math.cos(angle) * r1, y1 = Math.sin(angle) * r1;
+    var x2 = Math.cos(angle) * r2, y2 = Math.sin(angle) * r2;
+    var ln = document.createElementNS(NS, 'line');
+    ln.setAttribute('x1', x1.toFixed(2));
+    ln.setAttribute('y1', y1.toFixed(2));
+    ln.setAttribute('x2', x2.toFixed(2));
+    ln.setAttribute('y2', y2.toFixed(2));
+    ln.setAttribute('stroke', isMajor ? '#c9a86a' : '#5a5853');
+    ln.setAttribute('stroke-width', isMajor ? 2.2 : 0.5);
+    ln.setAttribute('stroke-linecap', 'round');
+    parent.appendChild(ln);
+  }
+</script>
+</body>
+</html>

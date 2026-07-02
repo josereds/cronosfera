@@ -1,0 +1,36 @@
+# Vercel
+.vercel/
+
+# Open Design internal metadata
+*.artifact.json
+.od-skills/
+
+# Temp / scratch screenshots
+tmp-*.png
+*-tmp.png
+tmp-*/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs / env
+*.log
+.env
+.env.local
+.env.*.local
+
+# Node (si en el futuro se añade tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

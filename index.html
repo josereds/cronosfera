@@ -1,0 +1,1890 @@
+<!doctype html>
+<html lang="es-CO"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta name="description" content="Cronosfera — Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
+  <title>Cronosfera · Relojes originales seleccionados</title>
+  <link rel="canonical" href="https://cronosfera-five.vercel.app/">
+  <meta property="og:site_name" content="Cronosfera">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cronosfera-five.vercel.app/">
+  <meta property="og:title" content="Cronosfera · Relojes originales seleccionados">
+  <meta property="og:description" content="Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
+  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Cronosfera — marketplace de relojería. Reloj de lujo sobre fondo grafito con detalles en bronce.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cronosfera · Relojes originales seleccionados">
+  <meta name="twitter:description" content="Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
+  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta name="twitter:image:alt" content="Cronosfera — marketplace de relojería.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       Cronosfera — Sistema visual compartido
+       ============================================================ */
+    :root {
+      --bg:           oklch(14% 0.008 250);
+      --bg-warm:      oklch(17% 0.010 250);
+      --surface:      oklch(20% 0.010 250);
+      --surface-2:    oklch(24% 0.012 250);
+      --fg:           oklch(96% 0.005 80);
+      --fg-soft:      oklch(82% 0.005 80);
+      --muted:        oklch(60% 0.008 80);
+      --muted-2:      oklch(48% 0.008 80);
+      --border:       oklch(30% 0.008 250);
+      --border-soft:  oklch(24% 0.006 250);
+      --accent:       oklch(78% 0.10 75);
+      --accent-deep:  oklch(68% 0.12 70);
+      --accent-soft:  oklch(28% 0.06 70);
+      --danger:       oklch(64% 0.18 25);
+      --success:      oklch(70% 0.12 155);
+      --info:         oklch(70% 0.10 230);
+
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow:    0 8px 30px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.55);
+
+      --r-sm: 4px;
+      --r:    8px;
+      --r-lg: 14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    img, svg { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; }
+
+    ::selection { background: var(--accent); color: var(--surface); }
+
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+    .container-wide { max-width: 1480px; margin: 0 auto; padding: 0 28px; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent-deep);
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); display: inline-block; }
+    .eyebrow.plain::before { display: none; }
+
+    .display {
+      font-family: var(--font-display);
+      font-weight: 500;
+      line-height: 1.02;
+      letter-spacing: -0.012em;
+      color: var(--fg);
+    }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    /* ---------- HEADER ---------- */
+    .site-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 80;
+      transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
+      border-bottom: 1px solid transparent;
+    }
+    .site-header.solid {
+      background: rgba(20, 22, 28, 0.86);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom-color: var(--border);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 32px;
+      height: 76px;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--fg);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .logo svg { width: 26px; height: 26px; }
+    .logo .dot { color: var(--accent); }
+
+    .nav-primary {
+      display: flex; align-items: center; gap: 28px;
+      flex: 1;
+    }
+    .nav-primary a {
+      font-size: 14px; font-weight: 450;
+      color: var(--fg-soft);
+      padding: 8px 0;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-primary a::after {
+      content: ""; position: absolute; bottom: 4px; left: 0;
+      width: 0; height: 1px; background: var(--accent);
+      transition: width 0.25s ease;
+    }
+    .nav-primary a:hover { color: var(--fg); }
+    .nav-primary a:hover::after { width: 100%; }
+
+    .header-actions { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      color: var(--fg-soft);
+      transition: background 0.2s, color 0.2s;
+      position: relative;
+    }
+    .icon-btn:hover { background: var(--surface); color: var(--fg); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .icon-btn .badge {
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: var(--accent); color: var(--surface);
+      border-radius: 999px;
+      font-size: 10px; font-weight: 600;
+      display: grid; place-items: center;
+      font-family: var(--font-mono);
+    }
+
+    .wholesale-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-right: 8px;
+    }
+    .wholesale-pill::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .session-slot { display: inline-flex; align-items: center; margin-left: 6px; }
+    .session-slot .auth-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 13px; font-weight: 500;
+      color: var(--fg-soft);
+      transition: all .2s;
+    }
+    .session-slot .auth-link:hover { border-color: var(--accent); color: var(--accent); }
+    .session-chip {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .session-chip:hover, .session-chip.open { border-color: var(--accent); }
+    .session-chip .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+    }
+    .session-chip .meta { padding-right: 8px; }
+    .session-chip .name { font-size: 12px; font-weight: 500; line-height: 1.2; }
+    .session-chip .role { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .session-menu {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+      opacity: 0; visibility: hidden; transform: translateY(-4px);
+      transition: opacity .15s, transform .15s, visibility .15s;
+      z-index: 90;
+    }
+    .session-chip.open .session-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .session-menu .mini-link {
+      display: block; padding: 9px 12px; font-size: 13px;
+      border-radius: 6px; transition: background .15s; width: 100%; text-align: left;
+    }
+    .session-menu .mini-link:hover { background: var(--surface-2); }
+    .session-menu .mini-link.danger:hover { background: color-mix(in oklab, var(--danger) 12%, transparent); color: var(--danger); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 22px;
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.04em;
+      border-radius: var(--r);
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--fg); color: var(--surface);
+    }
+    .btn-primary:hover { background: var(--fg-soft); transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: var(--fg);
+      border-color: var(--border);
+    }
+    .btn-outline:hover { border-color: var(--fg); background: var(--surface); }
+    .btn-ghost { color: var(--fg-soft); padding: 10px 14px; }
+    .btn-ghost:hover { color: var(--fg); }
+
+    .menu-toggle { display: none; }
+
+    /* ---------- HERO (video full-bleed) ---------- */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding-top: 76px;
+      overflow: hidden;
+      isolation: isolate;
+      /* Fondo oscuro tipo esfera: queda como fallback si el video no carga
+         o cuando el usuario tiene prefers-reduced-motion. */
+      background:
+        radial-gradient(60% 55% at 72% 38%, oklch(28% 0.04 70), transparent 62%),
+        radial-gradient(55% 45% at 18% 82%, oklch(22% 0.025 250), transparent 60%),
+        #14161c;
+    }
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+    }
+    .hero-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg,
+          rgba(15, 17, 22, 0.62) 0%,
+          rgba(15, 17, 22, 0.05) 30%,
+          rgba(15, 17, 22, 0.35) 62%,
+          rgba(15, 17, 22, 0.92) 100%),
+        linear-gradient(90deg,
+          rgba(15, 17, 22, 0.74) 0%,
+          rgba(15, 17, 22, 0.18) 48%,
+          rgba(15, 17, 22, 0) 100%);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 80px 28px 96px;
+      color: var(--surface);
+    }
+    .hero-content .inner { max-width: 720px; }
+    .hero-content .eyebrow { color: var(--accent); }
+    .hero-content .eyebrow::before { background: var(--accent); }
+    .hero-content h1 {
+      font-size: clamp(48px, 6.6vw, 92px);
+      margin: 26px 0 22px;
+      color: var(--surface);
+    }
+    .hero-content h1 em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .hero-content p.lead {
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(246, 241, 231, 0.86);
+      max-width: 540px;
+      margin-bottom: 36px;
+    }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 38px; }
+    .hero .btn-primary {
+      background: var(--accent);
+      color: oklch(14% 0.008 250);
+    }
+    .hero .btn-primary:hover {
+      background: var(--accent-deep);
+      transform: translateY(-1px);
+    }
+    .hero .btn-outline {
+      background: rgba(246, 241, 231, 0.06);
+      color: var(--surface);
+      border-color: rgba(246, 241, 231, 0.32);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .hero .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--danger);
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--danger) 60%, transparent);
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--danger) 60%, transparent); }
+      70% { box-shadow: 0 0 0 8px rgba(220, 60, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 60, 60, 0); }
+    }
+    .hero-trust {
+      display: flex; align-items: center; gap: 18px;
+      font-size: 12px;
+      color: rgba(246, 241, 231, 0.72);
+      letter-spacing: 0.04em;
+      flex-wrap: wrap;
+    }
+    .hero-trust .dot-sep {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: rgba(246, 241, 231, 0.35);
+    }
+    .hero-meta {
+      position: absolute;
+      right: 28px;
+      bottom: 32px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(246, 241, 231, 0.7);
+      background: rgba(15, 17, 22, 0.4);
+      border: 1px solid rgba(246, 241, 231, 0.14);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .hero-meta .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.18);
+    }
+
+    /* Header transparente sobre el hero oscuro — texto claro solo en index */
+    body.hero-video .site-header:not(.solid) .logo,
+    body.hero-video .site-header:not(.solid) .nav-primary a,
+    body.hero-video .site-header:not(.solid) .icon-btn {
+      color: rgba(246, 241, 231, 0.92);
+    }
+    body.hero-video .site-header:not(.solid) .logo .dot { color: var(--accent); }
+    body.hero-video .site-header:not(.solid) .nav-primary a:hover { color: var(--surface); }
+    body.hero-video .site-header:not(.solid) .icon-btn:hover {
+      background: rgba(246, 241, 231, 0.1);
+      color: var(--surface);
+    }
+    body.hero-video .site-header:not(.solid) .wholesale-pill {
+      background: rgba(201, 168, 106, 0.16);
+      color: var(--accent);
+      border-color: rgba(201, 168, 106, 0.35);
+    }
+
+    /* ---------- SECTIONS ---------- */
+    section.bay { padding: 110px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 56px; }
+    .section-head .title { font-size: clamp(34px, 4.2vw, 52px); max-width: 720px; }
+    .section-head .meta { color: var(--muted); font-size: 14px; max-width: 360px; text-align: right; }
+    .section-head .meta a { color: var(--fg); border-bottom: 1px solid var(--accent); padding-bottom: 2px; }
+
+    /* ---------- BRANDS ---------- */
+    .brands {
+      padding: 56px 0;
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--surface-2);
+    }
+    .brands-head {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      border-left: 1px solid var(--border-soft);
+      border-top: 1px solid var(--border-soft);
+      /* anchor: dark luxe band styles added above */
+    }
+    .brand-card {
+      padding: 32px 16px;
+      display: grid; place-items: center;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      color: var(--fg-soft);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      text-align: center;
+    }
+    .brand-card:hover {
+      color: var(--fg);
+      background: var(--surface);
+      letter-spacing: 0.06em;
+    }
+
+    /* ---------- COLLECTIONS ---------- */
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .collection-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      aspect-ratio: 4 / 5;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 28px;
+      cursor: pointer;
+      transition: transform 0.4s ease;
+    }
+    .collection-card .ph {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, oklch(38% 0.008 250), oklch(20% 0.008 250));
+      z-index: 0;
+    }
+    .collection-card .ph.warm { background: linear-gradient(160deg, oklch(58% 0.04 60), oklch(36% 0.05 50)); }
+    .collection-card .ph.cool { background: linear-gradient(160deg, oklch(58% 0.02 230), oklch(32% 0.02 240)); }
+    .collection-card .ph.fog { background: linear-gradient(160deg, oklch(70% 0.01 250), oklch(46% 0.005 250)); }
+    .collection-card .ph.ink { background: linear-gradient(160deg, oklch(26% 0.01 250), oklch(14% 0.005 250)); }
+    .collection-card .ph.steel { background: linear-gradient(160deg, oklch(72% 0.005 250), oklch(50% 0.005 250)); }
+    .collection-card .ph.bronze { background: linear-gradient(160deg, oklch(62% 0.06 60), oklch(38% 0.07 50)); }
+    .collection-card .ph.green { background: linear-gradient(160deg, oklch(45% 0.05 160), oklch(28% 0.04 165)); }
+
+    .collection-card .watch-mini {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -55%);
+      width: 62%;
+      opacity: 0.9;
+      z-index: 1;
+    }
+    .collection-card .label {
+      position: relative; z-index: 2;
+      color: var(--surface);
+    }
+    .collection-card .label .eyebrow {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 10px;
+    }
+    .collection-card .label .eyebrow::before { background: rgba(255,255,255,0.5); }
+    .collection-card .label h3 {
+      font-family: var(--font-display);
+      font-size: 28px; font-weight: 500;
+      letter-spacing: -0.005em;
+      line-height: 1.1;
+    }
+    .collection-card .label .arrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      opacity: 0; transform: translateX(-6px);
+      transition: all 0.3s ease;
+    }
+    .collection-card:hover .label .arrow { opacity: 1; transform: translateX(0); }
+    .collection-card:hover { transform: translateY(-3px); }
+
+    .col-large  { grid-column: span 6; }
+    .col-medium  { grid-column: span 3; }
+    .col-small   { grid-column: span 3; }
+
+    /* ---------- PRODUCTS ---------- */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+    }
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .product-media {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--bg-warm);
+      overflow: hidden;
+    }
+    .product-media .ph-img {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+    }
+    .product-media .ph-img svg { width: 60%; }
+    .product-tag {
+      position: absolute; top: 14px; left: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      z-index: 2;
+    }
+    .product-tag span {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 5px 9px;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--fg);
+      box-shadow: var(--shadow-sm);
+    }
+    .product-tag .new { background: var(--fg); color: var(--surface); }
+    .product-tag .special { background: var(--accent); color: var(--surface); }
+    .product-tag .best { background: var(--surface); color: var(--accent-deep); border: 1px solid var(--accent); }
+
+    .product-fav {
+      position: absolute; top: 12px; right: 12px;
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      background: var(--surface);
+      border-radius: 50%;
+      box-shadow: var(--shadow-sm);
+      color: var(--fg-soft);
+      transition: all 0.2s;
+      z-index: 2;
+    }
+    .product-fav:hover { color: var(--accent-deep); transform: scale(1.05); }
+    .product-fav.active { color: var(--accent); }
+    .product-fav svg { width: 18px; height: 18px; }
+
+    .product-quick {
+      position: absolute; bottom: 14px; left: 14px; right: 14px;
+      padding: 11px;
+      background: var(--fg); color: var(--surface);
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border-radius: var(--r);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      opacity: 0; transform: translateY(8px);
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+    .product-card:hover .product-quick { opacity: 1; transform: translateY(0); }
+    .product-quick svg { width: 16px; height: 16px; }
+
+    .product-info { padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .product-brand { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .product-model { font-size: 16px; font-weight: 500; color: var(--fg); line-height: 1.3; }
+    .product-variants {
+      display: flex; gap: 6px; margin-top: 4px;
+      font-size: 11px; color: var(--muted-2);
+      align-items: center;
+    }
+    .product-variants .dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .product-price {
+      margin-top: 12px;
+      display: flex; align-items: baseline; gap: 10px;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .product-price .now { font-size: 18px; font-weight: 500; color: var(--fg); }
+    .product-price .was { font-size: 13px; color: var(--muted-2); text-decoration: line-through; }
+    .product-price .off {
+      font-size: 11px; font-weight: 500;
+      color: var(--accent-deep);
+      background: var(--accent-soft);
+      padding: 2px 6px; border-radius: 3px;
+    }
+    .product-stock { margin-top: 6px; font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 6px; }
+    .product-stock::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+    .product-stock.low::before { background: var(--accent); }
+    .product-stock.low { color: var(--accent-deep); }
+
+    .product-wholesale {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--accent-soft);
+      border-radius: var(--r);
+      font-size: 11px;
+      color: var(--accent-deep);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .product-wholesale .price { font-family: var(--font-mono); font-weight: 600; color: var(--fg); }
+
+    /* ---------- WHOLESALE BAND ---------- */
+    .wholesale-band {
+      background: var(--fg);
+      color: var(--surface);
+      border-radius: var(--r-lg);
+      padding: 64px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .wholesale-band::before {
+      content: "";
+      position: absolute;
+      right: -100px; top: -100px;
+      width: 400px; height: 400px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .wholesale-band::after {
+      content: "";
+      position: absolute;
+      right: -50px; top: -50px;
+      width: 300px; height: 300px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .wholesale-band h2 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 3.6vw, 48px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin: 18px 0 20px;
+      color: var(--surface);
+    }
+    .wholesale-band h2 em { color: oklch(80% 0.10 70); font-style: italic; }
+    .wholesale-band p {
+      color: rgba(246,241,231,0.65);
+      font-size: 16px;
+      max-width: 440px;
+      margin-bottom: 32px;
+    }
+    .wholesale-band .eyebrow { color: oklch(80% 0.10 70); }
+    .wholesale-band .eyebrow::before { background: oklch(80% 0.10 70); }
+    .wholesale-band .actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .wholesale-band .btn-primary { background: var(--surface); color: var(--fg); }
+    .wholesale-band .btn-primary:hover { background: oklch(92% 0.02 80); }
+    .wholesale-band .btn-outline { border-color: rgba(255,255,255,0.2); color: var(--surface); }
+    .wholesale-band .btn-outline:hover { border-color: var(--surface); background: rgba(255,255,255,0.04); }
+
+    .wholesale-benefits {
+      display: grid; gap: 18px;
+      position: relative; z-index: 1;
+    }
+    .wholesale-benefit {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .wholesale-benefit:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .wholesale-benefit .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: oklch(80% 0.10 70);
+      width: 24px;
+      flex-shrink: 0;
+    }
+    .wholesale-benefit .txt { color: rgba(246,241,231,0.85); font-size: 14px; line-height: 1.4; }
+
+    /* ---------- TRUST ---------- */
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      border-top: 1px solid var(--border-soft);
+      border-left: 1px solid var(--border-soft);
+    }
+    .trust-cell {
+      padding: 36px 28px;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--surface-2);
+    }
+    .trust-cell svg { width: 32px; height: 32px; color: var(--accent-deep); margin-bottom: 18px; }
+    .trust-cell h4 { font-size: 14px; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 8px; }
+    .trust-cell p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ---------- STORY ---------- */
+    .story {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .story-visual {
+      aspect-ratio: 4 / 5;
+      background: linear-gradient(160deg, oklch(28% 0.008 250), oklch(14% 0.005 250));
+      border-radius: var(--r-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .story-visual .ph-macro {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+    }
+    .story-visual .ph-macro svg { width: 78%; opacity: 0.9; }
+    .story-visual .caption {
+      position: absolute; bottom: 24px; left: 24px; right: 24px;
+      color: rgba(255,255,255,0.7);
+      font-family: var(--font-mono);
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .story-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 52px);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.012em;
+      margin: 18px 0 24px;
+    }
+    .story-text p {
+      font-size: 17px; line-height: 1.65;
+      color: var(--fg-soft);
+      margin-bottom: 18px;
+      max-width: 540px;
+    }
+    .story-text .signature {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-soft);
+      display: flex; align-items: center; gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .story-text .signature .name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--fg);
+      font-style: italic;
+    }
+
+    /* ---------- TESTIMONIALS ---------- */
+    .testimonials-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+    .testimonials-head .demo-note {
+      font-size: 12px;
+      padding: 6px 12px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      border-radius: 999px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testimonial {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      padding: 32px;
+      display: flex; flex-direction: column;
+      gap: 16px;
+    }
+    .testimonial .stars { display: flex; gap: 2px; color: var(--accent); }
+    .testimonial .stars svg { width: 16px; height: 16px; }
+    .testimonial blockquote {
+      font-family: var(--font-display);
+      font-size: 19px;
+      line-height: 1.4;
+      color: var(--fg);
+      font-weight: 400;
+      font-style: italic;
+      flex: 1;
+    }
+    .testimonial .meta { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border-soft); }
+    .testimonial .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--bg-warm);
+      display: grid; place-items: center;
+      font-family: var(--font-display);
+      font-size: 16px; color: var(--accent-deep);
+      font-weight: 500;
+    }
+    .testimonial .who { font-size: 13px; }
+    .testimonial .who .name { font-weight: 500; color: var(--fg); }
+    .testimonial .who .city { color: var(--muted); }
+    .testimonial .product {
+      font-size: 11px;
+      color: var(--muted-2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* ---------- NEWSLETTER ---------- */
+    .newsletter {
+      background: var(--bg-warm);
+      border-radius: var(--r-lg);
+      padding: 80px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .newsletter::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, oklch(88% 0.06 70 / 0.5), transparent 60%);
+    }
+    .newsletter > * { position: relative; }
+    .newsletter h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 3.6vw, 44px);
+      font-weight: 500;
+      line-height: 1.1;
+      margin: 16px auto 14px;
+      max-width: 580px;
+    }
+    .newsletter p { color: var(--fg-soft); max-width: 480px; margin: 0 auto 32px; font-size: 16px; }
+    .newsletter form {
+      display: flex; gap: 8px;
+      max-width: 460px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px;
+    }
+    .newsletter input {
+      flex: 1;
+      border: 0; background: transparent;
+      padding: 10px 18px;
+      font-size: 14px;
+      outline: none;
+    }
+    .newsletter button {
+      padding: 11px 24px;
+      background: var(--fg); color: var(--surface);
+      border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .newsletter .fineprint {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ---------- FOOTER ---------- */
+    .site-footer {
+      background: var(--fg);
+      color: rgba(246,241,231,0.7);
+      padding: 80px 0 32px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.6fr repeat(4, 1fr);
+      gap: 48px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-brand .logo { color: var(--surface); margin-bottom: 18px; }
+    .footer-brand p { font-size: 14px; line-height: 1.6; max-width: 280px; margin-bottom: 24px; }
+    .footer-brand .country-select {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--surface);
+    }
+    .footer-col h5 {
+      color: var(--surface);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul a {
+      font-size: 13px;
+      color: rgba(246,241,231,0.65);
+      transition: color 0.2s;
+    }
+    .footer-col ul a:hover { color: var(--surface); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 28px;
+      font-size: 12px;
+      color: rgba(246,241,231,0.5);
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-bottom .payments { display: flex; gap: 10px; align-items: center; }
+    .footer-bottom .pay-pill {
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+    .footer-bottom .socials { display: flex; gap: 14px; }
+    .footer-bottom .socials a { color: rgba(246,241,231,0.5); transition: color 0.2s; }
+    .footer-bottom .socials a:hover { color: var(--surface); }
+    .footer-bottom .socials svg { width: 18px; height: 18px; }
+
+    /* ---------- Reveal ---------- */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+      .nav-primary { display: none; }
+      .hero-content { padding: 64px 28px 80px; }
+      .hero-meta { display: none; }
+      .wholesale-band { grid-template-columns: 1fr; padding: 44px; gap: 36px; }
+      .story { grid-template-columns: 1fr; gap: 48px; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 36px; }
+      .footer-brand { grid-column: 1 / -1; }
+      .trust-grid { grid-template-columns: repeat(2, 1fr); }
+      .brands-grid { grid-template-columns: repeat(4, 1fr); }
+      .collections-grid { grid-template-columns: repeat(6, 1fr); }
+      .col-large, .col-medium, .col-small { grid-column: span 6; }
+    }
+    @media (max-width: 700px) {
+      .container, .container-wide { padding: 0 18px; }
+      section.bay { padding: 72px 0; }
+      .header-inner { gap: 8px; height: 64px; }
+      .site-header.solid .header-actions .desktop-only { display: none; }
+      .header-actions .icon-btn:not(.menu-toggle):not(.cart-btn) { display: none; }
+      .header-actions .icon-btn { width: 36px; height: 36px; }
+      .menu-toggle { display: grid; }
+      .hero { padding-top: 64px; min-height: 88vh; }
+      .hero-content { padding: 48px 18px 64px; }
+      .hero-content h1 { font-size: 44px; }
+      .hero-content p.lead { font-size: 16px; }
+      .hero-cta .btn { flex: 1; padding: 13px 14px; font-size: 12px; }
+      .wholesale-band { padding: 32px 24px; }
+      .newsletter { padding: 56px 24px; }
+      .newsletter form { flex-direction: column; border-radius: var(--r-lg); padding: 12px; gap: 8px; }
+      .newsletter input { padding: 12px; text-align: center; }
+      .newsletter button { width: 100%; padding: 13px; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .product-info { padding: 14px; }
+      .product-model { font-size: 14px; }
+      .product-price .now { font-size: 16px; }
+      .product-quick { display: none; }
+      .brands-grid { grid-template-columns: repeat(2, 1fr); }
+      .brand-card { padding: 24px 12px; font-size: 18px; }
+      .trust-grid { grid-template-columns: 1fr; }
+      .collections-grid { grid-template-columns: 1fr; }
+      .col-large, .col-medium, .col-small { grid-column: span 1; }
+      .collection-card { aspect-ratio: 5/4; }
+      .section-head { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 36px; }
+      .section-head .meta { text-align: left; }
+      .footer-top { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      /* Sin autoplay: el fondo oscuro tipo esfera queda como imagen estática. */
+      .hero-video { display: none; }
+      .reveal { opacity: 1; transform: none; }
+    }
+    /* ====== AUCTIONS BAND ====== */
+    .pulse-dot {
+      display: inline-block;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--danger);
+      margin-right: 8px;
+      animation: pulseDot 1.4s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(1.35); }
+    }
+    .auctions-band {
+      padding: 80px 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent),
+        var(--bg);
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .auctions-band .section-head { margin-bottom: 36px; }
+    .auctions-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .auc-mini {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: all .3s ease;
+      display: flex; flex-direction: column;
+      text-decoration: none;
+    }
+    .auc-mini:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    }
+    .auc-mini-media {
+      position: relative;
+      aspect-ratio: 5/4;
+      background: linear-gradient(135deg, oklch(28% 0.008 250), oklch(18% 0.006 250));
+      display: grid; place-items: center;
+      overflow: hidden;
+    }
+    .auc-mini-media::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 65%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%);
+    }
+    .auc-mini-media .ph-img { width: 56%; position: relative; z-index: 1; filter: drop-shadow(0 14px 28px rgba(0,0,0,.4)); }
+    .auc-mini-badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--danger) 22%, transparent);
+      color: oklch(85% 0.16 25);
+      border: 1px solid color-mix(in oklab, var(--danger) 50%, transparent);
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em;
+      display: inline-flex; align-items: center; gap: 5px;
+      z-index: 2;
+    }
+    .auc-mini-badge .pulse-dot { width: 5px; height: 5px; margin: 0; }
+    .auc-mini-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .auc-mini-title { font-family: var(--font-display); font-size: 19px; font-weight: 500; line-height: 1.2; color: var(--fg); }
+    .auc-mini-row { display: flex; justify-content: space-between; align-items: end; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border-soft); margin-top: auto; }
+    .auc-mini-lbl { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+    .auc-mini-price { font-family: var(--font-display); font-size: 20px; color: var(--accent); font-weight: 600; }
+    .auc-mini-countdown {
+      font-family: var(--font-mono);
+      font-size: 13px; font-weight: 500;
+      background: var(--bg-warm);
+      padding: 5px 9px;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      letter-spacing: 0.04em;
+    }
+    .auc-mini-countdown.urgent { color: var(--danger); border-color: color-mix(in oklab, var(--danger) 40%, var(--border)); }
+    .auc-empty {
+      grid-column: 1 / -1;
+      padding: 56px 32px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--r-lg);
+    }
+    .auc-empty h3 { font-family: var(--font-display); font-size: 26px; font-weight: 500; margin-bottom: 8px; }
+    .auc-empty p { color: var(--muted); max-width: 460px; margin: 0 auto 16px; }
+    .auc-empty .btn { display: inline-flex; align-items: center; gap: 6px; }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body class="hero-video">
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container-wide header-inner">
+      <a href="index.html" class="logo" aria-label="Cronosfera, inicio">
+        <svg viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.2"></circle>
+          <circle cx="13" cy="13" r="1.4" fill="currentColor"></circle>
+          <line x1="13" y1="13" x2="13" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></line>
+          <line x1="13" y1="13" x2="19" y2="13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></line>
+        </svg>
+        Cronosfera<span class="dot">.</span>
+      </a>
+
+      <nav class="nav-primary" aria-label="Principal">
+        <a href="index.html">Inicio</a>
+        <a href="catalogo.html">Relojes</a>
+        <a href="subastas.html">Subastas</a>
+        <a href="catalogo.html?f=coleccion">Colecciones</a>
+        <a href="mayorista.html">Mayoristas</a>
+        <a href="#story">Nosotros</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="wholesale-pill" data-wholesale-flag style="display:none">Mayorista</span>
+        <button class="icon-btn desktop-only" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"></line></svg>
+        </button>
+        <span class="session-slot" data-session-slot></span>
+        <button class="icon-btn desktop-only" aria-label="Favoritos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"></path></svg>
+        </button>
+        <button class="icon-btn cart-btn" aria-label="Carrito">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"></path><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"></path></svg>
+          <span class="badge">2</span>
+        </button>
+        <button class="icon-btn menu-toggle" aria-label="Menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="8" x2="20" y2="8" stroke-linecap="round"></line><line x1="4" y1="14" x2="20" y2="14" stroke-linecap="round"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================== HERO ============================== -->
+    <section class="hero" aria-label="Cronosfera — marketplace de relojería">
+      <video class="hero-video"
+             autoplay muted loop playsinline preload="metadata"
+             aria-hidden="true"
+             poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%2314161c'/%3E%3C/svg%3E">
+        <source src="mqi3wgvm-Luxury_watch_exploded_view_anima__202606170826.mp4" type="video/mp4">
+      </video>
+      <div class="hero-scrim" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <div class="inner">
+          <span class="eyebrow">Marketplace de relojería · Colombia</span>
+          <h1 class="display">El tiempo también<br>define <em>quién eres.</em></h1>
+          <p class="lead">Descubre relojes originales seleccionados por su diseño, precisión y carácter. Piezas verificadas, envíos a toda Colombia y atención antes y después de la compra.</p>
+          <div class="hero-cta">
+            <a href="catalogo.html" class="btn btn-primary">
+              Explorar relojes
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"></line><polyline points="13,6 19,12 13,18" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+            </a>
+            <a href="subastas.html" class="btn btn-outline">
+              <span class="live-dot"></span>
+              Ver subastas en vivo
+            </a>
+          </div>
+          <div class="hero-trust">
+            <span>Relojes originales</span>
+            <span class="dot-sep"></span>
+            <span>Envíos a toda Colombia</span>
+            <span class="dot-sep"></span>
+            <span>Compra segura</span>
+          </div>
+        </div>
+      </div>
+
+      <span class="hero-meta" aria-hidden="true">
+        <span class="dot"></span>
+        Vista explotada · Calibre Aurora
+      </span>
+    </section>
+
+    <!-- ============================== BRANDS ============================== -->
+    <section class="brands">
+      <div class="container-wide">
+        <div class="brands-head">
+          <span class="eyebrow plain">Marcas disponibles en el marketplace</span>
+        </div>
+        <div class="brands-grid">
+          <div class="brand-card">Casio</div>
+          <div class="brand-card">Citizen</div>
+          <div class="brand-card">Seiko</div>
+          <div class="brand-card">Orient</div>
+          <div class="brand-card">Tissot</div>
+          <div class="brand-card">Fossil</div>
+          <div class="brand-card">Invicta</div>
+          <div class="brand-card">G-Shock</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== AUCTIONS LIVE ============================== -->
+    <section class="bay auctions-band" id="auctions">
+      <div class="container-wide">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow"><span class="pulse-dot"></span>En vivo · Subastas</span>
+            <h2 class="display title">Piezas en <em>puja abierta.</em></h2>
+          </div>
+          <p class="meta">Relojes seleccionados en subasta cronometrada. El tiempo se extiende automáticamente cuando entra una puja en el último minuto. <a href="subastas.html">Ver todas →</a></p>
+        </div>
+        <div class="auctions-strip" id="liveAuctions">
+          <!-- populated by JS; shows empty state if no live auctions -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== COLLECTIONS ============================== -->
+    <section class="bay" id="collections">
+      <div class="container-wide">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Colecciones</span>
+            <h2 class="display title">Recorre el catálogo por intención, no por marca.</h2>
+          </div>
+          <p class="meta">Cada colección agrupa relojes que comparten un propósito, un estilo o un momento. <a href="catalogo.html">Ver todo el catálogo →</a></p>
+        </div>
+
+        <div class="collections-grid reveal">
+
+          <a href="catalogo.html?f=automaticos" class="collection-card col-large">
+            <div class="ph ink"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <circle r="105" fill="#1a1c20" stroke="#5a5853" stroke-width="1"></circle>
+              <circle r="92" fill="#23262b"></circle>
+              <g stroke="#c9a86a" stroke-width="2" stroke-linecap="round">
+                <line x1="0" y1="-88" x2="0" y2="-78"></line>
+                <line x1="76" y1="-44" x2="68" y2="-39"></line>
+                <line x1="88" y1="0" x2="78" y2="0"></line>
+                <line x1="76" y1="44" x2="68" y2="39"></line>
+                <line x1="0" y1="88" x2="0" y2="78"></line>
+                <line x1="-76" y1="44" x2="-68" y2="39"></line>
+                <line x1="-88" y1="0" x2="-78" y2="0"></line>
+                <line x1="-76" y1="-44" x2="-68" y2="-39"></line>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-55" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="40" y2="0" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="0" y2="40" stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round"></line>
+              <circle r="4" fill="#c9a86a"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">42 referencias</span>
+              <h3>Automáticos</h3>
+              <span class="arrow">Ver colección <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"></line><polyline points="13,6 19,12 13,18" stroke-linecap="round" stroke-linejoin="round"></polyline></svg></span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=deportivos" class="collection-card col-medium">
+            <div class="ph cool"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <circle r="105" fill="#2a3038" stroke="#5a5853" stroke-width="1"></circle>
+              <circle r="92" fill="#323a42"></circle>
+              <g stroke="#e9e6df" stroke-width="2.4" stroke-linecap="round">
+                <line x1="0" y1="-88" x2="0" y2="-72"></line><line x1="88" y1="0" x2="72" y2="0"></line><line x1="0" y1="88" x2="0" y2="72"></line><line x1="-88" y1="0" x2="-72" y2="0"></line>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-60" stroke="#e9e6df" stroke-width="3.5" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="45" y2="20" stroke="#e9e6df" stroke-width="3.5" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="0" y2="50" stroke="#c9a86a" stroke-width="1.6" stroke-linecap="round"></line>
+              <circle r="5" fill="#e9e6df"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">28 referencias</span>
+              <h3>Deportivos</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=clasicos" class="collection-card col-medium">
+            <div class="ph bronze"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <circle r="105" fill="#5a4632" stroke="#8a6a48" stroke-width="1"></circle>
+              <circle r="92" fill="#6a5340"></circle>
+              <g font-family="Cormorant Garamond, serif" font-size="14" fill="#e9d6b8" text-anchor="middle">
+                <text y="-58">XII</text><text x="68" y="6">III</text><text y="74">VI</text><text x="-68" y="6">IX</text>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-55" stroke="#f0e2c4" stroke-width="2.6" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="38" y2="10" stroke="#f0e2c4" stroke-width="2.6" stroke-linecap="round"></line>
+              <circle r="3.5" fill="#f0e2c4"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">36 referencias</span>
+              <h3>Clásicos</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=mujer" class="collection-card col-small">
+            <div class="ph fog"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220" style="width:50%">
+              <circle r="100" fill="#c8c2b8" stroke="#a09a90" stroke-width="1"></circle>
+              <circle r="88" fill="#dcd6cc"></circle>
+              <g stroke="#7a7468" stroke-width="1.2" stroke-linecap="round">
+                <line x1="0" y1="-82" x2="0" y2="-72"></line><line x1="82" y1="0" x2="72" y2="0"></line><line x1="0" y1="82" x2="0" y2="72"></line><line x1="-82" y1="0" x2="-72" y2="0"></line>
+                <line x1="58" y1="-58" x2="52" y2="-52"></line><line x1="58" y1="58" x2="52" y2="52"></line><line x1="-58" y1="58" x2="-52" y2="52"></line><line x1="-58" y1="-58" x2="-52" y2="-52"></line>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-55" stroke="#5a544a" stroke-width="2" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="38" y2="5" stroke="#5a544a" stroke-width="2" stroke-linecap="round"></line>
+              <circle r="3" fill="#c9a86a"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">24 referencias</span>
+              <h3>Para mujer</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=hombre" class="collection-card col-small">
+            <div class="ph steel"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <circle r="105" fill="#8a8478" stroke="#5a544a" stroke-width="1"></circle>
+              <circle r="92" fill="#a8a298"></circle>
+              <g stroke="#3a342a" stroke-width="2.4" stroke-linecap="round">
+                <line x1="0" y1="-86" x2="0" y2="-72"></line><line x1="86" y1="0" x2="72" y2="0"></line><line x1="0" y1="86" x2="0" y2="72"></line><line x1="-86" y1="0" x2="-72" y2="0"></line>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-58" stroke="#2c261c" stroke-width="3.4" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="42" y2="14" stroke="#2c261c" stroke-width="3.4" stroke-linecap="round"></line>
+              <circle r="4" fill="#2c261c"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">48 referencias</span>
+              <h3>Para hombre</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=ediciones" class="collection-card col-medium">
+            <div class="ph green"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <circle r="105" fill="#2a4030" stroke="#1a2a20" stroke-width="1"></circle>
+              <circle r="92" fill="#344a3a"></circle>
+              <g stroke="#c9a86a" stroke-width="1.6" stroke-linecap="round" opacity="0.85">
+                <line x1="0" y1="-86" x2="0" y2="-74"></line><line x1="86" y1="0" x2="74" y2="0"></line><line x1="0" y1="86" x2="0" y2="74"></line><line x1="-86" y1="0" x2="-74" y2="0"></line>
+              </g>
+              <line x1="0" y1="0" x2="0" y2="-58" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
+              <line x1="0" y1="0" x2="40" y2="8" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
+              <circle r="4" fill="#c9a86a"></circle>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">12 referencias</span>
+              <h3>Ediciones especiales</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+          <a href="catalogo.html?f=smartwatches" class="collection-card col-medium">
+            <div class="ph"></div>
+            <svg class="watch-mini" viewBox="-110 -110 220 220">
+              <rect x="-92" y="-92" width="184" height="184" rx="38" fill="#1c1e22" stroke="#3a3d44" stroke-width="1"></rect>
+              <rect x="-80" y="-80" width="160" height="160" rx="30" fill="#23262b"></rect>
+              <rect x="-60" y="-30" width="120" height="14" rx="3" fill="#c9a86a"></rect>
+              <rect x="-60" y="-8" width="90" height="6" rx="2" fill="#9c9a93"></rect>
+              <rect x="-60" y="6" width="100" height="6" rx="2" fill="#9c9a93"></rect>
+              <circle cx="58" cy="46" r="10" fill="none" stroke="#c9a86a" stroke-width="2"></circle>
+              <path d="M 58,38 a 8,8 0 0 1 8,8" fill="none" stroke="#c9a86a" stroke-width="2.4" stroke-linecap="round"></path>
+            </svg>
+            <div class="label">
+              <span class="eyebrow">18 referencias</span>
+              <h3>Smartwatches</h3>
+              <span class="arrow">Ver → </span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== FEATURED ============================== -->
+    <section class="bay" id="featured" style="padding-top:0">
+      <div class="container-wide">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Selección de la semana</span>
+            <h2 class="display title">Productos destacados.</h2>
+          </div>
+          <p class="meta">Precios de demostración en pesos colombianos. Con sesión mayorista activa, verás tarifas especiales. <a href="catalogo.html">Ver todo →</a></p>
+        </div>
+
+        <div class="products-grid reveal" id="productsGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============================== WHOLESALE BAND ============================== -->
+    <section class="bay" style="padding-top:0">
+      <div class="container-wide">
+        <div class="wholesale-band reveal">
+          <div>
+            <span class="eyebrow">Programa mayorista</span>
+            <h2>Precios especiales para <em>hacer crecer</em> tu negocio.</h2>
+            <p>Tiendas, distribuidores y emprendedores pueden solicitar una cuenta mayorista. Tras la aprobación, accedes a tarifas especiales, precios por volumen, inventario anticipado y soporte comercial dedicado.</p>
+            <div class="actions">
+              <a href="mayorista.html" class="btn btn-primary">Solicitar cuenta mayorista</a>
+              <a href="mayorista.html#beneficios" class="btn btn-outline">Conocer beneficios</a>
+            </div>
+          </div>
+          <div class="wholesale-benefits">
+            <div class="wholesale-benefit"><span class="num">01</span><span class="txt">Tarifas especiales por debajo del precio minorista.</span></div>
+            <div class="wholesale-benefit"><span class="num">02</span><span class="txt">Escalas de precio por volumen configurables por producto.</span></div>
+            <div class="wholesale-benefit"><span class="num">03</span><span class="txt">Acceso anticipado a inventario y novedades.</span></div>
+            <div class="wholesale-benefit"><span class="num">04</span><span class="txt">Gestión rápida de pedidos, historial y facturas.</span></div>
+            <div class="wholesale-benefit"><span class="num">05</span><span class="txt">Soporte comercial antes y después de la compra.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== TRUST ============================== -->
+    <section class="bay" id="trust" style="padding-top:0">
+      <div class="container-wide">
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Confianza y respaldo</span>
+            <h2 class="display title">Comprar un reloj debe sentirse tan bien como usarlo.</h2>
+          </div>
+        </div>
+        <div class="trust-grid reveal">
+          <div class="trust-cell">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M16 4l10 4v8c0 7-5 11-10 12-5-1-10-5-10-12V8l10-4z" stroke-linejoin="round"></path><path d="M11 16l3.5 3.5L21 13" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <h4>Originales y verificados</h4>
+            <p>Cada pieza pasa por una verificación antes de publicarse y antes de despacharse.</p>
+          </div>
+          <div class="trust-cell">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="6" y="11" width="20" height="14" rx="2"></rect><path d="M11 11V8a5 5 0 0 1 10 0v3" stroke-linecap="round"></path><circle cx="16" cy="18" r="1.6" fill="currentColor"></circle></svg>
+            <h4>Pagos seguros</h4>
+            <p>Pasarelas compatibles con Colombia. No almacenamos datos completos de tarjetas.</p>
+          </div>
+          <div class="trust-cell">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 17h22v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8z" stroke-linejoin="round"></path><path d="M3 17l4-9h12l4 9" stroke-linejoin="round"></path><circle cx="10" cy="22" r="1.5"></circle><circle cx="20" cy="22" r="1.5"></circle></svg>
+            <h4>Envíos nacionales</h4>
+            <p>Despachos a toda Colombia con seguimiento. Tiempos y costos confirmados al checkout.</p>
+          </div>
+          <div class="trust-cell">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="16" cy="16" r="11"></circle><polyline points="16,9 16,16 21,19" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+            <h4>Garantía según producto</h4>
+            <p>Cada referencia define su propia garantía. El detalle aparece en la página de producto.</p>
+          </div>
+          <div class="trust-cell">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12c0-4 4-7 8-4s4 8 0 12-8 0-8-4" stroke-linejoin="round"></path><path d="M28 20c0 4-4 7-8 4s-4-8 0-12 8 0 8 4" stroke-linejoin="round"></path><line x1="11" y1="16" x2="21" y2="16" stroke-linecap="round"></line></svg>
+            <h4>Soporte antes y después</h4>
+            <p>Acompañamiento en la elección, en la entrega y en el posventa. Hablamos contigo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== STORY ============================== -->
+    <section class="bay" id="story" style="padding-top:0">
+      <div class="container-wide">
+        <div class="story reveal">
+          <div class="story-visual">
+            <div class="ph-macro">
+              <svg viewBox="-160 -160 320 320">
+                <defs>
+                  <radialGradient id="macroDial" cx="50%" cy="42%" r="65%">
+                    <stop offset="0%" stop-color="#3a3d44"></stop>
+                    <stop offset="55%" stop-color="#1d2026"></stop>
+                    <stop offset="100%" stop-color="#0c0e12"></stop>
+                  </radialGradient>
+                </defs>
+                <circle r="150" fill="#5a5853"></circle>
+                <circle r="138" fill="#3d3b37"></circle>
+                <circle r="126" fill="url(#macroDial)"></circle>
+                <g stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round">
+                  <line x1="0" y1="-118" x2="0" y2="-108"></line><line x1="118" y1="0" x2="108" y2="0"></line><line x1="0" y1="118" x2="0" y2="108"></line><line x1="-118" y1="0" x2="-108" y2="0"></line>
+                  <line x1="84" y1="-84" x2="78" y2="-78"></line><line x1="84" y1="84" x2="78" y2="78"></line><line x1="-84" y1="84" x2="-78" y2="78"></line><line x1="-84" y1="-84" x2="-78" y2="-78"></line>
+                </g>
+                <text y="-80" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-size="14" letter-spacing="5" fill="#c9a86a">CRONOSFERA</text>
+                <line x1="0" y1="0" x2="0" y2="-78" stroke="#e9e6df" stroke-width="3.4" stroke-linecap="round"></line>
+                <line x1="0" y1="0" x2="60" y2="14" stroke="#e9e6df" stroke-width="3.4" stroke-linecap="round"></line>
+                <line x1="0" y1="0" x2="0" y2="100" stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round"></line>
+                <circle r="6" fill="#1d2026" stroke="#c9a86a" stroke-width="0.6"></circle>
+                <ellipse cx="-40" cy="-70" rx="80" ry="40" fill="#ffffff" opacity="0.05" transform="rotate(-25)"></ellipse>
+              </svg>
+            </div>
+            <div class="caption">Detalle · esfera Calibre Aurora</div>
+          </div>
+          <div class="story-text">
+            <span class="eyebrow">Nuestra historia</span>
+            <h2>Un reloj no mide el tiempo. Lo conserva.</h2>
+            <p>Conserva recuerdos, representa etapas y acompaña decisiones. En Cronosfera reunimos piezas seleccionadas para quienes valoran el diseño, la precisión y los detalles.</p>
+            <p>Trabajamos con marcas reconocidas y referencias cuidadosamente escogidas. No prometemos distributor oficial: prometemos piezas originales, verificadas y bien acompañadas, desde la elección hasta el posventa.</p>
+            <div class="signature">
+              <div>
+                <div class="name">Cronosfera</div>
+                <div>Marketplace colombiano de relojería</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== TESTIMONIALS ============================== -->
+    <section class="bay" id="testimonials" style="padding-top:0">
+      <div class="container-wide">
+        <div class="testimonials-head reveal">
+          <div>
+            <span class="eyebrow">Testimonios de demostración</span>
+            <h2 class="display" style="font-size:clamp(32px,3.6vw,44px); margin-top:14px">Lo que imaginaríamos que dirían.</h2>
+          </div>
+          <span class="demo-note">Contenido provisional · placeholder</span>
+        </div>
+        <div class="testimonials-grid reveal">
+          <article class="testimonial">
+            <div class="stars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+            </div>
+            <blockquote>"Llegó bien empacado y con verificación visible. El acompañamiento antes de la compra hizo la diferencia."</blockquote>
+            <div class="meta">
+              <div class="avatar">AM</div>
+              <div>
+                <div class="who"><div class="name">Andrea Marín</div><div class="city">Medellín</div></div>
+                <div class="product">Cronosfera Aurora · Acero</div>
+              </div>
+            </div>
+          </article>
+          <article class="testimonial">
+            <div class="stars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+            </div>
+            <blockquote>"Compré como mayorista para mi tienda. El proceso de aprobación fue claro y los precios por volumen funcionaron."</blockquote>
+            <div class="meta">
+              <div class="avatar">CR</div>
+              <div>
+                <div class="who"><div class="name">Carlos Restrepo</div><div class="city">Cali</div></div>
+                <div class="product">Pedido mayorista · 12 unidades</div>
+              </div>
+            </div>
+          </article>
+          <article class="testimonial">
+            <div class="stars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
+            </div>
+            <blockquote>"La página de producto tiene las especificaciones claras. Sin exageraciones, sin promesas raras. Así debe ser."</blockquote>
+            <div class="meta">
+              <div class="avatar">MG</div>
+              <div>
+                <div class="who"><div class="name">María Gómez</div><div class="city">Bogotá</div></div>
+                <div class="product">Cronosfera Atlas Sport</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== NEWSLETTER ============================== -->
+    <section class="bay" style="padding-top:0">
+      <div class="container-wide">
+        <div class="newsletter reveal">
+          <span class="eyebrow plain">Newsletter</span>
+          <h2>Recibe nuevas colecciones, lanzamientos y ofertas seleccionadas.</h2>
+          <p>Solo escribimos cuando vale la pena. Cero ruido, cero spam.</p>
+          <form id="newsletterForm">
+            <input type="email" placeholder="Tu correo electrónico" required="" aria-label="Correo">
+            <button type="submit">Suscribirme</button>
+          </form>
+          <div class="fineprint">Al suscribirte aceptas recibir comunicaciones de Cronosfera. Puedes cancelar cuando quieras.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="logo" style="color:var(--surface)">
+            <svg viewBox="0 0 26 26" fill="none">
+              <circle cx="13" cy="13" r="11.5" stroke="currentColor" stroke-width="1.2"></circle>
+              <circle cx="13" cy="13" r="1.4" fill="currentColor"></circle>
+              <line x1="13" y1="13" x2="13" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></line>
+              <line x1="13" y1="13" x2="19" y2="13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></line>
+            </svg>
+            Cronosfera<span style="color:oklch(80% 0.10 70)">.</span>
+          </div>
+          <p>Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter. Cada segundo tiene una historia.</p>
+          
+        </div>
+
+        <div class="footer-col">
+          <h5>Catálogo</h5>
+          <ul>
+            <li><a href="catalogo.html">Todos los relojes</a></li>
+            <li><a href="catalogo.html?f=automaticos">Automáticos</a></li>
+            <li><a href="catalogo.html?f=deportivos">Deportivos</a></li>
+            <li><a href="catalogo.html?f=clasicos">Clásicos</a></li>
+            <li><a href="catalogo.html?f=smartwatches">Smartwatches</a></li>
+            <li><a href="catalogo.html?f=ediciones">Ediciones especiales</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Marcas</h5>
+          <ul>
+            <li><a href="catalogo.html?marca=casio">Casio</a></li>
+            <li><a href="catalogo.html?marca=citizen">Citizen</a></li>
+            <li><a href="catalogo.html?marca=seiko">Seiko</a></li>
+            <li><a href="catalogo.html?marca=tissot">Tissot</a></li>
+            <li><a href="catalogo.html?marca=orient">Orient</a></li>
+            <li><a href="catalogo.html">Ver todas</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Cuenta y pedidos</h5>
+          <ul>
+            <li><a href="acceso.html">Iniciar sesión</a></li>
+            <li><a href="acceso.html">Crear cuenta</a></li>
+            <li><a href="#">Mis pedidos</a></li>
+            <li><a href="#">Favoritos</a></li>
+            <li><a href="mayorista.html">Solicitar cuenta mayorista</a></li>
+            <li><a href="admin.html">Panel administrativo</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Servicio</h5>
+          <ul>
+            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Políticas de envío</a></li>
+            <li><a href="#">Cambios y devoluciones</a></li>
+            <li><a href="#">Garantía</a></li>
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Tratamiento de datos</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Cronosfera · Marketplace colombiano de relojería. Precios y referencias en este demo son ilustrativos.</div>
+        <div class="payments">
+          <span class="pay-pill">VISA</span>
+          <span class="pay-pill">MASTERCARD</span>
+          <span class="pay-pill">PSE</span>
+          <span class="pay-pill">NEQUI</span>
+          <span class="pay-pill">WOMPI</span>
+        </div>
+        <div class="socials">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"></circle></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 8h2V5h-2.5C12 5 11 6 11 7.5V10H9v3h2v6h3v-6h2.2l.8-3H14V8.5c0-.3.2-.5.5-.5H14z" stroke-linejoin="round"></path></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 4v9.5a3.5 3.5 0 1 1-3.5-3.5" stroke-linecap="round"></path><path d="M14 4c.5 2.5 2 4 4.5 4.2" stroke-linecap="round"></path></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="cronos-store.js"></script>
+  <script src="cronos-auction.js"></script>
+  <script src="cronos-auth.js"></script>
+  <script src="cronos-ui.js"></script>
+  <script>
+    // ============== Header scroll ==============
+    var header = document.getElementById('siteHeader');
+    function onScroll(){
+      if (window.scrollY > 24) header.classList.add('solid');
+      else header.classList.remove('solid');
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // ============== Reveal on scroll ==============
+    var revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
+      revealEls.forEach(function(el){ io.observe(el); });
+    } else {
+      revealEls.forEach(function(el){ el.classList.add('in'); });
+    }
+
+    // ============== Newsletter form ==============
+    var nl = document.getElementById('newsletterForm');
+    if (nl) {
+      nl.addEventListener('submit', function(e){
+        e.preventDefault();
+        var input = nl.querySelector('input');
+        input.value = '';
+        input.placeholder = 'Gracias — te avisaremos.';
+        input.blur();
+      });
+    }
+
+    // ============== Hero video (respeta prefers-reduced-motion) ==============
+    var heroVideo = document.querySelector('video.hero-video');
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (heroVideo && prefersReduced) {
+      heroVideo.pause();
+      heroVideo.removeAttribute('autoplay');
+    }
+    // Si el video falla al cargar, el fondo oscuro de .hero queda como fallback.
+
+    // ============== Featured products (desde Store si está disponible) ==============
+    var _legacyProducts = [
+      { brand: 'Cronosfera', model: 'Aurora 39 · Acero', price: 1299000, was: 1599000, off: 19, tone: 'ink', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#1d2026','#c9a86a','#7a7468'] },
+      { brand: 'Cronosfera', model: 'Atlas Sport · 42mm', price: 1840000, was: 0, off: 0, tone: 'cool', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#323a42','#2c261c'] },
+      { brand: 'Cronosfera', model: 'Heritage Bronze', price: 2690000, was: 2990000, off: 10, tone: 'bronze', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 4 unidades', stockLow: true, variants: ['#6a5340','#3a342a'] },
+      { brand: 'Cronosfera', model: 'Lumen Oro', price: 3450000, was: 0, off: 0, tone: 'bronze', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#c9a86a','#1d2026','#5a4632'] },
+      { brand: 'Cronosfera', model: 'Nimbus Smart', price: 949000, was: 1099000, off: 14, tone: 'ink', tag: null, stock: 'Disponible', variants: ['#1c1e22','#7a7468'] },
+      { brand: 'Cronosfera', model: 'Meridian Clásico', price: 1499000, was: 0, off: 0, tone: 'steel', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#a8a298','#1d2026','#c9a86a'] },
+      { brand: 'Cronosfera', model: 'Selva Verde 39', price: 1999000, was: 2299000, off: 13, tone: 'green', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 2 unidades', stockLow: true, variants: ['#344a3a','#1d2026'] },
+      { brand: 'Cronosfera', model: 'Aurora Mujer 33', price: 1149000, was: 0, off: 0, tone: 'fog', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#dcd6cc','#c9a86a','#5a544a'] }
+    ];
+    var products = (window.Store ? Store.getProducts().slice(0, 8) : _legacyProducts).map(function(p){
+      return {
+        id: p.id,
+        brand: p.brand,
+        model: p.model,
+        ref: p.ref,
+        price: p.price,
+        was: p.wasPrice || p.was || 0,
+        off: p.off || 0,
+        tone: p.tone,
+        tag: p.tag,
+        stock: p.stock,
+        stockLow: p.stockStatus === 'low' || p.stockLow,
+        stockOut: p.stockStatus === 'out' || p.stockOut,
+        variants: p.variants || []
+      };
+    });
+    function cop(v){ return '$' + v.toLocaleString('es-CO'); }
+    function watchSVG(tone){
+      var bg = ({ink:'#1a1c20', cool:'#323a42', bronze:'#6a5340', fog:'#dcd6cc', steel:'#a8a298', green:'#344a3a'})[tone] || '#1a1c20';
+      var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
+      var accent = '#c9a86a';
+      return ''
+        + '<svg viewBox="-110 -110 220 220">'
+        +   '<circle r="105" fill="#5a5853"/>'
+        +   '<circle r="94" fill="#3d3b37"/>'
+        +   '<circle r="84" fill="' + bg + '"/>'
+        +   '<g stroke="' + accent + '" stroke-width="1.6" stroke-linecap="round">'
+        +     '<line x1="0" y1="-78" x2="0" y2="-68"/><line x1="78" y1="0" x2="68" y2="0"/><line x1="0" y1="78" x2="0" y2="68"/><line x1="-78" y1="0" x2="-68" y2="0"/>'
+        +   '</g>'
+        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">CRONOSFERA</text>'
+        +   '<line x1="0" y1="0" x2="0" y2="-50" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
+        +   '<line x1="0" y1="0" x2="36" y2="10" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
+        +   '<line x1="0" y1="0" x2="0" y2="58" stroke="' + accent + '" stroke-width="1" stroke-linecap="round"/>'
+        +   '<circle r="3.4" fill="' + fg + '"/>'
+        +   '<ellipse cx="-30" cy="-46" rx="48" ry="22" fill="#ffffff" opacity="0.05" transform="rotate(-25)"/>'
+        + '</svg>';
+    }
+    var isWholesale = !!(window.Auth && Auth.isWholesale()); // sesión real desde Store
+    var grid = document.getElementById('productsGrid');
+    products.forEach(function(p){
+      var off = p.off ? '<span class="off">-' + p.off + '%</span>' : '';
+      var was = p.was ? '<span class="was">' + cop(p.was) + '</span>' : '';
+      var tag = p.tag ? '<span class="' + p.tag.kind + '">' + p.tag.label + '</span>' : '';
+      var variants = p.variants.map(function(c){ return '<span class="dot" style="background:' + c + '"></span>'; }).join('');
+      var wholesale = '';
+      if (isWholesale) {
+        var wp = window.Store ? Store.wholesalePriceFor(p) : Math.round(p.price * 0.78);
+        var save = p.price - wp;
+        wholesale = '<div class="product-wholesale"><span>Mayorista · mín. 6 un.</span><span class="price">' + cop(wp) + ' <span style="opacity:.6;font-weight:400">· ahorras ' + cop(save) + '</span></span></div>';
+      }
+      var card = document.createElement('a');
+      card.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : '');
+      card.className = 'product-card';
+      card.innerHTML = ''
+        + '<div class="product-media">'
+        +   '<div class="ph-img">' + watchSVG(p.tone) + '</div>'
+        +   '<div class="product-tag">' + tag + '</div>'
+        +   '<button class="product-fav" aria-label="Agregar a favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg></button>'
+        +   '<button class="product-quick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg> Vista rápida</button>'
+        + '</div>'
+        + '<div class="product-info">'
+        +   '<div class="product-brand">' + p.brand + '</div>'
+        +   '<div class="product-model">' + p.model + '</div>'
+        +   '<div class="product-variants">' + variants + '<span style="margin-left:6px">' + p.variants.length + ' acabados</span></div>'
+        +   '<div class="product-price"><span class="now">' + cop(p.price) + '</span>' + was + off + '</div>'
+        +   '<div class="product-stock' + (p.stockLow ? ' low' : '') + '">' + p.stock + '</div>'
+        +   wholesale
+        + '</div>';
+      var fav = card.querySelector('.product-fav');
+      fav.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); fav.classList.toggle('active'); });
+      var quick = card.querySelector('.product-quick');
+      quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });
+      grid.appendChild(card);
+    });
+
+    // ============== Live auctions strip ==============
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[c];
+      });
+    }
+
+    function renderLiveAuctions() {
+      var mount = document.getElementById('liveAuctions');
+      if (!mount || !window.Store) return;
+      Store.autoCloseExpired();
+      var auctions = Store.getAuctions().filter(function (a) {
+        var status = Store.getAuctionStatus(a);
+        return status === 'live' || status === 'scheduled';
+      }).sort(function (a, b) {
+        return new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime();
+      }).slice(0, 3);
+
+      if (auctions.length === 0) {
+        mount.innerHTML = ''
+          + '<div class="auc-empty">'
+          +   '<h3>Sin subastas activas por ahora.</h3>'
+          +   '<p>Desde el panel de administración puedes crear una subasta sobre cualquier pieza del catálogo. Cuando esté programada o en vivo aparecerá aquí.</p>'
+          +   '<a class="btn btn-outline" href="subastas.html">Ver calendario de subastas</a>'
+          + '</div>';
+        return;
+      }
+
+      mount.innerHTML = auctions.map(function (a) {
+        var p = Store.getProduct(a.productId);
+        var status = Store.getAuctionStatus(a);
+        var title = p ? p.brand + ' · ' + p.model : a.title || 'Pieza Cronosfera';
+        var img = window.Auction ? Auction.watchSVG(p ? p.tone : 'ink') : watchSVG(p ? p.tone : 'ink');
+        var countdown = status === 'live'
+          ? (window.Auction ? Auction.formatCountdown(new Date(a.endsAt).getTime() - Date.now()) : 'En vivo')
+          : 'Programada';
+        return ''
+          + '<a class="auc-mini reveal" href="subastas.html?id=' + encodeURIComponent(a.id) + '">'
+          +   '<div class="auc-mini-media">'
+          +     '<span class="auc-mini-badge"><span class="pulse-dot"></span>' + (status === 'live' ? 'EN VIVO' : 'PROGRAMADA') + '</span>'
+          +     '<div class="ph-img">' + img + '</div>'
+          +   '</div>'
+          +   '<div class="auc-mini-body">'
+          +     '<div class="auc-mini-title">' + escapeHtml(title) + '</div>'
+          +     '<div class="auc-mini-row">'
+          +       '<div><span class="auc-mini-lbl">' + (status === 'live' ? 'Puja actual' : 'Precio inicial') + '</span><span class="auc-mini-price">' + Store.formatCOP(a.currentBid || a.startPrice) + '</span></div>'
+          +       '<span class="auc-mini-countdown" data-ends="' + a.endsAt + '">' + countdown + '</span>'
+          +     '</div>'
+          +   '</div>'
+          + '</a>';
+      }).join('');
+    }
+
+    function syncWholesaleFlag() {
+      var flag = document.querySelector('[data-wholesale-flag]');
+      if (flag) flag.style.display = (window.Auth && Auth.isWholesale()) ? '' : 'none';
+    }
+
+    renderLiveAuctions();
+    syncWholesaleFlag();
+    if (window.Store && Store.subscribe) Store.subscribe(function () {
+      renderLiveAuctions();
+      syncWholesaleFlag();
+    });
+  </script>
+
+
+</body></html>

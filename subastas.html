@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14161c">
+  <meta name="description" content="Subastas Cronosfera — piezas seleccionadas en puja abierta con cierre cronometrado y extensión anti-snipe.">
+  <title>Subastas · Cronosfera</title>
+  <link rel="canonical" href="https://cronosfera-five.vercel.app/subastas.html">
+  <meta property="og:site_name" content="Cronosfera">
+  <meta property="og:title" content="Subastas · Cronosfera">
+  <meta property="og:description" content="Piezas seleccionadas en puja abierta. Cierra cronometrado, extensión anti-snipe.">
+  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ====== Dark luxe tokens ====== */
+    :root {
+      --bg:           oklch(14% 0.008 250);
+      --bg-warm:      oklch(17% 0.010 250);
+      --surface:      oklch(20% 0.010 250);
+      --surface-2:    oklch(24% 0.012 250);
+      --fg:           oklch(96% 0.005 80);
+      --fg-soft:      oklch(82% 0.005 80);
+      --muted:        oklch(60% 0.008 80);
+      --muted-2:      oklch(48% 0.008 80);
+      --border:       oklch(30% 0.008 250);
+      --border-soft:  oklch(24% 0.006 250);
+      --accent:       oklch(78% 0.10 75);
+      --accent-deep:  oklch(68% 0.12 70);
+      --accent-soft:  oklch(28% 0.06 70);
+      --danger:       oklch(64% 0.18 25);
+      --success:      oklch(70% 0.12 155);
+      --info:         oklch(70% 0.10 230);
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+      --shadow:    0 8px 30px rgba(0,0,0,.4);
+      --shadow-lg: 0 30px 80px rgba(0,0,0,.55);
+      --r-sm: 4px;
+      --r:    8px;
+      --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    img, svg { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; }
+    ::selection { background: var(--accent); color: var(--bg); }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .muted { color: var(--muted); }
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--accent);
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); }
+
+    .display {
+      font-family: var(--font-display);
+      font-weight: 500;
+      line-height: 1.02;
+      letter-spacing: -0.012em;
+      color: var(--fg);
+    }
+
+    /* ====== Header ====== */
+    .site-header {
+      position: sticky; top: 0; z-index: 80;
+      background: rgba(20, 22, 28, 0.86);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 32px;
+      height: 76px;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--fg);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .logo .dot { color: var(--accent); }
+    .nav-primary { display: flex; align-items: center; gap: 28px; flex: 1; }
+    .nav-primary a {
+      font-size: 14px; font-weight: 450; color: var(--fg-soft);
+      padding: 8px 0; position: relative; transition: color .2s;
+    }
+    .nav-primary a::after {
+      content: ""; position: absolute; bottom: 4px; left: 0;
+      width: 0; height: 1px; background: var(--accent);
+      transition: width .25s ease;
+    }
+    .nav-primary a:hover { color: var(--fg); }
+    .nav-primary a:hover::after { width: 100%; }
+    .nav-primary a.current { color: var(--fg); }
+    .nav-primary a.current::after { width: 100%; }
+    .header-actions { display: flex; align-items: center; gap: 14px; }
+
+    /* session chip */
+    [data-session-slot] .auth-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 13px; font-weight: 500;
+      transition: all .2s;
+    }
+    [data-session-slot] .auth-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .session-chip {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 6px 8px 6px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .session-chip:hover, .session-chip.open { border-color: var(--accent); }
+    .session-chip .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase;
+    }
+    .session-chip .meta { padding-right: 8px; }
+    .session-chip .name { font-size: 13px; font-weight: 500; line-height: 1.2; }
+    .session-chip .role { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .session-chip.role-admin .role { color: var(--accent); }
+    .session-chip.role-wholesale .role { color: var(--info); }
+    .session-menu {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+      opacity: 0; visibility: hidden; transform: translateY(-4px);
+      transition: opacity .15s, transform .15s, visibility .15s;
+    }
+    .session-chip.open .session-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+    .session-menu .mini-link {
+      display: block;
+      padding: 9px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: background .15s;
+      width: 100%; text-align: left;
+    }
+    .session-menu .mini-link:hover { background: var(--surface-2); color: var(--fg); }
+    .session-menu .mini-link.danger:hover { background: color-mix(in oklab, var(--danger) 12%, transparent); color: oklch(82% 0.14 25); }
+
+    /* ====== Hero interno ====== */
+    .auc-hero {
+      padding: 80px 0 56px;
+      border-bottom: 1px solid var(--border);
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent),
+        var(--bg);
+    }
+    .auc-hero-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 48px;
+      align-items: end;
+    }
+    @media (max-width: 900px) { .auc-hero-grid { grid-template-columns: 1fr; gap: 28px; } }
+    .auc-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(44px, 6vw, 76px);
+      font-weight: 500;
+      line-height: .98;
+      letter-spacing: -0.018em;
+      margin: 18px 0 18px;
+    }
+    .auc-hero h1 em { font-style: italic; color: var(--accent); }
+    .auc-hero p.lead { color: var(--fg-soft); font-size: 17px; max-width: 520px; }
+    .auc-hero-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+    }
+    .auc-hero-stat .n { font-family: var(--font-display); font-size: 32px; color: var(--accent); }
+    .auc-hero-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+    /* ====== Layout pestañas ====== */
+    .auc-section { padding: 64px 0; }
+    .auc-section + .auc-section { padding-top: 0; }
+    .section-head {
+      display: flex; align-items: end; justify-content: space-between;
+      margin-bottom: 32px; gap: 24px;
+    }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3vw, 40px);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-top: 10px;
+    }
+    .section-head .meta { color: var(--muted); font-size: 14px; max-width: 380px; text-align: right; }
+
+    .auc-filters {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .filter-chip {
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+      color: var(--fg-soft);
+      transition: all .2s;
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-chip.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+    /* ====== Cards grid ====== */
+    .auc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .auc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      transition: all .3s ease;
+      display: flex; flex-direction: column;
+    }
+    .auc-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+      box-shadow: 0 24px 60px rgba(0,0,0,.5), 0 0 0 1px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .auc-media {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, oklch(28% 0.008 250), oklch(18% 0.006 250));
+      display: grid; place-items: center;
+      overflow: hidden;
+    }
+    .auc-media::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 60%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 70%);
+    }
+    .auc-media .ph-img { width: 58%; position: relative; z-index: 1; filter: drop-shadow(0 18px 32px rgba(0,0,0,.4)); }
+    .auc-badge {
+      position: absolute; top: 14px; left: 14px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.04em;
+      z-index: 2;
+    }
+    .auc-badge.live {
+      background: color-mix(in oklab, var(--danger) 22%, transparent);
+      color: oklch(85% 0.16 25);
+      border: 1px solid color-mix(in oklab, var(--danger) 50%, transparent);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .auc-badge.live .pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--danger);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(1.3); }
+    }
+    .auc-badge.scheduled {
+      background: color-mix(in oklab, var(--info) 16%, transparent);
+      color: oklch(82% 0.10 230);
+      border: 1px solid color-mix(in oklab, var(--info) 40%, transparent);
+    }
+    .auc-badge.closed {
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .auc-body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    .auc-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .auc-bids { font-weight: 500; color: var(--fg-soft); }
+    .auc-title { font-family: var(--font-display); font-size: 22px; font-weight: 500; line-height: 1.2; }
+    .auc-title a:hover { color: var(--accent); }
+    .auc-price-row { display: flex; justify-content: space-between; align-items: end; gap: 12px; padding-top: 8px; border-top: 1px solid var(--border-soft); }
+    .auc-price-lbl { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .auc-price { font-family: var(--font-display); font-size: 24px; color: var(--accent); font-weight: 600; }
+    .auc-countdown {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--fg);
+      background: var(--bg-warm);
+      padding: 6px 10px;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      letter-spacing: 0.04em;
+    }
+    .auc-countdown.urgent { color: var(--danger); border-color: color-mix(in oklab, var(--danger) 50%, var(--border)); }
+    .auc-countdown.scheduled { color: var(--info); }
+    .auc-countdown.closed { color: var(--muted); }
+    .auc-cta {
+      margin-top: auto;
+      padding: 12px;
+      text-align: center;
+      background: var(--bg-warm);
+      border-radius: var(--r);
+      font-size: 14px; font-weight: 600;
+      transition: all .2s;
+    }
+    .auc-card:hover .auc-cta { background: var(--accent); color: var(--bg); }
+
+    /* ====== Detail ====== */
+    .auc-detail {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 56px;
+      padding: 56px 0 32px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .auc-detail { grid-template-columns: 1fr; gap: 36px; } }
+    .auc-detail-media {
+      position: relative;
+      aspect-ratio: 1/1;
+      background: linear-gradient(135deg, oklch(28% 0.008 250), oklch(18% 0.006 250));
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      overflow: hidden;
+    }
+    .auc-detail-media::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 65%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 65%);
+    }
+    .auc-detail-media .ph-img { width: 56%; position: relative; z-index: 1; filter: drop-shadow(0 24px 40px rgba(0,0,0,.5)); }
+    .auc-detail-media .auc-badge { top: 18px; left: 18px; }
+    .auc-detail-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .auc-detail-meta .mono { font-size: 12px; color: var(--muted); }
+    .auc-detail-title { font-family: var(--font-display); font-size: clamp(32px, 4vw, 48px); font-weight: 500; line-height: 1.05; margin-bottom: 14px; }
+    .auc-detail-lead { color: var(--fg-soft); font-size: 15px; margin-bottom: 28px; }
+    .auc-price-row.big { padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .auc-price-row.big .auc-price { font-size: 36px; }
+    .auc-price-row.big .auc-countdown { font-size: 18px; padding: 8px 12px; }
+    .auc-detail-specs {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 24px;
+      margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border);
+    }
+    .auc-detail-specs > div span { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .auc-detail-specs > div strong { font-family: var(--font-mono); font-size: 14px; }
+
+    .bid-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px; }
+    .bid-form-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+    .bid-form-row label { display: block; }
+    .bid-form-lbl { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .bid-form input {
+      width: 100%;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      border-radius: var(--r);
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .bid-form input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent); }
+    .btn-primary {
+      padding: 12px 22px;
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+      border-radius: var(--r);
+      letter-spacing: 0.01em;
+      transition: all .2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 6px 24px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .btn-primary:hover { background: var(--accent-deep); }
+    .bid-form-hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .bid-form-hint strong { color: var(--accent); }
+    .bid-msg { margin-top: 12px; }
+    .bid-ok { padding: 10px 12px; background: color-mix(in oklab, var(--success) 14%, transparent); color: oklch(85% 0.10 155); border-radius: var(--r); border: 1px solid color-mix(in oklab, var(--success) 35%, transparent); font-size: 13px; }
+    .bid-err { padding: 10px 12px; background: color-mix(in oklab, var(--danger) 14%, transparent); color: oklch(85% 0.16 25); border-radius: var(--r); border: 1px solid color-mix(in oklab, var(--danger) 35%, transparent); font-size: 13px; }
+    .bid-guest { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-lg); padding: 32px; text-align: center; }
+    .bid-guest p { margin-bottom: 14px; color: var(--fg-soft); }
+    .bid-guest .muted { color: var(--muted); font-size: 13px; }
+    .bid-guest .btn-primary { display: inline-flex; }
+
+    .bid-history { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .bid-history h3 { font-family: var(--font-display); font-size: 24px; font-weight: 500; margin-bottom: 18px; }
+    .bid-table { width: 100%; border-collapse: collapse; }
+    .bid-table th { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .bid-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-soft); font-size: 14px; }
+    .bid-table td.mono { color: var(--accent); }
+    .bid-history .empty { color: var(--muted); padding: 24px; text-align: center; }
+
+    /* ====== Empty ====== */
+    .empty-state {
+      padding: 80px 24px; text-align: center;
+      background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r-lg);
+    }
+    .empty-state .ico {
+      width: 56px; height: 56px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center;
+    }
+    .empty-state h3 { font-family: var(--font-display); font-size: 26px; font-weight: 500; margin-bottom: 8px; }
+    .empty-state p { color: var(--muted); max-width: 420px; margin: 0 auto; }
+
+    /* ====== Footer ====== */
+    .site-footer {
+      margin-top: 80px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      background: var(--bg-warm);
+    }
+    .site-footer .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .site-footer .copy { color: var(--muted); font-size: 13px; }
+    .site-footer .links { display: flex; gap: 24px; font-size: 13px; }
+    .site-footer .links a:hover { color: var(--accent); }
+
+    /* ====== reveal animation ====== */
+    [data-aos] { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s ease; }
+    [data-aos].in { opacity: 1; transform: none; }
+
+    @media (max-width: 720px) {
+      .header-inner { gap: 16px; height: 64px; }
+      .nav-primary { display: none; }
+      .auc-hero { padding: 48px 0 32px; }
+      .container { padding: 0 20px; }
+    }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Cronosfera<span class="dot">.</span></a>
+      <nav class="nav-primary">
+        <a href="catalogo.html">Catálogo</a>
+        <a href="subastas.html" class="current">Subastas</a>
+        <a href="mayorista.html">Mayorista</a>
+      </nav>
+      <div class="header-actions" data-session-slot></div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="auc-hero">
+    <div class="container">
+      <div class="auc-hero-grid">
+        <div>
+          <span class="eyebrow">Subastas · Colombia</span>
+          <h1>Piezas seleccionadas,<br><em>en puga abierta.</em></h1>
+          <p class="lead">Relojes curatoriados que entran a subasta con precio inicial accesible, cierre cronometrado y extensión anti-snipe para que el tiempo juegue limpio.</p>
+        </div>
+        <div class="auc-hero-stats">
+          <div class="auc-hero-stat"><div class="n" id="statLive">—</div><div class="l">En vivo</div></div>
+          <div class="auc-hero-stat"><div class="n" id="statUpcoming">—</div><div class="l">Próximas</div></div>
+          <div class="auc-hero-stat"><div class="n" id="statClosed">—</div><div class="l">Finalizadas</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <main id="content">
+    <!-- Se rellena por JS: detalle o listado -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container row">
+      <div class="copy">© <span id="year"></span> Cronosfera · Marketplace de relojería</div>
+      <div class="links">
+        <a href="catalogo.html">Catálogo</a>
+        <a href="subastas.html">Subastas</a>
+        <a href="mayorista.html">Mayorista</a>
+        <a href="login.html">Cuenta</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="cronos-store.js"></script>
+  <script src="cronos-auction.js"></script>
+  <script src="cronos-auth.js"></script>
+  <script src="cronos-ui.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    (function () {
+      var content = document.getElementById('content');
+      var params = new URLSearchParams(window.location.search);
+      var detailId = params.get('id');
+      var filter = params.get('f') || 'all';
+
+      function updateStats() {
+        var all = Store.getAuctions();
+        Store.autoCloseExpired();
+        var live = 0, upcoming = 0, closed = 0;
+        all.forEach(function (a) {
+          var s = Store.getAuctionStatus(a);
+          if (s === 'live') live++;
+          else if (s === 'scheduled') upcoming++;
+          else closed++;
+        });
+        document.getElementById('statLive').textContent = live;
+        document.getElementById('statUpcoming').textContent = upcoming;
+        document.getElementById('statClosed').textContent = closed;
+      }
+
+      function renderList() {
+        updateStats();
+        var all = Store.getAuctions();
+        Store.autoCloseExpired();
+        var filtered = all.filter(function (a) {
+          if (filter === 'all') return true;
+          return Store.getAuctionStatus(a) === filter;
+        });
+
+        // orden: live > scheduled > closed
+        filtered.sort(function (a, b) {
+          var order = { live: 0, scheduled: 1, closed: 2 };
+          var oa = order[Store.getAuctionStatus(a)];
+          var ob = order[Store.getAuctionStatus(b)];
+          if (oa !== ob) return oa - ob;
+          return new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime();
+        });
+
+        var html = ''
+          + '<section class="auc-section">'
+          +   '<div class="container">'
+          +     '<div class="section-head">'
+          +       '<div><span class="eyebrow">Subastas abiertas</span><h2>Encuentra tu próxima pieza</h2></div>'
+          +       '<p class="meta">Las pujas son públicas. El tiempo se extiende automáticamente si una puja entra en el último minuto.</p>'
+          +     '</div>'
+          +     '<div class="auc-filters">'
+          +       '<button class="filter-chip ' + (filter === 'all' ? 'active' : '') + '" data-f="all">Todas</button>'
+          +       '<button class="filter-chip ' + (filter === 'live' ? 'active' : '') + '" data-f="live">En vivo</button>'
+          +       '<button class="filter-chip ' + (filter === 'scheduled' ? 'active' : '') + '" data-f="scheduled">Próximas</button>'
+          +       '<button class="filter-chip ' + (filter === 'closed' ? 'active' : '') + '" data-f="closed">Finalizadas</button>'
+          +     '</div>';
+
+        if (filtered.length === 0) {
+          html += ''
+            + '<div class="empty-state">'
+            +   '<div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+            +   '<h3>' + (filter === 'all' ? 'Aún no hay subastas publicadas' : 'No hay subastas en esta categoría') + '</h3>'
+            +   '<p>' + (filter === 'all' ? 'El administrador puede crear subastas desde el panel de control. Vuelve pronto para encontrar piezas únicas en pujas abiertas.' : 'Prueba con otro filtro o vuelve en breve.') + '</p>'
+            + '</div>';
+        } else {
+          html += '<div class="auc-grid">' + filtered.map(function (a) { return Auction.renderCard(a); }).join('') + '</div>';
+        }
+        html += '</div></section>';
+
+        content.innerHTML = html;
+
+        document.querySelectorAll('.filter-chip').forEach(function (c) {
+          c.addEventListener('click', function () {
+            var newFilter = c.getAttribute('data-f');
+            var url = new URL(window.location.href);
+            url.searchParams.set('f', newFilter);
+            url.searchParams.delete('id');
+            window.history.pushState({}, '', url);
+            filter = newFilter;
+            renderList();
+          });
+        });
+
+        // reveal animation
+        requestAnimationFrame(function () {
+          document.querySelectorAll('[data-aos]').forEach(function (el, i) {
+            setTimeout(function () { el.classList.add('in'); }, i * 60);
+          });
+        });
+      }
+
+      function renderDetailPage() {
+        var a = Store.getAuction(detailId);
+        if (!a) {
+          content.innerHTML = ''
+            + '<section class="auc-section"><div class="container">'
+            +   '<div class="empty-state">'
+            +     '<h3>Subasta no encontrada</h3>'
+            +     '<p>Es posible que haya sido eliminada o que el enlace sea incorrecto.</p>'
+            +     '<p style="margin-top:18px"><a href="subastas.html" class="btn-primary">Ver todas las subastas</a></p>'
+            +   '</div>'
+            + '</div></section>';
+          return;
+        }
+        // contenedor temporal; el detalle se monta dentro
+        content.innerHTML = '<div class="container"><a href="subastas.html" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:24px 0 0">← Volver a subastas</a><div id="detailMount"></div></div>';
+        Auction.renderDetail(a, document.getElementById('detailMount'));
+      }
+
+      // routing
+      if (detailId) renderDetailPage();
+      else renderList();
+
+      // re-render en cambios de Store (ej: puja recibida)
+      Store.subscribe(function () {
+        if (detailId) renderDetailPage();
+        else renderList();
+      });
+
+      window.addEventListener('popstate', function () {
+        var p = new URLSearchParams(window.location.search);
+        var newId = p.get('id');
+        var newFilter = p.get('f') || 'all';
+        if (newId !== detailId || newFilter !== filter) {
+          detailId = newId;
+          filter = newFilter;
+          if (detailId) renderDetailPage(); else renderList();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
