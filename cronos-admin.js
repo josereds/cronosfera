@@ -532,7 +532,7 @@
     // prefill precio inicial cuando se elige producto
     modal.querySelector('[name=productId]').addEventListener('change', function (e) {
       var p = Store.getProduct(e.target.value);
-      if (p && !modal.querySelector('[name=startPrice]').value) modal.querySelector('[name=startPrice]').value = Math.round(p.price * 0.7);
+      if (p && !modal.querySelector('[name=startPrice]').value) modal.querySelector('[name=startPrice]').value = Math.round(p.price * 0.7 / 1000) * 1000;
     });
 
     modal.querySelector('#auctionForm').addEventListener('submit', function (e) {
