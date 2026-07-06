@@ -930,6 +930,24 @@ textarea::placeholder {
 
 .brand-hub { margin: 6px 0 48px; }
 
+/* ---------- Logo de la empresa ---------- */
+
+.logo .logo-img,
+.aside-logo .logo-img {
+  height: 46px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.site-footer .logo .logo-img { height: 38px; }
+
+.sidebar .logo .logo-img { height: 34px; }
+
+@media (max-width: 700px) {
+  .logo .logo-img { height: 38px; }
+}
+
 .page-head .sub #backToBrands {
   color: var(--accent);
   font-size: 13px;
