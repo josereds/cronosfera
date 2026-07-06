@@ -448,6 +448,10 @@
         wholesaleFields.style.display = regRole.value === 'wholesale' ? '' : 'none';
       });
 
+      if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+        tabs[1].click();
+      }
+
       loginForm.addEventListener('submit', function (e) {
         e.preventDefault();
         clearMsgs();
