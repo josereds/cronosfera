@@ -101,6 +101,7 @@
     { slug: 'mulco', name: 'Mulco', image: '' },
     { slug: 'nautica', name: 'Náutica', image: '' },
     { slug: 'orient', name: 'Orient', image: '' },
+    { slug: 'seiko', name: 'Seiko', image: '' },
     { slug: 'swatch', name: 'Swatch', image: '' },
     { slug: 'tissot', name: 'Tissot', image: '' },
     { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: '' },
