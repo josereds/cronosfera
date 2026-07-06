@@ -4,7 +4,13 @@
 
 Prototipo HTML/CSS/JS de producto completo — estático, sin backend, pero con la arquitectura de datos simulada lista para conectar a uno real. Estética editorial inspirada en relojería suiza: grafito profundo, marfil, gris acero y bronce envejecido como acento. Tipografía Cormorant Garamond + Inter + JetBrains Mono.
 
-**Demo en producción:** https://cronosfera-five.vercel.app
+**Demo en producción:** https://cronosfera-beta.vercel.app
+
+## Marcas y taxonomía (definidas por el cliente)
+
+El catálogo se navega **por marca** (estilo Imperio del Tiempo): Bulova, Casio, CAT, Citizen, Diesel, Festina, Fossil, Guess, MountRoyal, Mulco, Náutica, Orient, Swatch, Tissot, Tommy Hilfiger y **Multimarca** (marcas económicas de menor rotación). La lista vive en `BRANDS` dentro de `cronos-store.js`; cada marca tiene un campo `image` **pendiente de las fotos que entregue el cliente** (mientras esté vacío, el tile muestra el wordmark tipográfico).
+
+Cada producto lleva ficha técnica cerrada (selects en el panel admin): **mecanismo** (cuarzo, automático, mecánico, digital, anadigi, cuarzo de recarga solar), **cristal** (mineral, zafiro, hardlex, plexiglás), **pulso** (cuero, acero, silicona, lona, resina, caucho) y **género** (femenino, masculino, unisex). Dentro de una marca el orden por defecto es **alfabético por referencia**, con filtros de género y precio.
 
 ---
 

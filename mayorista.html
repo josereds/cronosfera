@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Cuenta mayorista Cronosfera — tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia." />
   <title>Cuenta mayorista · Cronosfera</title>
-  <link rel="canonical" href="https://cronosfera-five.vercel.app/mayorista.html">
+  <link rel="canonical" href="https://cronosfera-beta.vercel.app/mayorista.html">
   <meta property="og:site_name" content="Cronosfera">
   <meta property="og:locale" content="es_CO">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://cronosfera-five.vercel.app/mayorista.html">
+  <meta property="og:url" content="https://cronosfera-beta.vercel.app/mayorista.html">
   <meta property="og:title" content="Cuenta mayorista · Cronosfera">
   <meta property="og:description" content="Tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia.">
-  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Cronosfera — programa mayorista para revendedores y tiendas en Colombia.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Cuenta mayorista · Cronosfera">
   <meta name="twitter:description" content="Tarifas especiales, precios por volumen y atención comercial para revendedores y tiendas en Colombia.">
-  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta name="twitter:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -900,7 +900,7 @@
     </a>
     <nav class="nav-primary" aria-label="Principal">
       <a href="catalogo.html">Catálogo</a>
-      <a href="index.html#colecciones">Colecciones</a>
+      <a href="index.html#marcas">Marcas</a>
       <a href="index.html#marcas">Marcas</a>
       <a href="mayorista.html" class="current">Mayorista</a>
       <a href="index.html#historia">Historia</a>
@@ -916,7 +916,7 @@
       <span class="session-slot" data-session-slot></span>
       <button class="icon-btn" aria-label="Carrito">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7h14l-1.3 11.2A2 2 0 0 1 15.7 20H8.3a2 2 0 0 1-2-1.8L5 7Z" stroke-linejoin="round"/><path d="M9 7a3 3 0 0 1 6 0" stroke-linecap="round"/></svg>
-        <span class="badge">3</span>
+        
       </button>
     </div>
   </div>
@@ -1160,14 +1160,11 @@
       </div>
     </div>
 
-    <div class="states-row" role="group" aria-label="Vista previa de estados">
+    <div class="states-row" role="group" aria-label="Vista previa de estados" hidden>
       <button class="state-toggle active" data-state="pending">Pendiente</button>
       <button class="state-toggle" data-state="approved">Aprobada</button>
       <button class="state-toggle" data-state="rejected">Rechazada</button>
     </div>
-    <p style="text-align:center; color:var(--muted-2); font-size:12px; margin-top:14px;">
-      Vista previa para demostración. El cliente real solo ve su propio estado.
-    </p>
   </div>
 </section>
 
@@ -1380,7 +1377,7 @@
         <h5>Tienda</h5>
         <ul>
           <li><a href="catalogo.html">Catálogo</a></li>
-          <li><a href="index.html#colecciones">Colecciones</a></li>
+          <li><a href="index.html#marcas">Marcas</a></li>
           <li><a href="index.html#marcas">Marcas</a></li>
           <li><a href="mayorista.html">Mayorista</a></li>
         </ul>
@@ -1583,22 +1580,46 @@
     },
   };
 
+  function applyState(s, msgOverride) {
+    statusTag.textContent = s.tag;
+    statusTag.className = 'status-tag ' + s.cls;
+    statusTitle.textContent = s.title;
+    statusMsg.innerHTML = msgOverride || s.msg;
+    statusIcon.style.background = s.iconBg;
+    statusIcon.style.color = s.iconColor;
+    statusIcon.querySelector('svg').innerHTML =
+      '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" fill="none"/>' +
+      '<path d="' + s.iconSvg + '" stroke="currentColor" stroke-width="1.6" fill="none"/>';
+  }
+
   document.querySelectorAll('.state-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.state-toggle').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      const s = states[btn.dataset.state];
-      statusTag.textContent = s.tag;
-      statusTag.className = 'status-tag ' + s.cls;
-      statusTitle.textContent = s.title;
-      statusMsg.innerHTML = s.msg;
-      statusIcon.style.background = s.iconBg;
-      statusIcon.style.color = s.iconColor;
-      statusIcon.querySelector('svg').innerHTML =
-        '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" fill="none"/>' +
-        '<path d="' + s.iconSvg + '" stroke="currentColor" stroke-width="1.6" fill="none"/>';
+      applyState(states[btn.dataset.state]);
     });
   });
+
+  // La tarjeta refleja la solicitud REAL de la sesión; sin sesión muestra
+  // el estado neutro (no se inventan referencias).
+  function syncRealStatus() {
+    const user = window.Store ? Store.currentUser() : null;
+    const req = user ? Store.getWholesaleRequests().find((r) => r.userId === user.id) : null;
+    if (req && states[req.status]) {
+      const sent = new Date(req.createdAt || Date.now()).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+      const msg = req.status === 'pending'
+        ? 'Referencia <span class="mono">' + req.reference + '</span> · enviada el ' + sent + '. Tiempo estimado de respuesta: <strong>48 horas hábiles</strong>.'
+        : null;
+      applyState(states[req.status], msg);
+    } else {
+      statusTag.textContent = 'Sin solicitud';
+      statusTag.className = 'status-tag pending';
+      statusTitle.textContent = 'Aún no tienes una solicitud activa';
+      statusMsg.textContent = 'Diligencia el formulario de esta página para crear tu cuenta mayorista. Aquí verás el estado de la revisión.';
+    }
+  }
+  syncRealStatus();
+  if (window.Store && Store.subscribe) Store.subscribe(syncRealStatus);
 
   // ---------- phone & NIT light formatting ----------
   const nit = document.getElementById('f-nit');

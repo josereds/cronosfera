@@ -15,7 +15,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function watchSVG(tone) {
+  function watchSVG(tone, brandName) {
     var bg = ({ ink: '#1a1c20', cool: '#323a42', bronze: '#6a5340', fog: '#dcd6cc', steel: '#a8a298', green: '#344a3a' })[tone] || '#1a1c20';
     var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
     var accent = '#c9a86a';
@@ -27,7 +27,7 @@
       +   '<g stroke="' + accent + '" stroke-width="1.6" stroke-linecap="round">'
       +     '<line x1="0" y1="-78" x2="0" y2="-68"/><line x1="78" y1="0" x2="68" y2="0"/><line x1="0" y1="78" x2="0" y2="68"/><line x1="-78" y1="0" x2="-68" y2="0"/>'
       +   '</g>'
-      +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">CRONOSFERA</text>'
+      +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">' + (brandName || 'CRONOSFERA').toUpperCase() + '</text>'
       +   '<line x1="0" y1="0" x2="0" y2="-50" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
       +   '<line x1="0" y1="0" x2="36" y2="10" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
       +   '<line x1="0" y1="0" x2="0" y2="58" stroke="' + accent + '" stroke-width="1" stroke-linecap="round"/>'
@@ -66,7 +66,7 @@
     var status = global.Store.getAuctionStatus(auction);
     var remaining = new Date(auction.endsAt).getTime() - Date.now();
     var href = 'subastas.html?id=' + encodeURIComponent(auction.id);
-    var img = p ? watchSVG(p.tone) : watchSVG('ink');
+    var img = p ? watchSVG(p.tone, p.brand) : watchSVG('ink');
 
     var productTitle = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
     var ref = p ? p.ref : '';
@@ -115,7 +115,7 @@
     var user = global.Store.currentUser();
     var minNext = global.Store.minNextBid(auction);
 
-    var img = p ? watchSVG(p.tone) : watchSVG('ink');
+    var img = p ? watchSVG(p.tone, p.brand) : watchSVG('ink');
     var title = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
     var ref = p ? p.ref : '';
 

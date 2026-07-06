@@ -355,14 +355,30 @@
   }
 
   function openProductModal(id) {
-    var p = id ? Store.getProduct(id) : { brand: 'Cronosfera', model: '', ref: '', price: 0, wasPrice: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026'] };
+    var p = id ? Store.getProduct(id) : { brand: '', brandSlug: '', model: '', ref: '', price: 0, wasPrice: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026'], gender: '', mechanism: '', crystal: '', strap: '' };
+    if (p.brand && !p.brandSlug) p.brandSlug = Store.productBrandSlug(p);
     var overlay = el('div', { class: 'modal-overlay' });
     var modal = el('div', { class: 'modal product-modal' });
+
+    function specSelect(name, label, options, current) {
+      return '<label><span>' + label + '</span><select name="' + name + '" required>'
+        + '<option value=""' + (current ? '' : ' selected') + ' disabled>Selecciona…</option>'
+        + options.map(function (o) {
+            return '<option value="' + escapeHtml(o) + '"' + (current === o ? ' selected' : '') + '>' + escapeHtml(o) + '</option>';
+          }).join('')
+        + '</select></label>';
+    }
+
     modal.innerHTML = ''
       + '<div class="modal-head"><h3>' + (id ? 'Editar producto' : 'Nuevo producto') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
       + '<form id="productForm">'
       +   '<div class="form-grid">'
-      +     '<label><span>Marca</span><input name="brand" value="' + escapeHtml(p.brand) + '" required></label>'
+      +     '<label><span>Marca</span><select name="brandSlug" required>'
+      +       '<option value=""' + (p.brandSlug ? '' : ' selected') + ' disabled>Selecciona…</option>'
+      +       Store.getBrands().map(function (b) {
+            return '<option value="' + b.slug + '"' + ((p.brandSlug || '') === b.slug ? ' selected' : '') + '>' + escapeHtml(b.name) + '</option>';
+          }).join('')
+      +     '</select></label>'
       +     '<label><span>Modelo</span><input name="model" value="' + escapeHtml(p.model) + '" required></label>'
       +     '<label><span>Referencia (SKU)</span><input name="ref" value="' + escapeHtml(p.ref) + '" required></label>'
       +     '<label><span>Tono</span><select name="tone">'
@@ -370,6 +386,10 @@
             return '<option value="' + t + '"' + (p.tone === t ? ' selected' : '') + '>' + t + '</option>';
           }).join('')
       +     '</select></label>'
+      +     specSelect('mechanism', 'Mecanismo', Store.SPECS.mechanism, p.mechanism)
+      +     specSelect('crystal', 'Cristal', Store.SPECS.crystal, p.crystal)
+      +     specSelect('strap', 'Pulso', Store.SPECS.strap, p.strap)
+      +     specSelect('gender', 'Género', Store.SPECS.gender, p.gender)
       +     '<label><span>Precio (COP)</span><input type="number" name="price" value="' + (p.price || 0) + '" required min="0" step="1000"></label>'
       +     '<label><span>Precio antes (0 = sin descuento)</span><input type="number" name="wasPrice" value="' + (p.wasPrice || 0) + '" min="0" step="1000"></label>'
       +     '<label><span>Stock (texto)</span><input name="stock" value="' + escapeHtml(p.stock || '') + '"></label>'
@@ -395,12 +415,18 @@
     modal.querySelector('#productForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(this);
+      var selectedBrand = Store.getBrand(fd.get('brandSlug'));
       var data = {
         id: id || undefined,
-        brand: fd.get('brand'),
+        brand: selectedBrand ? selectedBrand.name : fd.get('brandSlug'),
+        brandSlug: fd.get('brandSlug'),
         model: fd.get('model'),
         ref: fd.get('ref'),
         tone: fd.get('tone'),
+        mechanism: fd.get('mechanism'),
+        crystal: fd.get('crystal'),
+        strap: fd.get('strap'),
+        gender: fd.get('gender'),
         price: Number(fd.get('price')),
         wasPrice: Number(fd.get('wasPrice')),
         off: Number(fd.get('wasPrice')) > 0 ? Math.round((1 - Number(fd.get('price')) / Number(fd.get('wasPrice'))) * 100) : 0,

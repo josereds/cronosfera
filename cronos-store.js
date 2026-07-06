@@ -16,8 +16,14 @@
     session: 'cronos:session',
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
-    counters: 'cronos:counters'
+    counters: 'cronos:counters',
+    meta: 'cronos:meta'
   };
+
+  // Al subir SEED_VERSION se regenera el catálogo demo en navegadores que ya
+  // tenían datos (se conservan usuarios y solicitudes; subastas/pujas se
+  // limpian porque referencian productos que dejan de existir).
+  var SEED_VERSION = 2;
 
   var subscribers = [];
   var emitScheduled = false;
@@ -76,22 +82,109 @@
     return null;
   }
 
+  // ---------- marcas y especificaciones ----------
+
+  // Marcas oficiales del marketplace (definidas por el cliente).
+  // "Multimarca" agrupa marcas económicas que rotan en menor cantidad.
+  // `image`: ruta a la foto de la marca (pendiente de que el cliente las
+  // entregue; mientras esté vacía el tile muestra el wordmark tipográfico).
+  var BRANDS = [
+    { slug: 'bulova', name: 'Bulova', image: '' },
+    { slug: 'casio', name: 'Casio', image: '' },
+    { slug: 'cat', name: 'CAT', image: '' },
+    { slug: 'citizen', name: 'Citizen', image: '' },
+    { slug: 'diesel', name: 'Diesel', image: '' },
+    { slug: 'festina', name: 'Festina', image: '' },
+    { slug: 'fossil', name: 'Fossil', image: '' },
+    { slug: 'guess', name: 'Guess', image: '' },
+    { slug: 'mount-royal', name: 'MountRoyal', image: '' },
+    { slug: 'mulco', name: 'Mulco', image: '' },
+    { slug: 'nautica', name: 'Náutica', image: '' },
+    { slug: 'orient', name: 'Orient', image: '' },
+    { slug: 'swatch', name: 'Swatch', image: '' },
+    { slug: 'tissot', name: 'Tissot', image: '' },
+    { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: '' },
+    { slug: 'multimarca', name: 'Multimarca', image: '', note: 'Otras marcas seleccionadas' }
+  ];
+
+  // Opciones cerradas para la ficha técnica (las usa el panel admin y los filtros).
+  var SPECS = {
+    mechanism: ['Cuarzo', 'Automático', 'Mecánico', 'Digital', 'Anadigi', 'Cuarzo de recarga solar'],
+    crystal: ['Mineral', 'Zafiro', 'Hardlex', 'Plexiglás'],
+    strap: ['Cuero', 'Acero', 'Silicona', 'Lona', 'Resina', 'Caucho'],
+    gender: ['Femenino', 'Masculino', 'Unisex']
+  };
+
+  function slugifyBrand(name) {
+    return String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
   // ---------- seed inicial ----------
 
-  var SEED_PRODUCTS = [
-    { brand: 'Cronosfera', model: 'Aurora 39 · Acero', ref: 'CR-AU-39-ABL', price: 1299000, wasPrice: 1599000, off: 19, tone: 'ink', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026', '#c9a86a', '#7a7468'] },
-    { brand: 'Cronosfera', model: 'Atlas Sport · 42mm', ref: 'CR-AT-42-SBL', price: 1840000, wasPrice: 0, off: 0, tone: 'cool', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', stockStatus: 'in', variants: ['#323a42', '#2c261c'] },
-    { brand: 'Cronosfera', model: 'Heritage Bronze', ref: 'CR-HE-40-BNL', price: 2690000, wasPrice: 2990000, off: 10, tone: 'bronze', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 4 un.', stockStatus: 'low', variants: ['#6a5340', '#3a342a'] },
-    { brand: 'Cronosfera', model: 'Lumen Oro', ref: 'CR-LU-39-GBL', price: 3450000, wasPrice: 0, off: 0, tone: 'bronze', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', stockStatus: 'in', variants: ['#c9a86a', '#1d2026', '#5a4632'] },
-    { brand: 'Cronosfera', model: 'Nimbus Smart', ref: 'CR-NI-44-KBL', price: 949000, wasPrice: 1099000, off: 14, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1c1e22', '#7a7468'] },
-    { brand: 'Cronosfera', model: 'Meridian Clásico', ref: 'CR-ME-40-SCL', price: 1499000, wasPrice: 0, off: 0, tone: 'steel', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', stockStatus: 'in', variants: ['#a8a298', '#1d2026', '#c9a86a'] },
-    { brand: 'Cronosfera', model: 'Selva Verde 39', ref: 'CR-SV-39-GSL', price: 1990000, wasPrice: 2299000, off: 13, tone: 'green', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 2 un.', stockStatus: 'low', variants: ['#344a3a', '#1d2026'] },
-    { brand: 'Cronosfera', model: 'Aurora Mujer 33', ref: 'CR-AM-33-RSL', price: 1149000, wasPrice: 0, off: 0, tone: 'fog', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', stockStatus: 'in', variants: ['#dcd6cc', '#c9a86a', '#5a544a'] },
-    { brand: 'Cronosfera', model: 'Eclipse Negro', ref: 'CR-EC-41-KBL', price: 2199000, wasPrice: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026', '#5a5853'] },
-    { brand: 'Cronosfera', model: 'Cumbre Andes 45', ref: 'CR-CU-45-BBL', price: 2890000, wasPrice: 3290000, off: 12, tone: 'cool', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', stockStatus: 'in', variants: ['#323a42', '#1d2026'] },
-    { brand: 'Cronosfera', model: 'Aurora Oro Rosa', ref: 'CR-AU-39-RGL', price: 2349000, wasPrice: 0, off: 0, tone: 'bronze', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#c9a86a', '#1d2026'] },
-    { brand: 'Cronosfera', model: 'Vega Smart Active', ref: 'CR-VG-44-KSL', price: 1290000, wasPrice: 1499000, off: 14, tone: 'ink', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Agotado', stockStatus: 'out', variants: ['#1c1e22', '#7a7468'] }
+  // [slug, model, ref, price, wasPrice, tone, gender, mechanism, crystal, strap, stockStatus, tagKind]
+  var SEED_ROWS = [
+    ['bulova', 'Sutton Automático', '96B429', 1890000, 2190000, 'steel', 'Masculino', 'Automático', 'Mineral', 'Cuero', 'in', 'best'],
+    ['bulova', 'Rubaiyat Dama', '98P170', 1450000, 0, 'fog', 'Femenino', 'Cuarzo', 'Zafiro', 'Acero', 'in', null],
+    ['casio', 'Vintage A168', 'A168WA-1W', 289000, 349000, 'steel', 'Unisex', 'Digital', 'Mineral', 'Acero', 'in', 'best'],
+    ['casio', 'Clásico MTP', 'MTP-V300L-1A', 419000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
+    ['cat', 'Elite 41', 'LF-141-21-121', 890000, 1090000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
+    ['cat', 'Twist Up Anadigi', 'AC-163-11-131', 1080000, 0, 'cool', 'Masculino', 'Anadigi', 'Mineral', 'Caucho', 'low', 'new'],
+    ['citizen', 'Eco-Drive BM8180', 'BM8180-03E', 1190000, 1390000, 'green', 'Masculino', 'Cuarzo de recarga solar', 'Mineral', 'Lona', 'in', 'best'],
+    ['citizen', 'Eco-Drive Dama', 'EM0570-85A', 1490000, 0, 'fog', 'Femenino', 'Cuarzo de recarga solar', 'Zafiro', 'Acero', 'in', null],
+    ['diesel', 'Mega Chief', 'DZ4318', 1290000, 1490000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['diesel', 'Master Chief Cuero', 'DZ1437', 890000, 0, 'bronze', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
+    ['festina', 'Prestige Cronógrafo', 'F20445-3', 1090000, 0, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', 'new'],
+    ['festina', 'Boyfriend Dama', 'F16940-1', 690000, 830000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['fossil', 'Neutra Cronógrafo', 'FS5304', 1150000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
+    ['fossil', 'Jacqueline Dama', 'ES3843', 720000, 850000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Cuero', 'in', 'best'],
+    ['guess', 'Chase Azul', 'W1041G2', 980000, 0, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['guess', 'Lady Frontier', 'GW0033L-1', 640000, 760000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
+    ['mount-royal', 'Heritage 40', 'MR-2201-BK', 560000, 680000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
+    ['mount-royal', 'Slim Clásico', 'MR-1108-SL', 420000, 0, 'steel', 'Unisex', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['mulco', 'Blue Marine', 'MW5-2029-045', 1390000, 1590000, 'cool', 'Unisex', 'Cuarzo', 'Mineral', 'Silicona', 'in', 'new'],
+    ['mulco', 'Ilusion Dama', 'MW3-12140-113', 990000, 0, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Silicona', 'low', null],
+    ['nautica', 'Bayside Azul', 'NAPBSC901', 850000, 990000, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Caucho', 'in', null],
+    ['nautica', 'NCT Cronógrafo', 'NAI12533G', 1050000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
+    ['orient', 'Kamasu Verde', 'RA-AA0004E', 1590000, 1790000, 'green', 'Masculino', 'Automático', 'Zafiro', 'Acero', 'low', 'best'],
+    ['orient', 'Bambino V2', 'FAC00009N', 1290000, 0, 'bronze', 'Masculino', 'Automático', 'Mineral', 'Cuero', 'in', null],
+    ['swatch', 'Big Bold Negro', 'SO27B100', 720000, 0, 'ink', 'Unisex', 'Cuarzo', 'Plexiglás', 'Silicona', 'in', 'new'],
+    ['swatch', 'Once Again', 'GB743-S26', 380000, 450000, 'steel', 'Unisex', 'Cuarzo', 'Plexiglás', 'Silicona', 'in', null],
+    ['tissot', 'Seastar 1000 Automático', 'T120-407-11', 3190000, 3590000, 'cool', 'Masculino', 'Automático', 'Zafiro', 'Acero', 'in', 'special'],
+    ['tissot', 'Tradition Cuero', 'T063-610-16', 1950000, 0, 'bronze', 'Masculino', 'Cuarzo', 'Zafiro', 'Cuero', 'in', null],
+    ['tommy-hilfiger', 'Decker Multifunción', 'TH-1791066', 1150000, 1290000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
+    ['tommy-hilfiger', 'Pippa Dama', 'TH-1782112', 780000, 0, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['multimarca', 'Curren Cronógrafo Acero', 'CU-8329-BK', 280000, 350000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
+    ['multimarca', 'Skmei Digital Deportivo', 'SK-9058-GN', 180000, 0, 'green', 'Unisex', 'Digital', 'Mineral', 'Resina', 'out', null]
   ];
+
+  var TAG_LABELS = { best: 'Más vendido', new: 'Nuevo', special: 'Edición especial' };
+  var TONE_VARIANTS = {
+    ink: ['#1d2026', '#5a5853'], cool: ['#323a42', '#1d2026'], bronze: ['#6a5340', '#3a342a'],
+    fog: ['#dcd6cc', '#c9a86a'], steel: ['#a8a298', '#1d2026'], green: ['#344a3a', '#1d2026']
+  };
+
+  var SEED_PRODUCTS = SEED_ROWS.map(function (r) {
+    var brand = find(BRANDS, function (b) { return b.slug === r[0]; });
+    var wasPrice = r[4] || 0;
+    return {
+      brand: brand ? brand.name : r[0],
+      brandSlug: r[0],
+      model: r[1],
+      ref: r[2],
+      price: r[3],
+      wasPrice: wasPrice,
+      off: wasPrice ? Math.round((1 - r[3] / wasPrice) * 100) : 0,
+      tone: r[5],
+      gender: r[6],
+      mechanism: r[7],
+      crystal: r[8],
+      strap: r[9],
+      stockStatus: r[10],
+      stock: r[10] === 'out' ? 'Agotado' : (r[10] === 'low' ? 'Bajo inventario' : 'Disponible'),
+      tag: r[11] ? { kind: r[11], label: TAG_LABELS[r[11]] } : null,
+      variants: TONE_VARIANTS[r[5]] || TONE_VARIANTS.ink
+    };
+  });
 
   var DEFAULT_CONFIG = {
     siteName: 'Cronosfera',
@@ -114,10 +207,16 @@
   };
 
   function ensureSeed() {
-    if (!read(NS.products, null)) {
+    var meta = read(NS.meta, {});
+    if (!read(NS.products, null) || (meta.seedVersion || 1) < SEED_VERSION) {
       write(NS.products, SEED_PRODUCTS.map(function (p) {
         return Object.assign({ id: uid('P') }, p, { createdAt: nowIso() });
       }));
+      // Las subastas/pujas previas referencian productos del catálogo anterior.
+      write(NS.auctions, []);
+      write(NS.bids, []);
+      meta.seedVersion = SEED_VERSION;
+      write(NS.meta, meta);
     }
     if (!read(NS.users, null)) {
       write(NS.users, [{
@@ -142,9 +241,31 @@
   function getProduct(id) { return find(getProducts(), function (p) { return p.id === id; }) || null; }
   function getProductByRef(ref) { return find(getProducts(), function (p) { return p.ref === ref; }) || null; }
 
+  // ---------- marcas ----------
+
+  function getBrands() {
+    var products = getProducts();
+    var images = getConfig().brandImages || {};
+    return BRANDS.map(function (b) {
+      return Object.assign({}, b, {
+        image: images[b.slug] || b.image || '',
+        count: products.filter(function (p) { return productBrandSlug(p) === b.slug; }).length
+      });
+    });
+  }
+
+  function getBrand(slug) {
+    return find(BRANDS, function (b) { return b.slug === slug; }) || null;
+  }
+
+  function productBrandSlug(p) {
+    return p.brandSlug || slugifyBrand(p.brand);
+  }
+
   function saveProduct(p) {
     var list = getProducts();
     if (!p.id) p.id = uid('P');
+    if (p.brand && !p.brandSlug) p.brandSlug = slugifyBrand(p.brand);
     var idx = list.findIndex(function (x) { return x.id === p.id; });
     if (idx >= 0) list[idx] = Object.assign({}, list[idx], p);
     else { p.createdAt = nowIso(); list.push(p); }
@@ -438,6 +559,11 @@
     saveProduct: saveProduct,
     deleteProduct: deleteProduct,
     wholesalePriceFor: wholesalePriceFor,
+    // marcas y especificaciones
+    getBrands: getBrands,
+    getBrand: getBrand,
+    productBrandSlug: productBrandSlug,
+    SPECS: SPECS,
     // usuarios / auth
     getUsers: getUsers,
     getUser: getUser,

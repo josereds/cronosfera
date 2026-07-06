@@ -5,21 +5,21 @@
   <meta name="theme-color" content="#f6f1e7">
   <meta name="description" content="Cronosfera — Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
   <title>Cronosfera · Relojes originales seleccionados</title>
-  <link rel="canonical" href="https://cronosfera-five.vercel.app/">
+  <link rel="canonical" href="https://cronosfera-beta.vercel.app/">
   <meta property="og:site_name" content="Cronosfera">
   <meta property="og:locale" content="es_CO">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://cronosfera-five.vercel.app/">
+  <meta property="og:url" content="https://cronosfera-beta.vercel.app/">
   <meta property="og:title" content="Cronosfera · Relojes originales seleccionados">
   <meta property="og:description" content="Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
-  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Cronosfera — marketplace de relojería. Reloj de lujo sobre fondo grafito con detalles en bronce.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Cronosfera · Relojes originales seleccionados">
   <meta name="twitter:description" content="Marketplace colombiano de relojes originales seleccionados por su diseño, precisión y carácter.">
-  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta name="twitter:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <meta name="twitter:image:alt" content="Cronosfera — marketplace de relojería.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -1136,8 +1136,8 @@
       <nav class="nav-primary" aria-label="Principal">
         <a href="index.html">Inicio</a>
         <a href="catalogo.html">Relojes</a>
+        <a href="#marcas">Marcas</a>
         <a href="subastas.html">Subastas</a>
-        <a href="catalogo.html?f=coleccion">Colecciones</a>
         <a href="mayorista.html">Mayoristas</a>
         <a href="#story">Nosotros</a>
       </nav>
@@ -1153,7 +1153,7 @@
         </button>
         <button class="icon-btn cart-btn" aria-label="Carrito">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"></path><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"></path></svg>
-          <span class="badge">2</span>
+          
         </button>
         <button class="icon-btn menu-toggle" aria-label="Menú">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="8" x2="20" y2="8" stroke-linecap="round"></line><line x1="4" y1="14" x2="20" y2="14" stroke-linecap="round"></line></svg>
@@ -1204,22 +1204,17 @@
       </span>
     </section>
 
-    <!-- ============================== BRANDS ============================== -->
-    <section class="brands">
+    <!-- ============================== MARCAS ============================== -->
+    <section class="bay" id="marcas">
       <div class="container-wide">
-        <div class="brands-head">
-          <span class="eyebrow plain">Marcas disponibles en el marketplace</span>
+        <div class="section-head reveal">
+          <div>
+            <span class="eyebrow">Catálogo de marcas</span>
+            <h2 class="display title">Compra por marca.</h2>
+          </div>
+          <p class="meta">Relojes originales de las casas que trabajamos, verificados antes de publicarse. <a href="catalogo.html">Ver todo el catálogo →</a></p>
         </div>
-        <div class="brands-grid">
-          <div class="brand-card">Casio</div>
-          <div class="brand-card">Citizen</div>
-          <div class="brand-card">Seiko</div>
-          <div class="brand-card">Orient</div>
-          <div class="brand-card">Tissot</div>
-          <div class="brand-card">Fossil</div>
-          <div class="brand-card">Invicta</div>
-          <div class="brand-card">G-Shock</div>
-        </div>
+        <div class="brand-index reveal" id="brandIndex"></div>
       </div>
     </section>
 
@@ -1239,164 +1234,6 @@
       </div>
     </section>
 
-    <!-- ============================== COLLECTIONS ============================== -->
-    <section class="bay" id="collections">
-      <div class="container-wide">
-        <div class="section-head reveal">
-          <div>
-            <span class="eyebrow">Colecciones</span>
-            <h2 class="display title">Recorre el catálogo por intención, no por marca.</h2>
-          </div>
-          <p class="meta">Cada colección agrupa relojes que comparten un propósito, un estilo o un momento. <a href="catalogo.html">Ver todo el catálogo →</a></p>
-        </div>
-
-        <div class="collections-grid reveal">
-
-          <a href="catalogo.html?f=automaticos" class="collection-card col-large">
-            <div class="ph ink"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <circle r="105" fill="#1a1c20" stroke="#5a5853" stroke-width="1"></circle>
-              <circle r="92" fill="#23262b"></circle>
-              <g stroke="#c9a86a" stroke-width="2" stroke-linecap="round">
-                <line x1="0" y1="-88" x2="0" y2="-78"></line>
-                <line x1="76" y1="-44" x2="68" y2="-39"></line>
-                <line x1="88" y1="0" x2="78" y2="0"></line>
-                <line x1="76" y1="44" x2="68" y2="39"></line>
-                <line x1="0" y1="88" x2="0" y2="78"></line>
-                <line x1="-76" y1="44" x2="-68" y2="39"></line>
-                <line x1="-88" y1="0" x2="-78" y2="0"></line>
-                <line x1="-76" y1="-44" x2="-68" y2="-39"></line>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-55" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="40" y2="0" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="0" y2="40" stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round"></line>
-              <circle r="4" fill="#c9a86a"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">42 referencias</span>
-              <h3>Automáticos</h3>
-              <span class="arrow">Ver colección <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"></line><polyline points="13,6 19,12 13,18" stroke-linecap="round" stroke-linejoin="round"></polyline></svg></span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=deportivos" class="collection-card col-medium">
-            <div class="ph cool"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <circle r="105" fill="#2a3038" stroke="#5a5853" stroke-width="1"></circle>
-              <circle r="92" fill="#323a42"></circle>
-              <g stroke="#e9e6df" stroke-width="2.4" stroke-linecap="round">
-                <line x1="0" y1="-88" x2="0" y2="-72"></line><line x1="88" y1="0" x2="72" y2="0"></line><line x1="0" y1="88" x2="0" y2="72"></line><line x1="-88" y1="0" x2="-72" y2="0"></line>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-60" stroke="#e9e6df" stroke-width="3.5" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="45" y2="20" stroke="#e9e6df" stroke-width="3.5" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="0" y2="50" stroke="#c9a86a" stroke-width="1.6" stroke-linecap="round"></line>
-              <circle r="5" fill="#e9e6df"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">28 referencias</span>
-              <h3>Deportivos</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=clasicos" class="collection-card col-medium">
-            <div class="ph bronze"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <circle r="105" fill="#5a4632" stroke="#8a6a48" stroke-width="1"></circle>
-              <circle r="92" fill="#6a5340"></circle>
-              <g font-family="Cormorant Garamond, serif" font-size="14" fill="#e9d6b8" text-anchor="middle">
-                <text y="-58">XII</text><text x="68" y="6">III</text><text y="74">VI</text><text x="-68" y="6">IX</text>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-55" stroke="#f0e2c4" stroke-width="2.6" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="38" y2="10" stroke="#f0e2c4" stroke-width="2.6" stroke-linecap="round"></line>
-              <circle r="3.5" fill="#f0e2c4"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">36 referencias</span>
-              <h3>Clásicos</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=mujer" class="collection-card col-small">
-            <div class="ph fog"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220" style="width:50%">
-              <circle r="100" fill="#c8c2b8" stroke="#a09a90" stroke-width="1"></circle>
-              <circle r="88" fill="#dcd6cc"></circle>
-              <g stroke="#7a7468" stroke-width="1.2" stroke-linecap="round">
-                <line x1="0" y1="-82" x2="0" y2="-72"></line><line x1="82" y1="0" x2="72" y2="0"></line><line x1="0" y1="82" x2="0" y2="72"></line><line x1="-82" y1="0" x2="-72" y2="0"></line>
-                <line x1="58" y1="-58" x2="52" y2="-52"></line><line x1="58" y1="58" x2="52" y2="52"></line><line x1="-58" y1="58" x2="-52" y2="52"></line><line x1="-58" y1="-58" x2="-52" y2="-52"></line>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-55" stroke="#5a544a" stroke-width="2" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="38" y2="5" stroke="#5a544a" stroke-width="2" stroke-linecap="round"></line>
-              <circle r="3" fill="#c9a86a"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">24 referencias</span>
-              <h3>Para mujer</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=hombre" class="collection-card col-small">
-            <div class="ph steel"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <circle r="105" fill="#8a8478" stroke="#5a544a" stroke-width="1"></circle>
-              <circle r="92" fill="#a8a298"></circle>
-              <g stroke="#3a342a" stroke-width="2.4" stroke-linecap="round">
-                <line x1="0" y1="-86" x2="0" y2="-72"></line><line x1="86" y1="0" x2="72" y2="0"></line><line x1="0" y1="86" x2="0" y2="72"></line><line x1="-86" y1="0" x2="-72" y2="0"></line>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-58" stroke="#2c261c" stroke-width="3.4" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="42" y2="14" stroke="#2c261c" stroke-width="3.4" stroke-linecap="round"></line>
-              <circle r="4" fill="#2c261c"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">48 referencias</span>
-              <h3>Para hombre</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=ediciones" class="collection-card col-medium">
-            <div class="ph green"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <circle r="105" fill="#2a4030" stroke="#1a2a20" stroke-width="1"></circle>
-              <circle r="92" fill="#344a3a"></circle>
-              <g stroke="#c9a86a" stroke-width="1.6" stroke-linecap="round" opacity="0.85">
-                <line x1="0" y1="-86" x2="0" y2="-74"></line><line x1="86" y1="0" x2="74" y2="0"></line><line x1="0" y1="86" x2="0" y2="74"></line><line x1="-86" y1="0" x2="-74" y2="0"></line>
-              </g>
-              <line x1="0" y1="0" x2="0" y2="-58" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
-              <line x1="0" y1="0" x2="40" y2="8" stroke="#e9e6df" stroke-width="3" stroke-linecap="round"></line>
-              <circle r="4" fill="#c9a86a"></circle>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">12 referencias</span>
-              <h3>Ediciones especiales</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-          <a href="catalogo.html?f=smartwatches" class="collection-card col-medium">
-            <div class="ph"></div>
-            <svg class="watch-mini" viewBox="-110 -110 220 220">
-              <rect x="-92" y="-92" width="184" height="184" rx="38" fill="#1c1e22" stroke="#3a3d44" stroke-width="1"></rect>
-              <rect x="-80" y="-80" width="160" height="160" rx="30" fill="#23262b"></rect>
-              <rect x="-60" y="-30" width="120" height="14" rx="3" fill="#c9a86a"></rect>
-              <rect x="-60" y="-8" width="90" height="6" rx="2" fill="#9c9a93"></rect>
-              <rect x="-60" y="6" width="100" height="6" rx="2" fill="#9c9a93"></rect>
-              <circle cx="58" cy="46" r="10" fill="none" stroke="#c9a86a" stroke-width="2"></circle>
-              <path d="M 58,38 a 8,8 0 0 1 8,8" fill="none" stroke="#c9a86a" stroke-width="2.4" stroke-linecap="round"></path>
-            </svg>
-            <div class="label">
-              <span class="eyebrow">18 referencias</span>
-              <h3>Smartwatches</h3>
-              <span class="arrow">Ver → </span>
-            </div>
-          </a>
-
-        </div>
-      </div>
-    </section>
 
     <!-- ============================== FEATURED ============================== -->
     <section class="bay" id="featured" style="padding-top:0">
@@ -1523,71 +1360,6 @@
       </div>
     </section>
 
-    <!-- ============================== TESTIMONIALS ============================== -->
-    <section class="bay" id="testimonials" style="padding-top:0">
-      <div class="container-wide">
-        <div class="testimonials-head reveal">
-          <div>
-            <span class="eyebrow">Testimonios de demostración</span>
-            <h2 class="display" style="font-size:clamp(32px,3.6vw,44px); margin-top:14px">Lo que imaginaríamos que dirían.</h2>
-          </div>
-          <span class="demo-note">Contenido provisional · placeholder</span>
-        </div>
-        <div class="testimonials-grid reveal">
-          <article class="testimonial">
-            <div class="stars">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-            </div>
-            <blockquote>"Llegó bien empacado y con verificación visible. El acompañamiento antes de la compra hizo la diferencia."</blockquote>
-            <div class="meta">
-              <div class="avatar">AM</div>
-              <div>
-                <div class="who"><div class="name">Andrea Marín</div><div class="city">Medellín</div></div>
-                <div class="product">Cronosfera Aurora · Acero</div>
-              </div>
-            </div>
-          </article>
-          <article class="testimonial">
-            <div class="stars">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-            </div>
-            <blockquote>"Compré como mayorista para mi tienda. El proceso de aprobación fue claro y los precios por volumen funcionaron."</blockquote>
-            <div class="meta">
-              <div class="avatar">CR</div>
-              <div>
-                <div class="who"><div class="name">Carlos Restrepo</div><div class="city">Cali</div></div>
-                <div class="product">Pedido mayorista · 12 unidades</div>
-              </div>
-            </div>
-          </article>
-          <article class="testimonial">
-            <div class="stars">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .5-5.5 4.6L18 21l-6-3.7L6 21l1.5-7.4L2 9l7-.5L12 2z"></path></svg>
-            </div>
-            <blockquote>"La página de producto tiene las especificaciones claras. Sin exageraciones, sin promesas raras. Así debe ser."</blockquote>
-            <div class="meta">
-              <div class="avatar">MG</div>
-              <div>
-                <div class="who"><div class="name">María Gómez</div><div class="city">Bogotá</div></div>
-                <div class="product">Cronosfera Atlas Sport</div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
 
     <!-- ============================== NEWSLETTER ============================== -->
     <section class="bay" style="padding-top:0">
@@ -1629,10 +1401,10 @@
           <ul>
             <li><a href="catalogo.html">Todos los relojes</a></li>
             <li><a href="catalogo.html?f=automaticos">Automáticos</a></li>
-            <li><a href="catalogo.html?f=deportivos">Deportivos</a></li>
-            <li><a href="catalogo.html?f=clasicos">Clásicos</a></li>
-            <li><a href="catalogo.html?f=smartwatches">Smartwatches</a></li>
-            <li><a href="catalogo.html?f=ediciones">Ediciones especiales</a></li>
+            <li><a href="catalogo.html?f=hombre">Para hombre</a></li>
+            <li><a href="catalogo.html?f=mujer">Para mujer</a></li>
+            <li><a href="catalogo.html?f=digitales">Digitales</a></li>
+            <li><a href="subastas.html">Subastas</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -1640,7 +1412,7 @@
           <ul>
             <li><a href="catalogo.html?marca=casio">Casio</a></li>
             <li><a href="catalogo.html?marca=citizen">Citizen</a></li>
-            <li><a href="catalogo.html?marca=seiko">Seiko</a></li>
+            <li><a href="catalogo.html?marca=bulova">Bulova</a></li>
             <li><a href="catalogo.html?marca=tissot">Tissot</a></li>
             <li><a href="catalogo.html?marca=orient">Orient</a></li>
             <li><a href="catalogo.html">Ver todas</a></li>
@@ -1762,7 +1534,7 @@
       };
     });
     function cop(v){ return '$' + v.toLocaleString('es-CO'); }
-    function watchSVG(tone){
+    function watchSVG(tone, brandName){
       var bg = ({ink:'#1a1c20', cool:'#323a42', bronze:'#6a5340', fog:'#dcd6cc', steel:'#a8a298', green:'#344a3a'})[tone] || '#1a1c20';
       var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
       var accent = '#c9a86a';
@@ -1774,7 +1546,7 @@
         +   '<g stroke="' + accent + '" stroke-width="1.6" stroke-linecap="round">'
         +     '<line x1="0" y1="-78" x2="0" y2="-68"/><line x1="78" y1="0" x2="68" y2="0"/><line x1="0" y1="78" x2="0" y2="68"/><line x1="-78" y1="0" x2="-68" y2="0"/>'
         +   '</g>'
-        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">CRONOSFERA</text>'
+        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">' + (brandName || 'CRONOSFERA').toUpperCase() + '</text>'
         +   '<line x1="0" y1="0" x2="0" y2="-50" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
         +   '<line x1="0" y1="0" x2="36" y2="10" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
         +   '<line x1="0" y1="0" x2="0" y2="58" stroke="' + accent + '" stroke-width="1" stroke-linecap="round"/>'
@@ -1800,7 +1572,7 @@
       card.className = 'product-card';
       card.innerHTML = ''
         + '<div class="product-media">'
-        +   '<div class="ph-img">' + watchSVG(p.tone) + '</div>'
+        +   '<div class="ph-img">' + watchSVG(p.tone, p.brand) + '</div>'
         +   '<div class="product-tag">' + tag + '</div>'
         +   '<button class="product-fav" aria-label="Agregar a favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg></button>'
         +   '<button class="product-quick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg> Vista rápida</button>'
@@ -1819,6 +1591,26 @@
       quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });
       grid.appendChild(card);
     });
+
+    // ============== Catálogo de marcas ==============
+    function renderBrandIndex() {
+      var mount = document.getElementById('brandIndex');
+      if (!mount || !window.Store) return;
+      mount.innerHTML = Store.getBrands().map(function (b) {
+        var media = b.image
+          ? '<img src="' + b.image + '" alt="' + b.name + '" loading="lazy">'
+          : '<span class="brand-tile-word">' + b.name + '</span>';
+        var meta = b.count > 0
+          ? b.count + (b.count === 1 ? ' referencia' : ' referencias')
+          : 'Próximamente';
+        return '<a class="brand-tile" href="catalogo.html?marca=' + b.slug + '"' + (b.count ? '' : ' data-empty="true"') + ' aria-label="Relojes ' + b.name + '">'
+          + '<span class="brand-tile-media">' + media + '</span>'
+          + '<span class="brand-tile-meta">' + meta + '</span>'
+          + '</a>';
+      }).join('');
+    }
+    renderBrandIndex();
+    if (window.Store && Store.subscribe) Store.subscribe(renderBrandIndex);
 
     // ============== Live auctions strip ==============
     function escapeHtml(s) {

@@ -821,3 +821,118 @@ textarea::placeholder {
     grid-template-columns: 1fr 1fr !important;
   }
 }
+
+/* ---------- Catálogo de marcas (tiles compartidos home + catálogo) ---------- */
+
+.brand-index {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+}
+
+.brand-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 148px;
+  padding: 28px 18px;
+  background: var(--bg-warm);
+  text-decoration: none;
+  transition: background .35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-tile::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  transition: width .4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-tile:hover,
+.brand-tile:focus-visible {
+  background: var(--surface);
+}
+
+.brand-tile:hover::after,
+.brand-tile:focus-visible::after {
+  width: 56%;
+}
+
+.brand-tile:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.brand-tile-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 54px;
+}
+
+.brand-tile-media img {
+  max-height: 54px;
+  max-width: 150px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.1);
+  opacity: .82;
+  transition: filter .35s ease, opacity .35s ease;
+}
+
+.brand-tile:hover .brand-tile-media img {
+  filter: none;
+  opacity: 1;
+}
+
+.brand-tile-word {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--fg-soft);
+  transition: color .35s ease;
+}
+
+.brand-tile:hover .brand-tile-word,
+.brand-tile:focus-visible .brand-tile-word {
+  color: var(--fg);
+}
+
+.brand-tile-meta {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.brand-tile[data-empty="true"] .brand-tile-meta {
+  color: var(--muted-2);
+}
+
+@media (max-width: 1020px) {
+  .brand-index { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .brand-index { grid-template-columns: repeat(2, 1fr); }
+  .brand-tile { min-height: 118px; padding: 20px 12px; }
+}
+
+.brand-hub { margin: 6px 0 48px; }
+
+.page-head .sub #backToBrands {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.page-head .sub #backToBrands:hover { text-decoration: underline; }

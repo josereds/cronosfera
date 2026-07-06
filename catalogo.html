@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Catálogo Cronosfera — relojes originales filtrados por marca, movimiento, precio, género y más." />
   <title>Relojes · Catálogo · Cronosfera</title>
-  <link rel="canonical" href="https://cronosfera-five.vercel.app/catalogo.html">
+  <link rel="canonical" href="https://cronosfera-beta.vercel.app/catalogo.html">
   <meta property="og:site_name" content="Cronosfera">
   <meta property="og:locale" content="es_CO">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://cronosfera-five.vercel.app/catalogo.html">
+  <meta property="og:url" content="https://cronosfera-beta.vercel.app/catalogo.html">
   <meta property="og:title" content="Catálogo · Cronosfera">
   <meta property="og:description" content="Relojes originales filtrados por marca, movimiento, precio, género y más.">
-  <meta property="og:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta property="og:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Cronosfera — marketplace de relojería. Reloj de lujo sobre fondo grafito con detalles en bronce.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Catálogo · Cronosfera">
   <meta name="twitter:description" content="Relojes originales filtrados por marca, movimiento, precio, género y más.">
-  <meta name="twitter:image" content="https://cronosfera-five.vercel.app/og-image.png">
+  <meta name="twitter:image" content="https://cronosfera-beta.vercel.app/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -618,7 +618,7 @@
         <a href="index.html">Inicio</a>
         <a href="catalogo.html" class="current">Relojes</a>
         <a href="subastas.html">Subastas</a>
-        <a href="catalogo.html?f=coleccion">Colecciones</a>
+        <a href="index.html#marcas">Marcas</a>
         <a href="mayorista.html">Mayoristas</a>
         <a href="index.html#story">Nosotros</a>
       </nav>
@@ -635,7 +635,7 @@
         </button>
         <button class="icon-btn cart-btn" aria-label="Carrito">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
-          <span class="badge">2</span>
+          
         </button>
         <button class="icon-btn menu-toggle" aria-label="Menú">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="8" x2="20" y2="8" stroke-linecap="round"/><line x1="4" y1="14" x2="20" y2="14" stroke-linecap="round"/></svg>
@@ -651,16 +651,22 @@
       <nav class="breadcrumbs" aria-label="Migas de pan">
         <a href="index.html">Inicio</a>
         <span class="sep">/</span>
-        <a href="catalogo.html">Catálogo</a>
-        <span class="sep">/</span>
-        <span class="current">Todos los relojes</span>
+        <a href="catalogo.html">Relojes</a>
+        <span class="sep" data-brand-crumb hidden>/</span>
+        <span class="current" id="crumbCurrent">Todas las marcas</span>
       </nav>
-      <h1>Todos los relojes</h1>
+      <h1 id="catalogTitle">Relojes por marca</h1>
       <div class="sub">
-        <span><span class="count" data-catalog-total>12</span> referencias disponibles</span>
+        <span><span class="count" data-catalog-total>—</span> referencias disponibles</span>
         <span>Precios en COP · inventario local</span>
+        <a id="backToBrands" href="catalogo.html" hidden>← Todas las marcas</a>
       </div>
     </div>
+
+    <!-- Hub de marcas (visible cuando no hay una marca seleccionada) -->
+    <section class="brand-hub" id="brandHub" aria-label="Marcas" hidden>
+      <div class="brand-index" id="brandHubGrid"></div>
+    </section>
 
     <div class="catalog">
 
@@ -673,17 +679,7 @@
 
         <details class="filter-group" open>
           <summary>Marca</summary>
-          <div class="body">
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Casio <span class="count">34</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Citizen <span class="count">22</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" checked /><span class="box"></span> Cronosfera <span class="count">48</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Seiko <span class="count">28</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Orient <span class="count">19</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Tissot <span class="count">17</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Fossil <span class="count">21</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> Invicta <span class="count">14</span></label>
-            <label class="check"><input type="checkbox" class="f-marca" /><span class="box"></span> G-Shock <span class="count">15</span></label>
-          </div>
+          <div class="body" id="brandFilter"><!-- marcas reales con conteo; las llena prepareFilterPanel() --></div>
         </details>
 
         <details class="filter-group" open>
@@ -703,92 +699,43 @@
         </details>
 
         <details class="filter-group" open>
-          <summary>Tipo de movimiento</summary>
+          <summary>Género</summary>
           <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> Automático</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Mecánico manual</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Cuarzo</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Solar</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Smart / Híbrido</label>
-          </div>
-        </details>
-
-        <details class="filter-group">
-          <summary>Género o estilo</summary>
-          <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> Hombre</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Mujer</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Femenino</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Masculino</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Unisex</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Deportivo</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Clásico</label>
           </div>
         </details>
 
         <details class="filter-group">
-          <summary>Tamaño de caja</summary>
+          <summary>Mecanismo</summary>
           <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> 28 – 34 mm</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 36 – 40 mm</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 41 – 44 mm</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 45 mm o más</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Cuarzo</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Automático</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Mecánico</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Digital</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Anadigi</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Cuarzo de recarga solar</label>
           </div>
         </details>
 
         <details class="filter-group">
-          <summary>Material</summary>
+          <summary>Pulso</summary>
           <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> Acero inoxidable</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Acero 904L</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Bronce</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Titanio</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Oro / chapado en oro</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Resina / polímero</label>
-          </div>
-        </details>
-
-        <details class="filter-group">
-          <summary>Color de esfera</summary>
-          <div class="body">
-            <div class="swatch-row">
-              <span class="swatch active" style="background:#1d2026" title="Negro"></span>
-              <span class="swatch" style="background:#2a4030" title="Verde"></span>
-              <span class="swatch" style="background:#1a2a44" title="Azul"></span>
-              <span class="swatch" style="background:#7a1c1c" title="Vino"></span>
-              <span class="swatch" style="background:#c9a86a" title="Champán"></span>
-              <span class="swatch" style="background:#dcd6cc" title="Marfil"></span>
-              <span class="swatch" style="background:#6a5340" title="Bronce"></span>
-              <span class="swatch" style="background:#7a7468" title="Gris"></span>
-            </div>
-          </div>
-        </details>
-
-        <details class="filter-group">
-          <summary>Resistencia al agua</summary>
-          <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> 30 m (3 ATM)</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 50 m (5 ATM)</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 100 m (10 ATM)</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> 200 m o más</label>
-          </div>
-        </details>
-
-        <details class="filter-group">
-          <summary>Tipo de correa</summary>
-          <div class="body">
-            <label class="check"><input type="checkbox" /><span class="box"></span> Acero</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Cuero</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Silicone / caucho</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Nailon / tela NATO</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Malla Milanés</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Acero</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Silicona</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Lona</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Resina</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> Caucho</label>
           </div>
         </details>
 
         <details class="filter-group">
           <summary>Disponibilidad</summary>
           <div class="body">
-            <label class="check"><input type="checkbox" checked /><span class="box"></span> En inventario</label>
+            <label class="check"><input type="checkbox" /><span class="box"></span> En inventario</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Bajo inventario</label>
-            <label class="check"><input type="checkbox" /><span class="box"></span> Pre-venta</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Mostrar agotados</label>
           </div>
         </details>
@@ -814,23 +761,18 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round"/><line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round"/><line x1="9" y1="18" x2="15" y2="18" stroke-linecap="round"/></svg>
               Filtros
             </button>
-            <span class="result-info"><b>34</b> resultados · ordenados por <b>relevancia</b></span>
-            <div class="chips">
-              <span class="chip">Cronosfera <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
-              <span class="chip">$ 1M – $ 2.5M <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
-              <span class="chip">En inventario <button aria-label="Quitar"><svg width="10" height="10" viewBox="0 0 10 10"><line x1="2" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="2" x2="2" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
-            </div>
+            <span class="result-info"></span>
+            <div class="chips"></div>
           </div>
           <div style="display:flex; gap:10px; align-items:center;">
             <div class="sort">
               <label for="sort">Ordenar:</label>
               <select id="sort">
-                <option>Relevancia</option>
-                <option>Más vendidos</option>
-                <option>Precio: menor a mayor</option>
-                <option>Precio: mayor a menor</option>
-                <option>Más recientes</option>
-                <option>Mayor descuento</option>
+                <option value="ref">Referencia (A–Z)</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="discount">Mayor descuento</option>
+                <option value="newest">Más recientes</option>
               </select>
             </div>
             <div class="view-toggle">
@@ -842,16 +784,6 @@
 
         <div class="products" id="products"></div>
 
-        <nav class="pagination" aria-label="Paginación">
-          <a href="#" aria-label="Anterior"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15,6 9,12 15,18" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          <a href="#" class="current">1</a>
-          <a href="#">2</a>
-          <a href="#">3</a>
-          <a href="#">4</a>
-          <span class="gap">…</span>
-          <a href="#">12</a>
-          <a href="#" aria-label="Siguiente"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9,6 15,12 9,18" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        </nav>
 
       </div>
     </div>
@@ -874,10 +806,10 @@
         </div>
         <div class="footer-col"><h5>Catálogo</h5><ul>
           <li><a href="catalogo.html">Todos</a></li><li><a href="catalogo.html?f=automaticos">Automáticos</a></li>
-          <li><a href="catalogo.html?f=deportivos">Deportivos</a></li><li><a href="catalogo.html?f=clasicos">Clásicos</a></li>
+          <li><a href="catalogo.html?f=hombre">Para hombre</a></li><li><a href="catalogo.html?f=mujer">Para mujer</a></li>
         </ul></div>
         <div class="footer-col"><h5>Marcas</h5><ul>
-          <li><a href="catalogo.html?marca=casio">Casio</a></li><li><a href="catalogo.html?marca=seiko">Seiko</a></li>
+          <li><a href="catalogo.html?marca=casio">Casio</a></li><li><a href="catalogo.html?marca=citizen">Citizen</a></li>
           <li><a href="catalogo.html?marca=tissot">Tissot</a></li><li><a href="catalogo.html">Ver todas</a></li>
         </ul></div>
         <div class="footer-col"><h5>Cuenta</h5><ul>
@@ -916,10 +848,11 @@
       { brand: 'Cronosfera', model: 'Aurora Oro Rosa', ref: 'CR-AU-39-RGL', price: 2349000, was: 0, off: 0, tone: 'bronze', tag: null, stock: 'Disponible', variants: ['#c9a86a','#1d2026'] },
       { brand: 'Cronosfera', model: 'Vega Smart Active', ref: 'CR-VG-44-KSL', price: 1290000, was: 1499000, off: 14, tone: 'ink', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Agotado', stockOut: true, variants: ['#1c1e22','#7a7468'] }
     ];
-    var products = (window.Store ? Store.getProducts() : _legacy).map(function(p){
+    function mapProduct(p) {
       return {
         id: p.id,
         brand: p.brand,
+        brandSlug: p.brandSlug || (window.Store ? Store.productBrandSlug(p) : ''),
         model: p.model,
         ref: p.ref,
         price: p.price,
@@ -930,11 +863,24 @@
         stock: p.stock,
         stockLow: p.stockStatus === 'low' || p.stockLow,
         stockOut: p.stockStatus === 'out' || p.stockOut,
-        variants: p.variants || []
+        variants: p.variants || [],
+        gender: p.gender || '',
+        mechanism: p.mechanism || '',
+        crystal: p.crystal || '',
+        strap: p.strap || '',
+        createdAt: p.createdAt || ''
       };
-    });
+    }
+    var products = (window.Store ? Store.getProducts() : _legacy).map(mapProduct);
+
+    // ---- Marca activa vía URL (?marca=slug) y filtros rápidos (?f=) ----
+    var urlParams = new URLSearchParams(window.location.search);
+    var activeBrand = null;
+    if (window.Store && urlParams.get('marca')) {
+      activeBrand = Store.getBrand(urlParams.get('marca'));
+    }
     function cop(v){ return '$' + v.toLocaleString('es-CO'); }
-    function watchSVG(tone){
+    function watchSVG(tone, brandName){
       var bg = ({ink:'#1a1c20', cool:'#323a42', bronze:'#6a5340', fog:'#dcd6cc', steel:'#a8a298', green:'#344a3a'})[tone] || '#1a1c20';
       var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
       var accent = '#c9a86a';
@@ -946,7 +892,7 @@
         +   '<g stroke="' + accent + '" stroke-width="1.6" stroke-linecap="round">'
         +     '<line x1="0" y1="-78" x2="0" y2="-68"/><line x1="78" y1="0" x2="68" y2="0"/><line x1="0" y1="78" x2="0" y2="68"/><line x1="-78" y1="0" x2="-68" y2="0"/>'
         +   '</g>'
-        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">CRONOSFERA</text>'
+        +   '<text y="-50" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="9" letter-spacing="3" fill="' + accent + '">' + (brandName || 'CRONOSFERA').toUpperCase() + '</text>'
         +   '<line x1="0" y1="0" x2="0" y2="-50" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
         +   '<line x1="0" y1="0" x2="36" y2="10" stroke="' + fg + '" stroke-width="2.6" stroke-linecap="round"/>'
         +   '<line x1="0" y1="0" x2="0" y2="58" stroke="' + accent + '" stroke-width="1" stroke-linecap="round"/>'
@@ -975,7 +921,7 @@
       card.className = 'product-card';
       card.innerHTML = ''
         + '<div class="product-media">'
-        +   '<div class="ph-img">' + watchSVG(p.tone) + '</div>'
+        +   '<div class="ph-img">' + watchSVG(p.tone, p.brand) + '</div>'
         +   '<div class="product-tag">' + tag + '</div>'
         +   '<button class="product-fav" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg></button>'
         + '</div>'
@@ -1022,7 +968,7 @@
       return Array.from(group.querySelectorAll('input[type=checkbox]:checked')).map(labelText);
     }
     function activeFilterInputs() {
-      var names = ['Marca', 'Precio (COP)', 'Disponibilidad', 'Promociones'];
+      var names = ['Marca', 'Género', 'Mecanismo', 'Pulso', 'Precio (COP)', 'Disponibilidad', 'Promociones'];
       return names.flatMap(function(name) {
         var group = filterGroup(name);
         if (!group) return [];
@@ -1083,10 +1029,33 @@
       if (!selected.length) return true;
       return selected.includes(normalizeText(p.brand));
     }
+    function specMatches(groupName, field) {
+      return function(p) {
+        var selected = checkedLabels(groupName).map(normalizeText);
+        if (!selected.length) return true;
+        return selected.includes(normalizeText(p[field]));
+      };
+    }
+    var genderMatches = specMatches('Género', 'gender');
+    var mechanismMatches = specMatches('Mecanismo', 'mechanism');
+    var strapMatches = specMatches('Pulso', 'strap');
     function applyFilters(list) {
-      return list.filter(function(p) {
-        return brandMatches(p) && priceMatches(p) && availabilityMatches(p) && promoMatches(p);
-      });
+      return sortList(list.filter(function(p) {
+        return brandMatches(p) && genderMatches(p) && mechanismMatches(p) && strapMatches(p)
+          && priceMatches(p) && availabilityMatches(p) && promoMatches(p);
+      }));
+    }
+    // Orden por defecto: referencias alfabéticas (pedido del cliente).
+    function sortList(list) {
+      var mode = (document.getElementById('sort') || {}).value || 'ref';
+      var sorted = list.slice();
+      var byRef = function(a, b) { return String(a.ref).localeCompare(String(b.ref), 'es'); };
+      if (mode === 'price-asc') sorted.sort(function(a, b) { return a.price - b.price || byRef(a, b); });
+      else if (mode === 'price-desc') sorted.sort(function(a, b) { return b.price - a.price || byRef(a, b); });
+      else if (mode === 'discount') sorted.sort(function(a, b) { return (b.off || 0) - (a.off || 0) || byRef(a, b); });
+      else if (mode === 'newest') sorted.sort(function(a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)) || byRef(a, b); });
+      else sorted.sort(byRef);
+      return sorted;
     }
     function updateCatalogMeta(list) {
       var info = document.querySelector('.result-info');
@@ -1118,39 +1087,25 @@
       }
     }
     function prepareFilterPanel() {
-      var supported = ['marca', 'precio (cop)', 'disponibilidad', 'promociones'];
+      var supported = ['marca', 'genero', 'mecanismo', 'pulso', 'precio (cop)', 'disponibilidad', 'promociones'];
       document.querySelectorAll('.filter-group').forEach(function(group) {
         var key = normalizeText(group.querySelector('summary')?.textContent);
         if (!supported.includes(key)) group.hidden = true;
       });
       var total = document.querySelector('[data-catalog-total]');
-      if (total) total.textContent = products.length;
-      var productBrands = Array.from(new Set(products.map(function(p) { return normalizeText(p.brand); })));
-      var brandGroup = filterGroup('Marca');
-      if (brandGroup) {
-        brandGroup.querySelectorAll('label.check').forEach(function(label) {
-          var input = label.querySelector('input');
-          var brand = normalizeText(labelText(input));
-          var exists = productBrands.includes(brand);
-          label.hidden = !exists;
-          if (exists) {
-            var count = products.filter(function(p) { return normalizeText(p.brand) === brand; }).length;
-            var countEl = label.querySelector('.count');
-            if (countEl) countEl.textContent = count;
-          } else if (input) {
-            input.checked = false;
-          }
-        });
+      if (total) {
+        total.textContent = activeBrand
+          ? products.filter(function(p) { return p.brandSlug === activeBrand.slug; }).length
+          : products.length;
       }
-      var availabilityGroup = filterGroup('Disponibilidad');
-      if (availabilityGroup) {
-        availabilityGroup.querySelectorAll('label.check').forEach(function(label) {
-          if (normalizeText(label.textContent).includes('pre-venta')) {
-            label.hidden = true;
-            var input = label.querySelector('input');
-            if (input) input.checked = false;
-          }
-        });
+      // Marcas reales del Store con conteo de inventario
+      var brandFilter = document.getElementById('brandFilter');
+      if (brandFilter && window.Store) {
+        var previouslyChecked = Array.from(brandFilter.querySelectorAll('input:checked')).map(function(i) { return i.getAttribute('data-slug'); });
+        brandFilter.innerHTML = Store.getBrands().map(function(b) {
+          var checked = previouslyChecked.includes(b.slug) || (activeBrand && activeBrand.slug === b.slug);
+          return '<label class="check"><input type="checkbox" class="f-marca" data-slug="' + b.slug + '"' + (checked ? ' checked' : '') + ' /><span class="box"></span> ' + b.name + ' <span class="count">' + b.count + '</span></label>';
+        }).join('');
       }
       var head = document.querySelector('.filters-head');
       if (head && !document.querySelector('.filters-note')) {
@@ -1160,7 +1115,70 @@
         head.insertAdjacentElement('afterend', note);
       }
     }
+
+    // ---- Hub de marcas y encabezado según la marca activa ----
+    function renderBrandHub() {
+      var hub = document.getElementById('brandHub');
+      var grid = document.getElementById('brandHubGrid');
+      if (!hub || !grid || !window.Store) return;
+      if (activeBrand) { hub.hidden = true; return; }
+      hub.hidden = false;
+      grid.innerHTML = Store.getBrands().map(function(b) {
+        var media = b.image
+          ? '<img src="' + b.image + '" alt="' + b.name + '" loading="lazy">'
+          : '<span class="brand-tile-word">' + b.name + '</span>';
+        var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
+        return '<a class="brand-tile" href="catalogo.html?marca=' + b.slug + '" aria-label="Relojes ' + b.name + '">'
+          + '<span class="brand-tile-media">' + media + '</span>'
+          + '<span class="brand-tile-meta">' + meta + '</span></a>';
+      }).join('');
+    }
+
+    function applyCatalogHeading() {
+      var title = document.getElementById('catalogTitle');
+      var crumb = document.getElementById('crumbCurrent');
+      var back = document.getElementById('backToBrands');
+      var crumbSep = document.querySelector('[data-brand-crumb]');
+      if (activeBrand) {
+        if (title) title.textContent = 'Relojes ' + activeBrand.name;
+        if (crumb) crumb.textContent = activeBrand.name;
+        if (crumbSep) crumbSep.hidden = false;
+        if (back) back.hidden = false;
+        document.title = 'Relojes ' + activeBrand.name + ' · Cronosfera';
+      } else {
+        if (title) title.textContent = 'Relojes por marca';
+        if (crumb) crumb.textContent = 'Todas las marcas';
+      }
+    }
+
+    // Filtros rápidos heredados (?f=) mapeados a los filtros reales
+    function applyQuickFilter() {
+      var f = urlParams.get('f');
+      if (!f) return;
+      var map = {
+        automaticos: ['Mecanismo', 'Automático'],
+        digitales: ['Mecanismo', 'Digital'],
+        smartwatches: ['Mecanismo', 'Digital'],
+        mujer: ['Género', 'Femenino'],
+        hombre: ['Género', 'Masculino']
+      };
+      var target = map[normalizeText(f)];
+      if (!target) return;
+      var group = filterGroup(target[0]);
+      if (!group) return;
+      group.querySelectorAll('label.check').forEach(function(label) {
+        if (normalizeText(label.textContent).trim() === normalizeText(target[1])) {
+          var input = label.querySelector('input');
+          if (input) input.checked = true;
+        }
+      });
+      group.setAttribute('open', '');
+    }
+
     prepareFilterPanel();
+    applyQuickFilter();
+    applyCatalogHeading();
+    renderBrandHub();
     renderProductList(applyFilters(products));
 
     function clearAll(){
@@ -1169,13 +1187,12 @@
       document.querySelectorAll('.filters .range input').forEach(function(input){ input.value = ''; });
       renderProductList(applyFilters(products));
     }
-    document.querySelectorAll('.filters input').forEach(function(input){
-      input.addEventListener('change', function(){ renderProductList(applyFilters(products)); });
-      input.addEventListener('input', function(){ renderProductList(applyFilters(products)); });
-    });
-    document.querySelectorAll('.swatch').forEach(function(s){
-      s.addEventListener('click', function(){ s.classList.toggle('active'); });
-    });
+    // Delegación: los checks de marca se regeneran, así que escuchamos el panel completo
+    var filtersPanel = document.getElementById('filters');
+    filtersPanel.addEventListener('change', function(e){ if (e.target.matches('input')) renderProductList(applyFilters(products)); });
+    filtersPanel.addEventListener('input', function(e){ if (e.target.matches('input')) renderProductList(applyFilters(products)); });
+    var sortSelect = document.getElementById('sort');
+    if (sortSelect) sortSelect.addEventListener('change', function(){ renderProductList(applyFilters(products)); });
 
     function openFilters(){ document.getElementById('filters').classList.add('open'); document.getElementById('backdrop').classList.add('open'); }
     function closeFilters(){ document.getElementById('filters').classList.remove('open'); document.getElementById('backdrop').classList.remove('open'); }
@@ -1191,10 +1208,9 @@
     if (window.Store && Store.subscribe) Store.subscribe(function(){
       syncWholesaleFlag();
       isWholesale = !!(window.Auth && Auth.isWholesale());
-      products = (window.Store ? Store.getProducts() : _legacy).map(function(p){
-        return { id: p.id, brand: p.brand, model: p.model, ref: p.ref, price: p.price, was: p.wasPrice || p.was || 0, off: p.off || 0, tone: p.tone, tag: p.tag, stock: p.stock, stockLow: p.stockStatus === 'low' || p.stockLow, stockOut: p.stockStatus === 'out' || p.stockOut, variants: p.variants || [] };
-      });
+      products = (window.Store ? Store.getProducts() : _legacy).map(mapProduct);
       prepareFilterPanel();
+      renderBrandHub();
       renderProductList(applyFilters(products));
     });
   </script>
