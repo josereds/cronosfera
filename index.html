@@ -1210,6 +1210,8 @@
           </div>
           <p class="meta">Relojes originales de las casas que trabajamos, verificados antes de publicarse. <a href="catalogo.html">Ver todo el catálogo →</a></p>
         </div>
+      </div>
+      <div class="container-brands">
         <div class="brand-index reveal" id="brandIndex"></div>
       </div>
     </section>
@@ -1588,6 +1590,9 @@
     });
 
     // ============== Catálogo de marcas ==============
+    // Algunos logos blancos traen mucho margen dentro de su propio PNG y se
+    // ven chicos junto a los demás a igual max-height; se acercan más.
+    var BRAND_LOGO_SCALE = { casio: 1.4, festina: 1.5, swatch: 1.2 };
     function renderBrandTile(b) {
       var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
       var emptyAttr = b.count ? '' : ' data-empty="true"';
@@ -1597,8 +1602,9 @@
           + '<span class="brand-tile-meta">' + meta + '</span>'
           + '</a>';
       }
+      var scale = BRAND_LOGO_SCALE[b.slug];
       var logo = b.image
-        ? '<img class="brand-tile-logo" src="' + b.image + '" alt="' + b.name + '" loading="lazy">'
+        ? '<img class="brand-tile-logo" src="' + b.image + '" alt="' + b.name + '" loading="lazy"' + (scale ? ' style="--logo-scale:' + scale + '"' : '') + '>'
         : '<span class="brand-tile-title">' + b.name + '</span>';
       return '<a class="brand-tile" href="catalogo.html?marca=' + b.slug + '"' + emptyAttr + ' aria-label="Relojes ' + b.name + '">'
         + '<span class="brand-tile-media">'

@@ -87,10 +87,10 @@
   // Marcas oficiales del marketplace (definidas por el cliente).
   // "Multimarca" agrupa marcas económicas que rotan en menor cantidad.
   // `image`: logotipo en blanco (franja inferior del tile). `photo`: foto de
-  // estilo de vida/producto que ocupa todo el tile. Faltantes: Bulova (sin
-  // logo ni foto) y Tommy Hilfiger (sin foto todavía).
+  // estilo de vida/producto que ocupa todo el tile. Bulova no tiene logo
+  // blanco todavía (el tile usa el nombre como texto en su lugar).
   var BRANDS = [
-    { slug: 'bulova', name: 'Bulova', image: '', photo: '' },
+    { slug: 'bulova', name: 'Bulova', image: '', photo: 'productos/marcas/bulova-foto.jpg' },
     { slug: 'casio', name: 'Casio', image: 'productos/marcas/casio-white.png', photo: 'productos/marcas/casio-foto.jpg' },
     { slug: 'cat', name: 'CAT', image: 'productos/marcas/cat-white.png', photo: 'productos/marcas/cat-foto.jpg' },
     { slug: 'citizen', name: 'Citizen', image: 'productos/marcas/citizen-white.png', photo: 'productos/marcas/citizen-foto.jpg' },
@@ -105,7 +105,7 @@
     { slug: 'seiko', name: 'Seiko', image: 'productos/marcas/seiko-white.png', photo: 'productos/marcas/seiko-foto.jpg' },
     { slug: 'swatch', name: 'Swatch', image: 'productos/marcas/swatch-white.png', photo: 'productos/marcas/swatch-foto.jpg' },
     { slug: 'tissot', name: 'Tissot', image: 'productos/marcas/tissot-white.png', photo: 'productos/marcas/tissot-foto.jpg' },
-    { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger-white.png', photo: '' },
+    { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger-white.png', photo: 'productos/marcas/tommy-hilfiger-foto.jpg' },
     { slug: 'multimarca', name: 'Multimarca', image: '', photo: '', note: 'Otras marcas seleccionadas' }
   ];
 

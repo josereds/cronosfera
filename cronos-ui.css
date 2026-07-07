@@ -824,12 +824,29 @@ textarea::placeholder {
 
 /* ---------- Catálogo de marcas (tiles compartidos home + catálogo) ---------- */
 
+/* Escapa del ancho limitado de .container padre (usado en catalogo.html,
+   donde el hub de marcas vive dentro del contenedor angosto de la página). */
+.brand-hub-breakout {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.container-brands {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (max-width: 700px) {
+  .container-brands { padding: 0 18px; }
+}
+
 .brand-index {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border-soft);
-  border: 1px solid var(--border-soft);
+  gap: 16px;
 }
 
 .brand-tile {
@@ -900,8 +917,9 @@ textarea::placeholder {
 
 .brand-tile-logo {
   max-width: 76%;
-  max-height: 30px;
+  max-height: 34px;
   object-fit: contain;
+  transform: scale(var(--logo-scale, 1));
 }
 
 .brand-tile-title {
