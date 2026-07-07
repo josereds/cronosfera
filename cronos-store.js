@@ -86,26 +86,27 @@
 
   // Marcas oficiales del marketplace (definidas por el cliente).
   // "Multimarca" agrupa marcas económicas que rotan en menor cantidad.
-  // `image`: ruta a la foto de la marca (pendiente de que el cliente las
-  // entregue; mientras esté vacía el tile muestra el wordmark tipográfico).
+  // `image`: logotipo en blanco (franja inferior del tile). `photo`: foto de
+  // estilo de vida/producto que ocupa todo el tile. Faltantes: Bulova (sin
+  // logo ni foto) y Tommy Hilfiger (sin foto todavía).
   var BRANDS = [
-    { slug: 'bulova', name: 'Bulova', image: '' },
-    { slug: 'casio', name: 'Casio', image: 'productos/marcas/casio.png' },
-    { slug: 'cat', name: 'CAT', image: 'productos/marcas/cat.png' },
-    { slug: 'citizen', name: 'Citizen', image: 'productos/marcas/citizen.png' },
-    { slug: 'diesel', name: 'Diesel', image: 'productos/marcas/diesel.png' },
-    { slug: 'festina', name: 'Festina', image: 'productos/marcas/festina.png' },
-    { slug: 'fossil', name: 'Fossil', image: 'productos/marcas/fossil.png' },
-    { slug: 'guess', name: 'Guess', image: 'productos/marcas/guess.png' },
-    { slug: 'mount-royal', name: 'MountRoyal', image: 'productos/marcas/mount-royal.png' },
-    { slug: 'mulco', name: 'Mulco', image: 'productos/marcas/mulco.png' },
-    { slug: 'nautica', name: 'Náutica', image: 'productos/marcas/nautica.png' },
-    { slug: 'orient', name: 'Orient', image: 'productos/marcas/orient.png' },
-    { slug: 'seiko', name: 'Seiko', image: 'productos/marcas/seiko.png' },
-    { slug: 'swatch', name: 'Swatch', image: 'productos/marcas/swatch.png' },
-    { slug: 'tissot', name: 'Tissot', image: 'productos/marcas/tissot.png' },
-    { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger.png' },
-    { slug: 'multimarca', name: 'Multimarca', image: '', note: 'Otras marcas seleccionadas' }
+    { slug: 'bulova', name: 'Bulova', image: '', photo: '' },
+    { slug: 'casio', name: 'Casio', image: 'productos/marcas/casio-white.png', photo: 'productos/marcas/casio-foto.jpg' },
+    { slug: 'cat', name: 'CAT', image: 'productos/marcas/cat-white.png', photo: 'productos/marcas/cat-foto.jpg' },
+    { slug: 'citizen', name: 'Citizen', image: 'productos/marcas/citizen-white.png', photo: 'productos/marcas/citizen-foto.jpg' },
+    { slug: 'diesel', name: 'Diesel', image: 'productos/marcas/diesel-white.png', photo: 'productos/marcas/diesel-foto.jpg' },
+    { slug: 'festina', name: 'Festina', image: 'productos/marcas/festina-white.png', photo: 'productos/marcas/festina-foto.jpg' },
+    { slug: 'fossil', name: 'Fossil', image: 'productos/marcas/fossil-white.png', photo: 'productos/marcas/fossil-foto.jpg' },
+    { slug: 'guess', name: 'Guess', image: 'productos/marcas/guess-white.png', photo: 'productos/marcas/guess-foto.jpg' },
+    { slug: 'mount-royal', name: 'MountRoyal', image: 'productos/marcas/mount-royal-white.png', photo: 'productos/marcas/mount-royal-foto.jpg' },
+    { slug: 'mulco', name: 'Mulco', image: 'productos/marcas/mulco-white.png', photo: 'productos/marcas/mulco-foto.jpg' },
+    { slug: 'nautica', name: 'Náutica', image: 'productos/marcas/nautica-white.png', photo: 'productos/marcas/nautica-foto.jpg' },
+    { slug: 'orient', name: 'Orient', image: 'productos/marcas/orient-white.png', photo: 'productos/marcas/orient-foto.jpg' },
+    { slug: 'seiko', name: 'Seiko', image: 'productos/marcas/seiko-white.png', photo: 'productos/marcas/seiko-foto.jpg' },
+    { slug: 'swatch', name: 'Swatch', image: 'productos/marcas/swatch-white.png', photo: 'productos/marcas/swatch-foto.jpg' },
+    { slug: 'tissot', name: 'Tissot', image: 'productos/marcas/tissot-white.png', photo: 'productos/marcas/tissot-foto.jpg' },
+    { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger-white.png', photo: '' },
+    { slug: 'multimarca', name: 'Multimarca', image: '', photo: '', note: 'Otras marcas seleccionadas' }
   ];
 
   // Opciones cerradas para la ficha técnica (las usa el panel admin y los filtros).

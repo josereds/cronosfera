@@ -1588,28 +1588,30 @@
     });
 
     // ============== Catálogo de marcas ==============
-    // Ajuste manual de encuadre: algunos logos traen mucho margen en blanco
-    // dentro de su propio PNG y se ven pequeños; se acercan más que el resto.
-    var BRAND_LOGO_SCALE = {
-      casio: 1.5, diesel: 1.3, swatch: 1.6, 'tommy-hilfiger': 1.4,
-      guess: 1.4, citizen: 1.4, cat: 1.3, festina: 1.4
-    };
+    function renderBrandTile(b) {
+      var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
+      var emptyAttr = b.count ? '' : ' data-empty="true"';
+      if (!b.photo) {
+        return '<a class="brand-tile brand-tile-plain" href="catalogo.html?marca=' + b.slug + '"' + emptyAttr + ' aria-label="Relojes ' + b.name + '">'
+          + '<span class="brand-tile-word">' + b.name + '</span>'
+          + '<span class="brand-tile-meta">' + meta + '</span>'
+          + '</a>';
+      }
+      var logo = b.image
+        ? '<img class="brand-tile-logo" src="' + b.image + '" alt="' + b.name + '" loading="lazy">'
+        : '<span class="brand-tile-title">' + b.name + '</span>';
+      return '<a class="brand-tile" href="catalogo.html?marca=' + b.slug + '"' + emptyAttr + ' aria-label="Relojes ' + b.name + '">'
+        + '<span class="brand-tile-media">'
+        +   '<img class="brand-tile-photo" src="' + b.photo + '" alt="' + b.name + '" loading="lazy">'
+        +   '<span class="brand-tile-count">' + meta + '</span>'
+        + '</span>'
+        + '<span class="brand-tile-footer">' + logo + '</span>'
+        + '</a>';
+    }
     function renderBrandIndex() {
       var mount = document.getElementById('brandIndex');
       if (!mount || !window.Store) return;
-      mount.innerHTML = Store.getBrands().map(function (b) {
-        var scale = BRAND_LOGO_SCALE[b.slug];
-        var media = b.image
-          ? '<img src="' + b.image + '" alt="' + b.name + '" loading="lazy"' + (scale ? ' style="--logo-scale:' + scale + '"' : '') + '>'
-          : '<span class="brand-tile-word">' + b.name + '</span>';
-        var meta = b.count > 0
-          ? b.count + (b.count === 1 ? ' referencia' : ' referencias')
-          : 'Próximamente';
-        return '<a class="brand-tile" href="catalogo.html?marca=' + b.slug + '"' + (b.count ? '' : ' data-empty="true"') + ' aria-label="Relojes ' + b.name + '">'
-          + '<span class="brand-tile-media">' + media + '</span>'
-          + '<span class="brand-tile-footer"><span class="brand-tile-title">' + b.name + '</span><span class="brand-tile-meta">' + meta + '</span></span>'
-          + '</a>';
-      }).join('');
+      mount.innerHTML = Store.getBrands().map(renderBrandTile).join('');
     }
     renderBrandIndex();
     if (window.Store && Store.subscribe) Store.subscribe(renderBrandIndex);
