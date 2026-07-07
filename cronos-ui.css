@@ -836,36 +836,16 @@ textarea::placeholder {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 148px;
-  padding: 28px 18px;
-  background: var(--bg-warm);
   text-decoration: none;
-  transition: background .35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.brand-tile::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 0;
-  height: 1px;
-  background: var(--accent);
-  transform: translateX(-50%);
-  transition: width .4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--bg-warm);
+  transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .35s ease;
 }
 
 .brand-tile:hover,
 .brand-tile:focus-visible {
-  background: var(--surface);
-}
-
-.brand-tile:hover::after,
-.brand-tile:focus-visible::after {
-  width: 56%;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
 }
 
 .brand-tile:focus-visible {
@@ -874,48 +854,63 @@ textarea::placeholder {
 }
 
 .brand-tile-media {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 78px;
+  aspect-ratio: 16 / 10;
   width: 100%;
-  max-width: 180px;
-  padding: 14px 20px;
+  overflow: hidden;
   background: oklch(97% 0.004 80);
-  border-radius: var(--r, 10px);
-  box-shadow: 0 1px 2px rgba(0,0,0,.15);
-  transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .35s ease;
 }
 
-.brand-tile:hover .brand-tile-media,
-.brand-tile:focus-visible .brand-tile-media {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+.brand-tile-media:has(.brand-tile-word) {
+  background: var(--bg-warm);
 }
 
 .brand-tile-media img {
-  max-height: 44px;
-  max-width: 100%;
+  width: 78%;
+  height: 78%;
   object-fit: contain;
+  transform: scale(var(--logo-scale, 1));
+  transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-tile:hover .brand-tile-media img,
+.brand-tile:focus-visible .brand-tile-media img {
+  transform: scale(calc(var(--logo-scale, 1) * 1.05));
 }
 
 .brand-tile-word {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(18px, 1.8vw, 22px);
+  font-size: clamp(20px, 2vw, 26px);
   font-weight: 500;
   letter-spacing: 0.04em;
-  color: oklch(22% 0.01 80);
+  color: var(--fg-soft);
+}
+
+.brand-tile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.brand-tile-title {
+  font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--fg);
 }
 
 .brand-tile-meta {
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted-2);
-}
-
-.brand-tile[data-empty="true"] .brand-tile-meta {
-  color: var(--muted-2);
+  white-space: nowrap;
 }
 
 @media (max-width: 1020px) {
