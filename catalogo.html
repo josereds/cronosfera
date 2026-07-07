@@ -317,6 +317,72 @@
     }
     .range input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
 
+    .filter-group .body#brandFilter {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 10px;
+      row-gap: 2px;
+    }
+    #brandFilter .check { padding: 4px 0; }
+    #brandFilter .check .count { font-size: 10px; }
+
+    .price-slider { padding-top: 2px; }
+    .price-slider-values {
+      display: flex; justify-content: space-between;
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--fg-soft);
+      margin-bottom: 16px;
+    }
+    .price-slider-track {
+      position: relative;
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      margin: 0 3px;
+    }
+    .price-slider-range {
+      position: absolute;
+      top: 0; height: 4px;
+      background: var(--fg);
+      border-radius: 999px;
+    }
+    .price-slider-track input[type="range"] {
+      position: absolute;
+      top: 50%; left: 0;
+      width: 100%; height: 4px;
+      margin: 0;
+      transform: translateY(-50%);
+      background: transparent;
+      pointer-events: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .price-slider-track input[type="range"]::-webkit-slider-thumb {
+      pointer-events: auto;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--fg);
+      border: 2px solid var(--surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,.35);
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+    }
+    .price-slider-track input[type="range"]::-moz-range-thumb {
+      pointer-events: auto;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--fg);
+      border: 2px solid var(--surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,.35);
+      cursor: pointer;
+    }
+    .price-slider-track input[type="range"]::-moz-range-track { background: transparent; border: 0; }
+    .price-slider-track input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .price-slider-track input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 1px; }
+
     /* ---------- TOOLBAR ---------- */
     .toolbar {
       display: flex; justify-content: space-between; align-items: center;
@@ -674,32 +740,33 @@
         </div>
 
         <details class="filter-group" open>
-          <summary>Marca</summary>
-          <div class="body" id="brandFilter"><!-- marcas reales con conteo; las llena prepareFilterPanel() --></div>
-        </details>
-
-        <details class="filter-group" open>
-          <summary>Precio (COP)</summary>
-          <div class="body">
-            <div class="range">
-              <input type="text" inputmode="numeric" placeholder="$ 0" aria-label="Mínimo" />
-              <span style="color:var(--muted-2)">—</span>
-              <input type="text" inputmode="numeric" placeholder="$ 5.000.000" aria-label="Máximo" />
-            </div>
-            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> Menos de $ 500.000</label>
-            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 500.000 – $ 1.000.000</label>
-            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 1.000.000 – $ 2.500.000</label>
-            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> $ 2.500.000 – $ 5.000.000</label>
-            <label class="check"><input type="checkbox" name="price" /><span class="box"></span> Más de $ 5.000.000</label>
-          </div>
-        </details>
-
-        <details class="filter-group" open>
           <summary>Género</summary>
           <div class="body">
             <label class="check"><input type="checkbox" /><span class="box"></span> Femenino</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Masculino</label>
             <label class="check"><input type="checkbox" /><span class="box"></span> Unisex</label>
+          </div>
+        </details>
+
+        <details class="filter-group" open>
+          <summary>Marca</summary>
+          <div class="body brand-filter-grid" id="brandFilter"><!-- marcas reales con conteo; las llena prepareFilterPanel() --></div>
+        </details>
+
+        <details class="filter-group" open>
+          <summary>Precio (COP)</summary>
+          <div class="body">
+            <div class="price-slider">
+              <div class="price-slider-values">
+                <span id="priceMinLabel">$ 0</span>
+                <span id="priceMaxLabel">$ 5.000.000</span>
+              </div>
+              <div class="price-slider-track">
+                <div class="price-slider-range" id="priceRangeFill"></div>
+                <input type="range" id="priceMin" min="0" max="5000000" step="10000" value="0" aria-label="Precio mínimo">
+                <input type="range" id="priceMax" min="0" max="5000000" step="10000" value="5000000" aria-label="Precio máximo">
+              </div>
+            </div>
           </div>
         </details>
 
@@ -963,39 +1030,81 @@
       return Array.from(group.querySelectorAll('input[type=checkbox]:checked')).map(labelText);
     }
     function activeFilterInputs() {
-      var names = ['Marca', 'Género', 'Mecanismo', 'Pulso', 'Precio (COP)', 'Disponibilidad', 'Promociones'];
-      return names.flatMap(function(name) {
+      var names = ['Género', 'Marca', 'Mecanismo', 'Pulso', 'Disponibilidad', 'Promociones'];
+      var items = names.flatMap(function(name) {
         var group = filterGroup(name);
         if (!group) return [];
         return Array.from(group.querySelectorAll('input[type=checkbox]:checked')).map(function(input) {
-          return { input: input, label: labelText(input) };
+          return { label: labelText(input), reset: function() { input.checked = false; } };
         });
       });
-    }
-    function numericValue(input) {
-      var raw = (input?.value || '').replace(/[^\d]/g, '');
-      return raw ? Number(raw) : null;
-    }
-    function selectedPriceRanges() {
-      return checkedLabels('Precio (COP)').map(function(label) {
-        var t = normalizeText(label);
-        if (t.includes('menos')) return [0, 500000];
-        if (t.includes('500.000') && t.includes('1.000.000')) return [500000, 1000000];
-        if (t.includes('1.000.000') && t.includes('2.500.000')) return [1000000, 2500000];
-        if (t.includes('2.500.000') && t.includes('5.000.000')) return [2500000, 5000000];
-        if (t.includes('mas') || t.includes('5.000.000')) return [5000000, Infinity];
-        return null;
-      }).filter(Boolean);
+      var priceMin = document.getElementById('priceMin');
+      var priceMax = document.getElementById('priceMax');
+      if (priceMin && priceMax) {
+        var lo = Number(priceMin.value), hi = Number(priceMax.value);
+        if (lo > Number(priceMin.min) || hi < Number(priceMax.max)) {
+          items.push({
+            label: 'Precio: ' + cop(lo) + ' – ' + cop(hi),
+            reset: resetPriceSlider
+          });
+        }
+      }
+      return items;
     }
     function priceMatches(p) {
-      var group = filterGroup('Precio (COP)');
-      var inputs = group ? group.querySelectorAll('.range input') : [];
-      var min = numericValue(inputs[0]);
-      var max = numericValue(inputs[1]);
-      var ranges = selectedPriceRanges();
-      var inManual = (min === null || p.price >= min) && (max === null || p.price <= max);
-      if (!ranges.length) return inManual;
-      return inManual && ranges.some(function(range) { return p.price >= range[0] && p.price <= range[1]; });
+      var priceMin = document.getElementById('priceMin');
+      var priceMax = document.getElementById('priceMax');
+      if (!priceMin || !priceMax) return true;
+      return p.price >= Number(priceMin.value) && p.price <= Number(priceMax.value);
+    }
+    function updatePriceSliderVisual() {
+      var minInput = document.getElementById('priceMin');
+      var maxInput = document.getElementById('priceMax');
+      var fill = document.getElementById('priceRangeFill');
+      var minLabel = document.getElementById('priceMinLabel');
+      var maxLabel = document.getElementById('priceMaxLabel');
+      if (!minInput || !maxInput) return;
+      var min = Number(minInput.value), max = Number(maxInput.value);
+      if (min > max) {
+        if (document.activeElement === maxInput) { minInput.value = max; min = max; }
+        else { maxInput.value = min; max = min; }
+      }
+      var bound = Number(minInput.max) || 1;
+      if (fill) {
+        fill.style.left = (min / bound * 100) + '%';
+        fill.style.right = (100 - (max / bound * 100)) + '%';
+      }
+      if (minLabel) minLabel.textContent = cop(min);
+      if (maxLabel) maxLabel.textContent = cop(max);
+    }
+    function resetPriceSlider() {
+      var minInput = document.getElementById('priceMin');
+      var maxInput = document.getElementById('priceMax');
+      if (!minInput || !maxInput) return;
+      minInput.value = minInput.min;
+      maxInput.value = maxInput.max;
+      updatePriceSliderVisual();
+    }
+    function initPriceSlider() {
+      var minInput = document.getElementById('priceMin');
+      var maxInput = document.getElementById('priceMax');
+      if (!minInput || !maxInput) return;
+      var prices = products.map(function(p) { return p.price; }).filter(function(v) { return v > 0; });
+      var boundMax = prices.length ? Math.ceil(Math.max.apply(null, prices) / 100000) * 100000 : 5000000;
+      var firstInit = !minInput.dataset.ready;
+      minInput.min = maxInput.min = 0;
+      minInput.max = maxInput.max = boundMax;
+      minInput.step = maxInput.step = 10000;
+      if (firstInit) {
+        minInput.value = 0;
+        maxInput.value = boundMax;
+        minInput.dataset.ready = '1';
+        minInput.addEventListener('input', updatePriceSliderVisual);
+        maxInput.addEventListener('input', updatePriceSliderVisual);
+      } else if (Number(maxInput.value) > boundMax) {
+        maxInput.value = boundMax;
+      }
+      updatePriceSliderVisual();
     }
     function availabilityMatches(p) {
       var selected = checkedLabels('Disponibilidad').map(normalizeText);
@@ -1068,7 +1177,7 @@
         btn.textContent = '×';
         btn.addEventListener('click', function(e) {
           e.preventDefault();
-          item.input.checked = false;
+          item.reset();
           renderProductList(applyFilters(products));
         });
         chip.appendChild(btn);
@@ -1102,6 +1211,7 @@
           return '<label class="check"><input type="checkbox" class="f-marca" data-slug="' + b.slug + '"' + (checked ? ' checked' : '') + ' /><span class="box"></span> ' + b.name + ' <span class="count">' + b.count + '</span></label>';
         }).join('');
       }
+      initPriceSlider();
       var head = document.querySelector('.filters-head');
       if (head && !document.querySelector('.filters-note')) {
         var note = document.createElement('p');
@@ -1192,7 +1302,7 @@
     function clearAll(){
       document.querySelectorAll('.filters input[type=checkbox]').forEach(function(c){ c.checked = false; });
       document.querySelectorAll('.swatch').forEach(function(s){ s.classList.remove('active'); });
-      document.querySelectorAll('.filters .range input').forEach(function(input){ input.value = ''; });
+      resetPriceSlider();
       renderProductList(applyFilters(products));
     }
     // Delegación: los checks de marca se regeneran, así que escuchamos el panel completo
