@@ -232,6 +232,9 @@
     }
     .main-shot svg { width: 78%; transition: transform 0.4s ease; }
     .main-shot:hover svg { transform: scale(1.08); }
+    .main-shot img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .main-shot:hover img { transform: scale(1.06); }
+    .gallery.single-shot { grid-template-columns: 1fr; }
     .main-shot .corner {
       position: absolute; top: 16px; left: 16px;
       display: flex; flex-direction: column; gap: 6px;
@@ -618,6 +621,7 @@
     .mini-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     .mini-card .media { aspect-ratio: 1; background: var(--bg-warm); display: grid; place-items: center; }
     .mini-card .media svg { width: 60%; }
+    .mini-card .media img { width: 100%; height: 100%; object-fit: cover; }
     .mini-card .info-m { padding: 14px; }
     .mini-card .br { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
     .mini-card .md { font-size: 14px; font-weight: 500; margin-top: 2px; }
@@ -1192,8 +1196,18 @@
       favBtn.querySelector('span').textContent = favBtn.classList.contains('active') ? 'En favoritos' : 'Agregar a favoritos';
     });
 
-    // Related
-    var rel = window.Store ? Store.getProducts().slice(1, 5) : [
+    // Related: mismo id actual (?id=) excluido, prioriza misma marca
+    var currentId = new URLSearchParams(window.location.search).get('id');
+    var rel = window.Store ? (function () {
+      var all = Store.getProducts().filter(function (x) { return x.id !== currentId; });
+      var current = currentId ? Store.getProduct(currentId) : null;
+      if (current) {
+        var sameBrand = all.filter(function (x) { return Store.productBrandSlug(x) === Store.productBrandSlug(current); });
+        var rest = all.filter(function (x) { return Store.productBrandSlug(x) !== Store.productBrandSlug(current); });
+        all = sameBrand.concat(rest);
+      }
+      return all.slice(0, 4);
+    })() : [
       { brand: 'Cronosfera', model: 'Atlas Sport 42', price: 1840000, tone: 'cool' },
       { brand: 'Cronosfera', model: 'Heritage Bronze', price: 2690000, tone: 'bronze' },
       { brand: 'Cronosfera', model: 'Selva Verde 39', price: 1999000, tone: 'green' },
@@ -1218,8 +1232,9 @@
       var a = document.createElement('a');
       a.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : '');
       a.className = 'mini-card';
+      var media = p.image ? '<img src="' + p.image + '" alt="' + p.brand + ' ' + p.model + '" loading="lazy">' : watchSVG(p.tone, p.brand);
       a.innerHTML = ''
-        + '<div class="media">' + watchSVG(p.tone, p.brand) + '</div>'
+        + '<div class="media">' + media + '</div>'
         + '<div class="info-m">'
         +   '<div class="br">' + p.brand + '</div>'
         +   '<div class="md">' + p.model + '</div>'
@@ -1306,9 +1321,12 @@
         var rows = [
           ['Marca', p.brand],
           ['Referencia', p.ref],
+          ['Tamaño de caja', p.caseSize],
+          ['Material de caja', p.caseMaterial],
           ['Mecanismo', p.mechanism],
           ['Cristal', p.crystal],
           ['Pulso', p.strap],
+          ['Resistencia al agua', p.waterResistance],
           ['Género', p.gender]
         ].filter(function (r) { return r[1]; });
         specsGrid.innerHTML = rows.map(function (r) {
@@ -1357,14 +1375,33 @@
       // Actualizar title
       document.title = p.brand + ' · ' + p.model + ' — Cronosfera';
 
-      // Actualizar la imagen principal con el tone correcto
-      var mainSvg = document.getElementById('mainSvg');
-      if (mainSvg && typeof watchSVG === 'function') {
-        mainSvg.outerHTML = watchSVG(p.tone, p.brand).replace('<svg ', '<svg id="mainSvg" ');
+      // Foto real del producto: reemplaza el SVG genérico y oculta la tira de
+      // ángulos falsos (solo tenemos una foto por referencia, no 5 ángulos).
+      if (p.image) {
+        var mainShot = document.getElementById('mainShot');
+        var mainSvgEl = document.getElementById('mainSvg');
+        if (mainSvgEl) mainSvgEl.outerHTML = '<img id="mainSvg" src="' + p.image + '" alt="' + p.brand + ' ' + p.model + '">';
+        var gallery = document.querySelector('.gallery');
+        var thumbs = document.querySelector('.thumbs');
+        if (thumbs) thumbs.style.display = 'none';
+        if (gallery) gallery.classList.add('single-shot');
+        var corner = mainShot ? mainShot.querySelector('.corner') : null;
+        if (corner) corner.remove();
       } else {
-        var mainPh = document.querySelector('.gallery .ph.main, .product-media .ph');
-        if (mainPh && typeof watchSVG === 'function') mainPh.innerHTML = watchSVG(p.tone, p.brand);
+        var mainSvg = document.getElementById('mainSvg');
+        if (mainSvg && typeof watchSVG === 'function') {
+          mainSvg.outerHTML = watchSVG(p.tone, p.brand).replace('<svg ', '<svg id="mainSvg" ');
+        }
       }
+
+      // Opciones de color/acabado/correa eran simulación del prototipo demo;
+      // cada referencia real es una configuración fija, no hay variantes que elegir.
+      var fakeOptions = document.querySelector('.option-block')?.parentElement;
+      if (fakeOptions) fakeOptions.style.display = 'none';
+      // Tabla de precios por volumen es demo (no tenemos escalonado real por cantidad);
+      // el precio mayorista plano ya se muestra en .wholesale-card.
+      var volumeBlock = document.querySelector('.volume');
+      if (volumeBlock) volumeBlock.style.display = 'none';
 
       // Si el producto está en una subasta activa, añadir bloque
       var auc = Store.getAuctions().find(function (a) {

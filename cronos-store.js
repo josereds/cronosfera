@@ -23,7 +23,7 @@
   // Al subir SEED_VERSION se regenera el catálogo demo en navegadores que ya
   // tenían datos (se conservan usuarios y solicitudes; subastas/pujas se
   // limpian porque referencian productos que dejan de existir).
-  var SEED_VERSION = 2;
+  var SEED_VERSION = 3;
 
   var subscribers = [];
   var emitScheduled = false;
@@ -122,69 +122,57 @@
 
   // ---------- seed inicial ----------
 
-  // [slug, model, ref, price, wasPrice, tone, gender, mechanism, crystal, strap, stockStatus, tagKind]
-  var SEED_ROWS = [
-    ['bulova', 'Sutton Automático', '96B429', 1890000, 2190000, 'steel', 'Masculino', 'Automático', 'Mineral', 'Cuero', 'in', 'best'],
-    ['bulova', 'Rubaiyat Dama', '98P170', 1450000, 0, 'fog', 'Femenino', 'Cuarzo', 'Zafiro', 'Acero', 'in', null],
-    ['casio', 'Vintage A168', 'A168WA-1W', 289000, 349000, 'steel', 'Unisex', 'Digital', 'Mineral', 'Acero', 'in', 'best'],
-    ['casio', 'Clásico MTP', 'MTP-V300L-1A', 419000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
-    ['cat', 'Elite 41', 'LF-141-21-121', 890000, 1090000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
-    ['cat', 'Twist Up Anadigi', 'AC-163-11-131', 1080000, 0, 'cool', 'Masculino', 'Anadigi', 'Mineral', 'Caucho', 'low', 'new'],
-    ['citizen', 'Eco-Drive BM8180', 'BM8180-03E', 1190000, 1390000, 'green', 'Masculino', 'Cuarzo de recarga solar', 'Mineral', 'Lona', 'in', 'best'],
-    ['citizen', 'Eco-Drive Dama', 'EM0570-85A', 1490000, 0, 'fog', 'Femenino', 'Cuarzo de recarga solar', 'Zafiro', 'Acero', 'in', null],
-    ['diesel', 'Mega Chief', 'DZ4318', 1290000, 1490000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['diesel', 'Master Chief Cuero', 'DZ1437', 890000, 0, 'bronze', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
-    ['festina', 'Prestige Cronógrafo', 'F20445-3', 1090000, 0, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', 'new'],
-    ['festina', 'Boyfriend Dama', 'F16940-1', 690000, 830000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['fossil', 'Neutra Cronógrafo', 'FS5304', 1150000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
-    ['fossil', 'Jacqueline Dama', 'ES3843', 720000, 850000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Cuero', 'in', 'best'],
-    ['guess', 'Chase Azul', 'W1041G2', 980000, 0, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['guess', 'Lady Frontier', 'GW0033L-1', 640000, 760000, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
-    ['mount-royal', 'Heritage 40', 'MR-2201-BK', 560000, 680000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
-    ['mount-royal', 'Slim Clásico', 'MR-1108-SL', 420000, 0, 'steel', 'Unisex', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['mulco', 'Blue Marine', 'MW5-2029-045', 1390000, 1590000, 'cool', 'Unisex', 'Cuarzo', 'Mineral', 'Silicona', 'in', 'new'],
-    ['mulco', 'Ilusion Dama', 'MW3-12140-113', 990000, 0, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Silicona', 'low', null],
-    ['nautica', 'Bayside Azul', 'NAPBSC901', 850000, 990000, 'cool', 'Masculino', 'Cuarzo', 'Mineral', 'Caucho', 'in', null],
-    ['nautica', 'NCT Cronógrafo', 'NAI12533G', 1050000, 0, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Silicona', 'in', null],
-    ['orient', 'Kamasu Verde', 'RA-AA0004E', 1590000, 1790000, 'green', 'Masculino', 'Automático', 'Zafiro', 'Acero', 'low', 'best'],
-    ['orient', 'Bambino V2', 'FAC00009N', 1290000, 0, 'bronze', 'Masculino', 'Automático', 'Mineral', 'Cuero', 'in', null],
-    ['swatch', 'Big Bold Negro', 'SO27B100', 720000, 0, 'ink', 'Unisex', 'Cuarzo', 'Plexiglás', 'Silicona', 'in', 'new'],
-    ['swatch', 'Once Again', 'GB743-S26', 380000, 450000, 'steel', 'Unisex', 'Cuarzo', 'Plexiglás', 'Silicona', 'in', null],
-    ['tissot', 'Seastar 1000 Automático', 'T120-407-11', 3190000, 3590000, 'cool', 'Masculino', 'Automático', 'Zafiro', 'Acero', 'in', 'special'],
-    ['tissot', 'Tradition Cuero', 'T063-610-16', 1950000, 0, 'bronze', 'Masculino', 'Cuarzo', 'Zafiro', 'Cuero', 'in', null],
-    ['tommy-hilfiger', 'Decker Multifunción', 'TH-1791066', 1150000, 1290000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Cuero', 'in', null],
-    ['tommy-hilfiger', 'Pippa Dama', 'TH-1782112', 780000, 0, 'fog', 'Femenino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['multimarca', 'Curren Cronógrafo Acero', 'CU-8329-BK', 280000, 350000, 'ink', 'Masculino', 'Cuarzo', 'Mineral', 'Acero', 'in', null],
-    ['multimarca', 'Skmei Digital Deportivo', 'SK-9058-GN', 180000, 0, 'green', 'Unisex', 'Digital', 'Mineral', 'Resina', 'out', null]
+  // Catálogo real entregado por el cliente (WhatsApp, 2026-07-06): 26 relojes con
+  // foto propia en /productos. Sin precios "antes" ni etiquetas de marketing —
+  // esos datos no vinieron en el mensaje, así que no se inventan.
+  var SEED_PRODUCTS_RAW = [
+    { brandSlug: 'cat', model: 'Multifunción 44mm', ref: '1314926226', price: 978000, caseSize: '44mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Silicona', waterResistance: '100m', gender: 'Masculino', image: 'productos/cat-1314926226.jpg' },
+    { brandSlug: 'bulova', model: 'Clásico 38mm', ref: '96B015', price: 987000, caseSize: '38mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Acero', waterResistance: '50m', gender: 'Unisex', image: 'productos/bulova-96b015.jpg' },
+    { brandSlug: 'casio', model: 'Vintage A100', ref: 'A-100WE-1A', price: 336000, caseSize: '40.7mm', caseMaterial: 'Acero', mechanism: 'Digital', crystal: 'Plexiglás', strap: 'Acero', waterResistance: '50m', gender: 'Unisex', image: 'productos/casio-a100we1a.jpg' },
+    { brandSlug: 'casio', model: 'World Time Illuminator', ref: 'AE-1200WHD-1A', price: 238000, caseSize: '42.1mm', caseMaterial: 'Resina', mechanism: 'Digital', crystal: 'Plexiglás', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/casio-ae1200whd1a.jpg' },
+    { brandSlug: 'casio', model: 'Illuminator Anadigi', ref: 'AMW-870DA-2A1', price: 464000, caseSize: '44mm', caseMaterial: 'Acero', mechanism: 'Anadigi', crystal: 'Mineral', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/casio-amw870da2a1.jpg' },
+    { brandSlug: 'citizen', model: 'Eco-Drive World Time', ref: 'BX1010-02E', price: 1315000, caseSize: '44mm', caseMaterial: 'Acero', mechanism: 'Cuarzo de recarga solar', crystal: 'Mineral', strap: 'Cuero', waterResistance: '200m', gender: 'Masculino', image: 'productos/citizen-bx101002e.jpg' },
+    { brandSlug: 'diesel', model: 'Solar Powered', ref: 'DZ4621', price: 1343000, caseSize: '49mm', caseMaterial: 'Resina', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Lona', waterResistance: '50m', gender: 'Masculino', image: 'productos/diesel-dz4621.jpg' },
+    { brandSlug: 'fossil', model: 'Bisel de Cristales', ref: 'ES5130', price: 959000, caseSize: '37mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Acero', waterResistance: '50m', gender: 'Femenino', image: 'productos/fossil-es5130.jpg' },
+    { brandSlug: 'festina', model: 'Multifunción', ref: 'F16716-4', price: 522000, caseSize: '36mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Acero', waterResistance: null, gender: 'Femenino', image: 'productos/festina-f167164.jpg' },
+    { brandSlug: 'fossil', model: 'Cronógrafo Cuero', ref: 'FS5020', price: 799000, caseSize: '46mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Cuero', waterResistance: '100m', gender: 'Masculino', image: 'productos/fossil-fs5020.jpg' },
+    { brandSlug: 'casio', model: 'G-SHOCK Transparente', ref: 'GA-B001G-2A', price: 930000, caseSize: '46mm', caseMaterial: 'Resina', mechanism: 'Anadigi', crystal: 'Mineral', strap: 'Resina', waterResistance: '200m', gender: 'Unisex', image: 'productos/casio-gab001g2a.jpg' },
+    { brandSlug: 'guess', model: 'Diamante', ref: 'GW0528L1', price: 848000, caseSize: '36mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Acero', waterResistance: '30m', gender: 'Femenino', image: 'productos/guess-gw0528l1.jpg' },
+    { brandSlug: 'mulco', model: 'Lush Nácar', ref: 'MW317290223', price: 1330000, caseSize: '42mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Silicona', waterResistance: '100m', gender: 'Femenino', image: 'productos/mulco-mw317290223.jpg' },
+    { brandSlug: 'nautica', model: 'Bayside Cronógrafo', ref: 'NAPBSS501', price: 984000, caseSize: '46mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Silicona', waterResistance: '100m', gender: 'Masculino', image: 'productos/nautica-napbss501.jpg' },
+    { brandSlug: 'nautica', model: 'Cronógrafo + Correa Extra', ref: 'NAPWRS503', price: 933000, caseSize: '46mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Mineral', strap: 'Silicona', waterResistance: '100m', gender: 'Masculino', image: 'productos/nautica-napwrs503.jpg' },
+    { brandSlug: 'orient', model: 'Kamasu', ref: 'RA-AA0004E', price: 1813000, caseSize: '41.8mm', caseMaterial: 'Acero', mechanism: 'Automático', crystal: 'Zafiro', strap: 'Acero', waterResistance: '200m', gender: 'Masculino', image: 'productos/orient-raaa0004e.jpg' },
+    { brandSlug: 'orient', model: 'Chronograph', ref: 'RA-TX0306S', price: 1359000, caseSize: '40mm', caseMaterial: 'Acero', mechanism: 'Cuarzo de recarga solar', crystal: 'Zafiro', strap: 'Cuero', waterResistance: '50m', gender: 'Masculino', image: 'productos/orient-ratx0306s.jpg' },
+    { brandSlug: 'swatch', model: 'Cronógrafo Transparente', ref: 'SB02K100', price: 952000, caseSize: '47mm', caseMaterial: 'Resina', mechanism: 'Cuarzo', crystal: 'Plexiglás', strap: 'Silicona', waterResistance: '30m', gender: 'Unisex', image: 'productos/swatch-sb02k100.jpg' },
+    { brandSlug: 'seiko', model: '5 Sports GMT Negro', ref: 'SSK001K1', price: 2423000, caseSize: '42.5mm', caseMaterial: 'Acero', mechanism: 'Automático', crystal: 'Hardlex', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/seiko-ssk001k1.jpg' },
+    { brandSlug: 'seiko', model: '5 Sports GMT Azul', ref: 'SSK003K1', price: 2423000, caseSize: '42.5mm', caseMaterial: 'Acero', mechanism: 'Automático', crystal: 'Hardlex', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/seiko-ssk003k1.jpg' },
+    { brandSlug: 'seiko', model: '5 Sports GMT Naranja', ref: 'SSK005K1', price: 2423000, caseSize: '42.5mm', caseMaterial: 'Acero', mechanism: 'Automático', crystal: 'Hardlex', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/seiko-ssk005k1.jpg' },
+    { brandSlug: 'tissot', model: 'Seastar Nácar', ref: 'T1202101711600', price: 3426000, caseSize: '36mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Zafiro', strap: 'Silicona', waterResistance: '30m', gender: 'Femenino', image: 'productos/tissot-t1202101711600.jpg' },
+    { brandSlug: 'tissot', model: 'PRX Verde', ref: 'T1372101108100', price: 2639000, caseSize: '35mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Zafiro', strap: 'Acero', waterResistance: '100m', gender: 'Unisex', image: 'productos/tissot-t1372101108100.jpg' },
+    { brandSlug: 'tissot', model: 'Cronógrafo Bicolor', ref: 'T1414171701100', price: 3616000, caseSize: '45mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Zafiro', strap: 'Silicona', waterResistance: '100m', gender: 'Masculino', image: 'productos/tissot-t1414171701100.jpg' },
+    { brandSlug: 'tissot', model: 'T-Race Powermatic 80', ref: 'T1418071104100', price: 4749000, caseSize: '45mm', caseMaterial: 'Acero', mechanism: 'Automático', crystal: 'Zafiro', strap: 'Acero', waterResistance: '100m', gender: 'Masculino', image: 'productos/tissot-t1418071104100.jpg' },
+    { brandSlug: 'tissot', model: 'Bisel Estriado Celeste', ref: 'T1562101135100', price: 2338000, caseSize: '36mm', caseMaterial: 'Acero', mechanism: 'Cuarzo', crystal: 'Zafiro', strap: 'Acero', waterResistance: '50m', gender: 'Femenino', image: 'productos/tissot-t1562101135100.jpg' }
   ];
 
-  var TAG_LABELS = { best: 'Más vendido', new: 'Nuevo', special: 'Edición especial' };
-  var TONE_VARIANTS = {
-    ink: ['#1d2026', '#5a5853'], cool: ['#323a42', '#1d2026'], bronze: ['#6a5340', '#3a342a'],
-    fog: ['#dcd6cc', '#c9a86a'], steel: ['#a8a298', '#1d2026'], green: ['#344a3a', '#1d2026']
+  var TONE_BY_BRAND = {
+    cat: 'ink', bulova: 'steel', casio: 'ink', citizen: 'cool', diesel: 'ink', fossil: 'fog',
+    festina: 'cool', guess: 'fog', mulco: 'fog', nautica: 'cool', orient: 'green', swatch: 'ink',
+    seiko: 'ink', tissot: 'cool'
   };
 
-  var SEED_PRODUCTS = SEED_ROWS.map(function (r) {
-    var brand = find(BRANDS, function (b) { return b.slug === r[0]; });
-    var wasPrice = r[4] || 0;
-    return {
-      brand: brand ? brand.name : r[0],
-      brandSlug: r[0],
-      model: r[1],
-      ref: r[2],
-      price: r[3],
-      wasPrice: wasPrice,
-      off: wasPrice ? Math.round((1 - r[3] / wasPrice) * 100) : 0,
-      tone: r[5],
-      gender: r[6],
-      mechanism: r[7],
-      crystal: r[8],
-      strap: r[9],
-      stockStatus: r[10],
-      stock: r[10] === 'out' ? 'Agotado' : (r[10] === 'low' ? 'Bajo inventario' : 'Disponible'),
-      tag: r[11] ? { kind: r[11], label: TAG_LABELS[r[11]] } : null,
-      variants: TONE_VARIANTS[r[5]] || TONE_VARIANTS.ink
-    };
+  var SEED_PRODUCTS = SEED_PRODUCTS_RAW.map(function (p) {
+    var brand = find(BRANDS, function (b) { return b.slug === p.brandSlug; });
+    var tone = TONE_BY_BRAND[p.brandSlug] || 'ink';
+    return Object.assign({
+      brand: brand ? brand.name : p.brandSlug,
+      wasPrice: 0,
+      off: 0,
+      tone: tone,
+      stockStatus: 'in',
+      stock: 'Disponible',
+      tag: null,
+      variants: []
+    }, p);
   });
 
   var DEFAULT_CONFIG = {
