@@ -90,7 +90,7 @@
   // estilo de vida/producto que ocupa todo el tile. Bulova no tiene logo
   // blanco todavía (el tile usa el nombre como texto en su lugar).
   var BRANDS = [
-    { slug: 'bulova', name: 'Bulova', image: '', photo: 'productos/marcas/bulova-foto.jpg' },
+    { slug: 'bulova', name: 'Bulova', image: 'productos/marcas/bulova-white.png', photo: 'productos/marcas/bulova-foto.jpg' },
     { slug: 'casio', name: 'Casio', image: 'productos/marcas/casio-white.png', photo: 'productos/marcas/casio-foto.jpg' },
     { slug: 'cat', name: 'CAT', image: 'productos/marcas/cat-white.png', photo: 'productos/marcas/cat-foto.jpg' },
     { slug: 'citizen', name: 'Citizen', image: 'productos/marcas/citizen-white.png', photo: 'productos/marcas/citizen-foto.jpg' },
