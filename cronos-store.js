@@ -17,7 +17,8 @@
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
     counters: 'cronos:counters',
-    meta: 'cronos:meta'
+    meta: 'cronos:meta',
+    cart: 'cronos:cart'
   };
 
   // Al subir SEED_VERSION se regenera el catálogo demo en navegadores que ya
@@ -514,6 +515,56 @@
       .sort(function (a, b) { return b.amount - a.amount; });
   }
 
+  // ---------- carrito ----------
+
+  function getCart() { return read(NS.cart, []); }
+
+  function getCartItems() {
+    return getCart().map(function (line) {
+      var p = getProduct(line.productId);
+      if (!p) return null;
+      return Object.assign({}, p, { qty: line.qty, lineTotal: p.price * line.qty });
+    }).filter(Boolean);
+  }
+
+  function getCartCount() {
+    return getCart().reduce(function (sum, line) { return sum + line.qty; }, 0);
+  }
+
+  function getCartTotal() {
+    return getCartItems().reduce(function (sum, item) { return sum + item.lineTotal; }, 0);
+  }
+
+  function addToCart(productId, qty) {
+    qty = Math.max(1, Number(qty) || 1);
+    var cart = getCart();
+    var line = find(cart, function (l) { return l.productId === productId; });
+    if (line) line.qty += qty;
+    else cart.push({ productId: productId, qty: qty });
+    write(NS.cart, cart);
+    return cart;
+  }
+
+  function setCartQty(productId, qty) {
+    qty = Math.max(0, Number(qty) || 0);
+    var cart = getCart();
+    if (qty <= 0) {
+      write(NS.cart, cart.filter(function (l) { return l.productId !== productId; }));
+      return getCart();
+    }
+    var line = find(cart, function (l) { return l.productId === productId; });
+    if (line) line.qty = qty;
+    else cart.push({ productId: productId, qty: qty });
+    write(NS.cart, cart);
+    return getCart();
+  }
+
+  function removeFromCart(productId) {
+    write(NS.cart, getCart().filter(function (l) { return l.productId !== productId; }));
+  }
+
+  function clearCart() { write(NS.cart, []); }
+
   // ---------- config ----------
 
   function getConfig() { return Object.assign({}, DEFAULT_CONFIG, read(NS.config, {})); }
@@ -581,6 +632,15 @@
     // bids
     getBids: getBids,
     getBidsForAuction: getBidsForAuction,
+    // carrito
+    getCart: getCart,
+    getCartItems: getCartItems,
+    getCartCount: getCartCount,
+    getCartTotal: getCartTotal,
+    addToCart: addToCart,
+    setCartQty: setCartQty,
+    removeFromCart: removeFromCart,
+    clearCart: clearCart,
     // config
     getConfig: getConfig,
     saveConfig: saveConfig,

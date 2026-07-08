@@ -893,6 +893,7 @@
   <script src="cronos-store.js"></script>
   <script src="cronos-auth.js"></script>
   <script src="cronos-ui.js"></script>
+<script src="cronos-cart.js"></script>
   <script>
     var _legacy = [
       { brand: 'Cronosfera', model: 'Aurora 39 · Acero', ref: 'CR-AU-39-ABL', price: 1299000, was: 1599000, off: 19, tone: 'ink', tag: { kind: 'best', label: 'Más vendido' }, stock: 'Disponible', variants: ['#1d2026','#c9a86a','#7a7468'] },
@@ -1004,7 +1005,13 @@
       var fav = card.querySelector('.product-fav');
       fav.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); fav.classList.toggle('active'); });
       var cta = card.querySelector('.product-cta .btn');
-      cta.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); if (!p.stockOut) { cta.textContent = '✓ En el carrito'; setTimeout(function(){ cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg> Agregar'; }, 1600); } });
+      cta.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        if (p.stockOut) return;
+        if (window.Store) Store.addToCart(p.id, 1);
+        cta.textContent = '✓ En el carrito';
+        setTimeout(function(){ cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg> Agregar'; }, 1600);
+      });
       var quick = card.querySelector('.icon-mini');
       quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });
       grid.appendChild(card);

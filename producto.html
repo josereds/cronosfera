@@ -1145,6 +1145,7 @@
   <script src="cronos-store.js"></script>
   <script src="cronos-auth.js"></script>
   <script src="cronos-ui.js"></script>
+<script src="cronos-cart.js"></script>
   <script>
     // Tabs
     document.querySelectorAll('.tabs-nav button').forEach(function(btn){
@@ -1199,11 +1200,23 @@
 
     // Add to cart
     var addBtn = document.getElementById('addCart');
+    var buyNowBtn = document.getElementById('buyNow');
+    function currentProductId() { return new URLSearchParams(window.location.search).get('id'); }
     addBtn.addEventListener('click', function(){
+      var id = currentProductId();
+      if (id && window.Store) Store.addToCart(id, q);
       var orig = addBtn.innerHTML;
       addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20,6 9,17 4,12" stroke-linecap="round" stroke-linejoin="round"/></svg> Añadido (' + q + ')';
       setTimeout(function(){ addBtn.innerHTML = orig; }, 1800);
+      if (window.CronosCart) CronosCart.open();
     });
+    if (buyNowBtn) {
+      buyNowBtn.addEventListener('click', function () {
+        var id = currentProductId();
+        if (id && window.Store) Store.addToCart(id, q);
+        if (window.CronosCart) CronosCart.open();
+      });
+    }
 
     // Favorite
     var favBtn = document.getElementById('favBtn');
