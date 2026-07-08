@@ -235,6 +235,22 @@
     .main-shot img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
     .main-shot:hover img { transform: scale(1.06); }
     .gallery.single-shot { grid-template-columns: 1fr; }
+
+    /* Lupa: solo se activa sobre fotos reales (ver initMagnifier). El hover
+       de escala de arriba se desactiva para no pelear con el cálculo de la lupa. */
+    .main-shot.has-magnifier { cursor: none; }
+    .main-shot.has-magnifier img,
+    .main-shot.has-magnifier:hover img { transform: none; transition: none; }
+    .mag-lens {
+      position: absolute;
+      display: none;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      box-shadow: 0 10px 28px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.15);
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 5;
+    }
     .main-shot .corner {
       position: absolute; top: 16px; left: 16px;
       display: flex; flex-direction: column; gap: 6px;
@@ -1242,6 +1258,35 @@
         + '</div>';
       rg.appendChild(a);
     });
+
+    // Lupa de zoom: solo aparece mientras el mouse está sobre la foto real.
+    function initMagnifier(container, img) {
+      var old = container.querySelector('.mag-lens');
+      if (old) old.remove();
+      container.classList.add('has-magnifier');
+      var lens = document.createElement('div');
+      lens.className = 'mag-lens';
+      container.appendChild(lens);
+
+      var ZOOM = 2.2;
+      var SIZE = 190;
+
+      function place(clientX, clientY) {
+        var rect = container.getBoundingClientRect();
+        var x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        var y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+        lens.style.width = SIZE + 'px';
+        lens.style.height = SIZE + 'px';
+        lens.style.left = (x - SIZE / 2) + 'px';
+        lens.style.top = (y - SIZE / 2) + 'px';
+        lens.style.backgroundImage = 'url(' + img.currentSrc + ')';
+        lens.style.backgroundSize = (rect.width * ZOOM) + 'px ' + (rect.height * ZOOM) + 'px';
+        lens.style.backgroundPosition = -(x * ZOOM - SIZE / 2) + 'px ' + -(y * ZOOM - SIZE / 2) + 'px';
+      }
+      container.addEventListener('mouseenter', function (e) { lens.style.display = 'block'; place(e.clientX, e.clientY); });
+      container.addEventListener('mousemove', function (e) { place(e.clientX, e.clientY); });
+      container.addEventListener('mouseleave', function () { lens.style.display = 'none'; });
+    }
   </script>
 
   <!-- ===== Store + Auth (dynamic product loading) ===== -->
@@ -1387,6 +1432,9 @@
         if (gallery) gallery.classList.add('single-shot');
         var corner = mainShot ? mainShot.querySelector('.corner') : null;
         if (corner) corner.remove();
+        // La lupa necesita el <img> ya insertado en el DOM (outerHTML crea un nodo nuevo).
+        var realImg = document.getElementById('mainSvg');
+        if (mainShot && realImg && typeof initMagnifier === 'function') initMagnifier(mainShot, realImg);
       } else {
         var mainSvg = document.getElementById('mainSvg');
         if (mainSvg && typeof watchSVG === 'function') {
