@@ -106,7 +106,7 @@
     { slug: 'swatch', name: 'Swatch', image: 'productos/marcas/swatch-white.png', photo: 'productos/marcas/swatch-foto.jpg' },
     { slug: 'tissot', name: 'Tissot', image: 'productos/marcas/tissot-white.png', photo: 'productos/marcas/tissot-foto.jpg' },
     { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger-white.png', photo: 'productos/marcas/tommy-hilfiger-foto.jpg' },
-    { slug: 'multimarca', name: 'Multimarca', image: '', photo: '', note: 'Otras marcas seleccionadas' }
+    { slug: 'multimarca', name: 'Multimarca', image: '', photo: 'productos/marcas/multimarca-foto.jpg', note: 'Otras marcas seleccionadas' }
   ];
 
   // Opciones cerradas para la ficha técnica (las usa el panel admin y los filtros).

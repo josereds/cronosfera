@@ -369,31 +369,6 @@
       width: 3px; height: 3px; border-radius: 50%;
       background: rgba(246, 241, 231, 0.35);
     }
-    .hero-meta {
-      position: absolute;
-      right: 28px;
-      bottom: 32px;
-      z-index: 2;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(246, 241, 231, 0.7);
-      background: rgba(15, 17, 22, 0.4);
-      border: 1px solid rgba(246, 241, 231, 0.14);
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    .hero-meta .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.18);
-    }
 
     /* Header transparente sobre el hero oscuro — texto claro solo en index */
     body.hero-video .site-header:not(.solid) .logo,
@@ -967,7 +942,6 @@
     @media (max-width: 1100px) {
       .nav-primary { display: none; }
       .hero-content { padding: 64px 28px 80px; }
-      .hero-meta { display: none; }
       .wholesale-band { grid-template-columns: 1fr; padding: 44px; gap: 36px; }
       .story { grid-template-columns: 1fr; gap: 48px; }
       .testimonials-grid { grid-template-columns: 1fr 1fr; }
@@ -1194,10 +1168,6 @@
         </div>
       </div>
 
-      <span class="hero-meta" aria-hidden="true">
-        <span class="dot"></span>
-        Vista explotada · Calibre Aurora
-      </span>
     </section>
 
     <!-- ============================== MARCAS ============================== -->
@@ -1340,7 +1310,7 @@
                 <ellipse cx="-40" cy="-70" rx="80" ry="40" fill="#ffffff" opacity="0.05" transform="rotate(-25)"></ellipse>
               </svg>
             </div>
-            <div class="caption">Detalle · esfera Calibre Aurora</div>
+            <div class="caption">Detalle · construcción interna</div>
           </div>
           <div class="story-text">
             <span class="eyebrow">Nuestra historia</span>
