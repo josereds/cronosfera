@@ -1562,7 +1562,7 @@
     // ============== Catálogo de marcas ==============
     // Algunos logos blancos traen mucho margen dentro de su propio PNG y se
     // ven chicos junto a los demás a igual max-height; se acercan más.
-    var BRAND_LOGO_SCALE = { casio: 1.4, festina: 1.5, swatch: 1.2 };
+    var BRAND_LOGO_SCALE = {};
     function renderBrandTile(b) {
       var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
       var emptyAttr = b.count ? '' : ' data-empty="true"';
