@@ -262,6 +262,25 @@
       background: var(--fg); color: var(--surface);
     }
     .corner .tag.accent { background: var(--accent); }
+    .corner .tag.stock {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: color-mix(in oklab, var(--success) 16%, var(--surface));
+      color: color-mix(in oklab, var(--success) 65%, var(--fg));
+      border: 1px solid color-mix(in oklab, var(--success) 30%, var(--border));
+    }
+    .corner .tag.stock::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+    .corner .tag.stock.out {
+      background: color-mix(in oklab, var(--danger, oklch(55% 0.18 25)) 16%, var(--surface));
+      color: color-mix(in oklab, var(--danger, oklch(55% 0.18 25)) 65%, var(--fg));
+      border-color: color-mix(in oklab, var(--danger, oklch(55% 0.18 25)) 30%, var(--border));
+    }
+    .corner .tag.stock.out::before { background: var(--danger, oklch(55% 0.18 25)); }
+    .corner .tag.stock.low {
+      background: color-mix(in oklab, var(--warning, var(--accent)) 18%, var(--surface));
+      color: color-mix(in oklab, var(--warning, var(--accent)) 65%, var(--fg));
+      border-color: color-mix(in oklab, var(--warning, var(--accent)) 30%, var(--border));
+    }
+    .corner .tag.stock.low::before { background: var(--warning, var(--accent)); }
     .main-shot .zoom-hint {
       position: absolute; bottom: 16px; right: 16px;
       background: var(--surface);
@@ -295,14 +314,41 @@
       max-width: 520px;
       margin-bottom: 26px;
     }
-    .rating-row {
-      display: flex; gap: 14px; align-items: center;
-      font-size: 13px; color: var(--muted);
-      padding-bottom: 22px; margin-bottom: 22px;
-      border-bottom: 1px solid var(--border-soft);
-    }
     .stars-mini { display: inline-flex; gap: 1px; color: var(--accent); }
     .stars-mini svg { width: 14px; height: 14px; }
+
+    /* TÍTULO + PRECIO en el mismo renglón */
+    .title-price-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+    .title-price-row h1 { margin-bottom: 0; flex: 1; min-width: 0; }
+    .title-price-row .price-row {
+      flex-shrink: 0;
+      justify-content: flex-end;
+      text-align: right;
+      padding-top: 6px;
+    }
+
+    /* Lista simple de especificaciones (orden fijo, formato "etiqueta : valor") */
+    .simple-specs {
+      margin-bottom: 26px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .simple-specs .row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border-soft);
+      font-size: 14px;
+    }
+    .simple-specs .k { color: var(--muted); }
+    .simple-specs .v { color: var(--fg); font-weight: 500; text-align: right; }
 
     /* PRICE BLOCK */
     .price-block {
@@ -687,6 +733,8 @@
       .menu-toggle { display: grid; }
       .info h1 { font-size: 32px; }
       .price-row .now { font-size: 26px; }
+      .title-price-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .title-price-row .price-row { text-align: left; justify-content: flex-start; padding-top: 0; }
       .buy-row { grid-template-columns: 1fr; }
       .qty { width: fit-content; }
       .micro-trust { grid-template-columns: 1fr; }
@@ -857,21 +905,18 @@
             <span class="brand">Cronosfera</span>
             <span class="ref">Ref. CR-AU-39-ABL</span>
           </div>
-          <h1>Aurora 39 · Acero</h1>
-          <p class="lead">Automático de carga bilateral, caja de acero 904L de 39 mm y cristal de zafiro doble domo. Una pieza de uso diario, dimensionada para acompañarte mucho más que una temporada.</p>
-
-          <div class="rating-row">
-            <span class="sku-line">SKU <span class="mono">CR-AU-39-ABL</span></span>
-            <span style="color:var(--muted-2)">·</span>
-            <span>Original verificado antes del despacho</span>
-          </div>
-
-          <div class="price-block">
+          <div class="title-price-row">
+            <h1>Aurora 39 · Acero</h1>
             <div class="price-row">
               <span class="now">$ 1.299.000</span>
               <span class="was">$ 1.599.000</span>
               <span class="off">-19%</span>
             </div>
+          </div>
+
+          <div class="simple-specs" id="simpleSpecs"></div>
+
+          <div class="price-block">
             <div class="price-meta">
               <span>Precio de demostración</span>
               <span class="dot-sep"></span>
@@ -913,7 +958,6 @@
             </div>
           </div>
 
-          <div class="stock-banner">En inventario · 18 unidades disponibles en Bogotá · envío inmediato</div>
 
           <div style="margin-top:24px">
             <div class="option-block">
@@ -1348,7 +1392,24 @@
       setText('.info .brand, .product-brand', p.brand);
       setText('.info h1, .product-model', p.model);
       setText('.info .ref, .product .ref', 'Ref. ' + p.ref);
-      setHTML('.rating-row', 'SKU <span class="mono">' + p.ref + '</span> <span style="color:var(--muted-2)">·</span> Original verificado antes del despacho');
+
+      // Lista simple de especificaciones, en el orden pedido por el cliente.
+      var simpleSpecs = document.getElementById('simpleSpecs');
+      if (simpleSpecs) {
+        var caja = [p.caseSize, p.caseMaterial].filter(Boolean).join(' ');
+        var simpleRows = [
+          ['Referencia', p.ref],
+          ['Tamaño y material de la caja', caja],
+          ['Mecanismo', p.mechanism],
+          ['Material del cristal', p.crystal],
+          ['Pulso', p.strap],
+          ['Resistencia al agua', p.waterResistance],
+          ['Género', p.gender]
+        ].filter(function (r) { return r[1]; });
+        simpleSpecs.innerHTML = simpleRows.map(function (r) {
+          return '<div class="row"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span></div>';
+        }).join('');
+      }
 
       // Breadcrumb: Inicio / Relojes / Marca / Modelo
       var crumbs = document.querySelector('.breadcrumbs');
@@ -1393,14 +1454,14 @@
       }
 
       // Precio principal
-      var priceNow = document.querySelector('.price-block .now, .product-price .now');
+      var priceNow = document.querySelector('.title-price-row .now, .product-price .now');
       if (priceNow) priceNow.textContent = '$ ' + p.price.toLocaleString('es-CO');
 
-      var priceWas = document.querySelector('.price-block .was, .product-price .was');
+      var priceWas = document.querySelector('.title-price-row .was, .product-price .was');
       if (priceWas && p.wasPrice) priceWas.textContent = '$ ' + p.wasPrice.toLocaleString('es-CO');
       else if (priceWas) priceWas.style.display = 'none';
 
-      var priceOff = document.querySelector('.price-block .off, .product-price .off');
+      var priceOff = document.querySelector('.title-price-row .off, .product-price .off');
       if (priceOff && p.off) priceOff.textContent = '-' + p.off + '%';
       else if (priceOff) priceOff.style.display = 'none';
 
@@ -1408,11 +1469,10 @@
       var stockEl = document.querySelector('.stock, .product-stock');
       if (stockEl) stockEl.textContent = p.stock;
 
-      // Stock banner
-      var banner = document.querySelector('.stock-banner');
-      if (banner) {
-        banner.textContent = p.stock;
-        banner.className = 'stock-banner ' + (p.stockStatus || 'in');
+      // Disponibilidad como badge en la esquina superior izquierda de la foto.
+      var cornerEl = document.querySelector('.main-shot .corner');
+      if (cornerEl) {
+        cornerEl.innerHTML = '<span class="tag stock ' + (p.stockStatus || 'in') + '">' + p.stock + '</span>';
       }
 
       // Wholesale card
@@ -1443,8 +1503,6 @@
         var thumbs = document.querySelector('.thumbs');
         if (thumbs) thumbs.style.display = 'none';
         if (gallery) gallery.classList.add('single-shot');
-        var corner = mainShot ? mainShot.querySelector('.corner') : null;
-        if (corner) corner.remove();
         // La lupa necesita el <img> ya insertado en el DOM (outerHTML crea un nodo nuevo).
         var realImg = document.getElementById('mainSvg');
         if (mainShot && realImg && typeof initMagnifier === 'function') initMagnifier(mainShot, realImg);
