@@ -922,7 +922,7 @@ textarea::placeholder {
   max-width: 76%;
   max-height: 34px;
   object-fit: contain;
-  transform: scale(var(--logo-scale, 1));
+  transform: scale(var(--logo-scale, 1)) translateY(var(--logo-offset-y, 0));
 }
 
 .brand-tile-title {
