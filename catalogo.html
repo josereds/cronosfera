@@ -1232,8 +1232,8 @@
 
     // Algunos logos blancos traen mucho margen dentro de su propio PNG y se
     // ven chicos junto a los demás a igual max-height; se acercan más.
-    var BRAND_LOGO_SCALE = { mulco: 2.55, orient: 1.3, festina: 1.2, 'mount-royal': 1.2, bulova: 1.3, seiko: 1.3, cat: 1.2, tissot: 1.2 };
-    var BRAND_LOGO_OFFSET_Y = { fossil: 3, mulco: -6 };
+    var BRAND_LOGO_SCALE = { mulco: 2.55, orient: 1.5, festina: 1.38, 'mount-royal': 1.2, bulova: 1.3, seiko: 1.3, cat: 1.2, tissot: 1.2, diesel: 1.15, fossil: 1.15, guess: 1.15 };
+    var BRAND_LOGO_OFFSET_Y = { fossil: 3, mulco: -6, seiko: 4 };
     function renderBrandTile(b) {
       var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
       var emptyAttr = b.count ? '' : ' data-empty="true"';
