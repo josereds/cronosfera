@@ -1258,7 +1258,7 @@
       buyNowBtn.addEventListener('click', function () {
         var id = currentProductId();
         if (id && window.Store) Store.addToCart(id, q);
-        if (window.CronosCart) CronosCart.open();
+        window.location.href = 'checkout.html';
       });
     }
 

@@ -3,8 +3,8 @@
    ------------------------------------------------------------
    - Contador visible en el ícono de carrito (.cart-btn) de cada página
    - Panel flotante para ver, ajustar y quitar artículos
-   - No hay pasarela de pago conectada todavía: el panel es honesto al
-     respecto en vez de simular un botón de pago que no hace nada.
+   - "Finalizar compra" lleva a checkout.html, que arma el pedido y
+     ofrece pago con Wompi o coordinación por WhatsApp (ver ese archivo).
    ============================================================ */
 (function (global) {
   'use strict';
@@ -36,7 +36,8 @@
       +   '<div class="cart-panel-body"></div>'
       +   '<div class="cart-panel-foot">'
       +     '<div class="cart-panel-total"><span>Subtotal</span><strong id="cartPanelTotal">$0</strong></div>'
-      +     '<p class="cart-panel-note">Precios de demostración · el pago en línea todavía no está activo.</p>'
+      +     '<p class="cart-panel-note">Precios de demostración · COP.</p>'
+      +     '<a href="checkout.html" class="cart-panel-checkout">Finalizar compra</a>'
       +     '<button type="button" class="btn cart-panel-continue">Seguir viendo el catálogo</button>'
       +   '</div>'
       + '</div>';

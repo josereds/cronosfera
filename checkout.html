@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Finaliza tu compra en Cronosfera: revisa tu pedido, ingresa tus datos de envío y paga con tarjeta, PSE o coordina por WhatsApp.">
+  <title>Finalizar compra · Cronosfera</title>
+  <link rel="canonical" href="https://cronosfera-beta.vercel.app/checkout.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           oklch(97% 0.008 80);
+      --bg-warm:      oklch(95% 0.012 80);
+      --surface:      oklch(100% 0 0);
+      --surface-2:    oklch(98% 0.006 80);
+      --fg:           oklch(22% 0.005 250);
+      --fg-soft:      oklch(34% 0.005 250);
+      --muted:        oklch(52% 0.006 250);
+      --muted-2:      oklch(64% 0.006 250);
+      --border:       oklch(88% 0.006 250);
+      --border-soft:  oklch(93% 0.006 250);
+      --accent:       oklch(52% 0.08 60);
+      --accent-deep:  oklch(42% 0.08 60);
+      --accent-soft:  oklch(90% 0.05 65);
+      --success:      oklch(48% 0.10 155);
+      --danger:       oklch(52% 0.13 25);
+      --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.04);
+      --shadow:    0 4px 16px rgba(20, 22, 28, 0.05);
+      --shadow-lg: 0 18px 50px rgba(20, 22, 28, 0.10);
+      --r: 8px; --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--fg);
+      font: 400 16px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; color: inherit; background: none; border: 0; }
+    input, select, textarea { font: inherit; color: inherit; }
+    ul { list-style: none; }
+    svg { display: block; max-width: 100%; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    /* HEADER */
+    .site-header {
+      position: sticky; top: 0; z-index: 80;
+      background: rgba(246, 241, 231, 0.92);
+      backdrop-filter: blur(20px) saturate(1.1);
+      -webkit-backdrop-filter: blur(20px) saturate(1.1);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .header-inner { display: flex; align-items: center; gap: 32px; height: 76px; }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 600; letter-spacing: 0.02em;
+      color: var(--fg); display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .logo svg, .logo-img { width: 26px; height: 26px; }
+    .logo .dot { color: var(--accent); }
+    .nav-primary { display: flex; align-items: center; gap: 28px; flex: 1; }
+    .nav-primary a { font-size: 14px; color: var(--fg-soft); padding: 8px 0; }
+    .nav-primary a:hover { color: var(--fg); }
+    .header-actions { display: flex; align-items: center; gap: 4px; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: grid; place-items: center; border-radius: 50%;
+      color: var(--fg-soft); position: relative;
+    }
+    .icon-btn:hover { background: var(--surface); color: var(--fg); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .menu-toggle { display: none; }
+    .session-slot { display: inline-flex; align-items: center; margin-left: 8px; }
+
+    /* PAGE HEAD */
+    .checkout-top { padding: 40px 0 8px; }
+    .checkout-top .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent-deep);
+    }
+    .checkout-top h1 {
+      font-family: var(--font-display); font-weight: 500;
+      font-size: clamp(28px, 3.4vw, 38px);
+      margin-top: 10px;
+    }
+    .steps-hint { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+    /* LAYOUT */
+    .checkout-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px;
+      padding: 32px 0 90px; align-items: start;
+    }
+    .checkout-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 26px;
+      margin-bottom: 22px;
+    }
+    .checkout-card h2 {
+      font-family: var(--font-display); font-weight: 500; font-size: 20px;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+    }
+    .checkout-card h2 .n {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--fg); color: var(--surface);
+      font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: block; margin-bottom: 14px; }
+    .field.full { grid-column: 1 / -1; }
+    .field span { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field textarea {
+      width: 100%; background: var(--bg-warm); border: 1px solid var(--border);
+      padding: 11px 14px; border-radius: var(--r); color: var(--fg);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .form-actions { display: flex; justify-content: flex-end; margin-top: 4px; }
+    .btn-primary {
+      height: 48px; padding: 0 24px;
+      background: var(--fg); color: var(--surface);
+      border-radius: var(--r); font-size: 14px; font-weight: 500; letter-spacing: 0.04em;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { background: var(--fg-soft); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      height: 44px; padding: 0 20px; border: 1px solid var(--border); border-radius: var(--r);
+      font-size: 13px; font-weight: 500; background: var(--surface);
+    }
+    .btn-ghost:hover { border-color: var(--fg); }
+
+    /* Payment step (locked until step 1 completed) */
+    #paymentCard.locked .payment-options { opacity: .45; pointer-events: none; filter: grayscale(.3); }
+    .payment-options { display: grid; gap: 14px; }
+    .payment-option {
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: 18px 20px;
+    }
+    .payment-option-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .payment-option-head strong { font-size: 15px; font-weight: 500; }
+    .payment-option p.desc { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .payment-pending {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); background: var(--surface-2); border: 1px solid var(--border-soft);
+      padding: 4px 10px; border-radius: 999px;
+    }
+    .payment-pending::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--muted-2); }
+    #wompiWidgetMount { min-height: 48px; }
+    .whatsapp-btn {
+      height: 48px; padding: 0 22px;
+      background: oklch(54% 0.14 150); color: #fff;
+      border-radius: var(--r); font-size: 14px; font-weight: 500;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all .2s;
+    }
+    .whatsapp-btn:hover { background: oklch(48% 0.14 150); }
+    .whatsapp-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Summary panel */
+    .summary-panel { position: sticky; top: 96px; }
+    .summary-item {
+      display: flex; gap: 12px; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border-soft);
+    }
+    .summary-item img { width: 52px; height: 52px; object-fit: cover; border-radius: var(--r); background: var(--bg-warm); flex-shrink: 0; }
+    .summary-item-info { flex: 1; min-width: 0; }
+    .summary-item-info .b { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .summary-item-info .m { font-size: 14px; font-weight: 500; }
+    .summary-item-info .q { font-size: 12px; color: var(--muted); }
+    .summary-item .p { font-family: var(--font-mono); font-size: 13px; font-weight: 500; white-space: nowrap; }
+    .summary-totals { padding-top: 16px; display: grid; gap: 8px; }
+    .summary-totals .row { display: flex; justify-content: space-between; font-size: 14px; color: var(--fg-soft); }
+    .summary-totals .row.grand { font-size: 17px; font-weight: 600; color: var(--fg); padding-top: 10px; border-top: 1px solid var(--border-soft); }
+    .summary-note { font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+
+    /* Empty state */
+    .checkout-empty { padding: 90px 0; text-align: center; }
+    .checkout-empty h2 { font-family: var(--font-display); font-size: 28px; font-weight: 500; margin-bottom: 10px; }
+    .checkout-empty p { color: var(--muted); margin-bottom: 24px; }
+
+    /* Confirmation view */
+    .confirm-box { max-width: 560px; margin: 0 auto; padding: 90px 0; text-align: center; }
+    .confirm-icon { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 20px; display: grid; place-items: center; }
+    .confirm-icon.ok { background: color-mix(in oklab, var(--success) 16%, transparent); color: var(--success); }
+    .confirm-icon.pending { background: var(--surface-2); color: var(--muted); }
+    .confirm-icon.fail { background: color-mix(in oklab, var(--danger) 16%, transparent); color: var(--danger); }
+    .confirm-icon svg { width: 30px; height: 30px; }
+    .confirm-box h2 { font-family: var(--font-display); font-size: 26px; font-weight: 500; margin-bottom: 10px; }
+    .confirm-box p { color: var(--muted); margin-bottom: 24px; }
+    .confirm-ref { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .spinner {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite; margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FOOTER (igual a las demás páginas) */
+    .site-footer { background: var(--fg); color: rgba(246,241,231,0.7); padding: 60px 0 32px; }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 36px;
+      padding-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-brand .logo { color: var(--surface); margin-bottom: 14px; }
+    .footer-brand p { font-size: 13px; max-width: 280px; }
+    .footer-col h5 {
+      color: var(--surface); font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 14px; font-weight: 500;
+    }
+    .footer-col ul li { margin-bottom: 8px; }
+    .footer-col a { font-size: 13px; color: rgba(246,241,231,0.65); }
+    .footer-col a:hover { color: var(--surface); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; padding-top: 22px;
+      font-size: 12px; color: rgba(246,241,231,0.5); gap: 18px; flex-wrap: wrap;
+    }
+
+    @media (max-width: 1100px) {
+      .nav-primary { display: none; }
+      .checkout-grid { grid-template-columns: 1fr; }
+      .summary-panel { position: static; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+    @media (max-width: 700px) {
+      .container { padding: 0 18px; }
+      .header-inner { height: 64px; gap: 8px; }
+      .header-actions .icon-btn:not(.menu-toggle):not(.cart-btn) { display: none; }
+      .field-grid { grid-template-columns: 1fr; }
+      .checkout-card { padding: 20px; }
+      .footer-top { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="cronos-ui.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Cronosfera, inicio">
+        <img src="logo-cronosfera.svg" class="logo-img" alt="" aria-hidden="true">
+        Cronosfera<span class="dot">.</span>
+      </a>
+      <nav class="nav-primary" aria-label="Principal">
+        <a href="index.html">Inicio</a>
+        <a href="catalogo.html">Relojes</a>
+        <a href="subastas.html">Subastas</a>
+        <a href="mayorista.html">Mayoristas</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn cart-btn" aria-label="Carrito">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
+        </button>
+        <span class="session-slot" data-session-slot></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="checkout-top">
+      <span class="eyebrow">Checkout</span>
+      <h1>Finalizar compra</h1>
+      <p class="steps-hint">Completa tus datos de envío y elige cómo quieres pagar.</p>
+    </div>
+  </div>
+
+  <!-- Vacío -->
+  <div class="container" id="checkoutEmpty" style="display:none">
+    <div class="checkout-empty">
+      <h2>Tu carrito está vacío</h2>
+      <p>Explora el catálogo y agrega algún reloj antes de finalizar la compra.</p>
+      <a href="catalogo.html" class="btn-primary">Ver catálogo</a>
+    </div>
+  </div>
+
+  <!-- Formulario + resumen -->
+  <div class="container" id="checkoutMain" style="display:none">
+    <div class="checkout-grid">
+      <div class="checkout-col">
+        <form class="checkout-card" id="shippingForm" novalidate>
+          <h2><span class="n">1</span> Tus datos de envío</h2>
+          <div class="field-grid">
+            <label class="field"><span>Nombre completo *</span><input name="name" required autocomplete="name"></label>
+            <label class="field"><span>Teléfono / WhatsApp *</span><input name="phone" required autocomplete="tel" placeholder="Ej. 3001234567"></label>
+            <label class="field full"><span>Correo (opcional)</span><input type="email" name="email" autocomplete="email"></label>
+            <label class="field full"><span>Dirección *</span><input name="address" required autocomplete="street-address"></label>
+            <label class="field"><span>Ciudad *</span><input name="city" required autocomplete="address-level2"></label>
+            <label class="field"><span>Departamento</span><input name="state" autocomplete="address-level1"></label>
+            <label class="field full"><span>Notas para el pedido (opcional)</span><textarea name="notes" placeholder="Referencias de la dirección, horario de entrega, etc."></textarea></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="continueToPayment">
+              Continuar al pago
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </form>
+
+        <div class="checkout-card locked" id="paymentCard">
+          <h2><span class="n">2</span> Método de pago</h2>
+          <div class="payment-options" id="paymentOptions">
+            <div class="payment-option" id="wompiOption">
+              <div class="payment-option-head">
+                <strong>Tarjeta de crédito / débito o PSE</strong>
+                <span class="payment-pending" id="wompiPendingTag" style="display:none">Pendiente de activación</span>
+              </div>
+              <p class="desc">Paga en línea de forma segura a través de Wompi.</p>
+              <div id="wompiWidgetMount"></div>
+              <p class="steps-hint" id="wompiOfflineNote" style="display:none">El administrador de la tienda todavía no ha conectado la pasarela de pago. Por ahora, coordina tu compra por WhatsApp.</p>
+            </div>
+            <div class="payment-option" id="whatsappOption">
+              <div class="payment-option-head">
+                <strong>Coordinar por WhatsApp</strong>
+                <span class="payment-pending" id="whatsappPendingTag" style="display:none">Pendiente de activación</span>
+              </div>
+              <p class="desc">Te enviamos el resumen de tu pedido por WhatsApp para confirmar el pago y el envío directamente con la tienda.</p>
+              <button type="button" class="whatsapp-btn" id="whatsappBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.7.8-.9 1c-.2.2-.3.2-.6.1s-1.2-.4-2.2-1.4c-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.5.1-.6l.4-.5c.1-.1.2-.3.2-.4.1-.1.1-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.7 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+                Continuar por WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-col">
+        <div class="checkout-card summary-panel">
+          <h2>Tu pedido</h2>
+          <div id="summaryItems"></div>
+          <div class="summary-totals">
+            <div class="row"><span>Subtotal</span><span class="mono" id="summarySubtotal">$0</span></div>
+            <div class="row"><span>Envío</span><span>Se coordina con la tienda</span></div>
+            <div class="row grand"><span>Total</span><span class="mono" id="summaryTotal">$0</span></div>
+          </div>
+          <p class="summary-note">Precios de demostración · COP · impuestos incluidos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmación -->
+  <div class="container" id="checkoutConfirm" style="display:none">
+    <div class="confirm-box" id="confirmBox"></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="logo" style="color:var(--surface)">
+            <img src="logo-cronosfera.svg" class="logo-img" alt="" aria-hidden="true">
+            Cronosfera<span style="color:oklch(80% 0.10 70)">.</span>
+          </div>
+          <p>Marketplace colombiano de relojes originales seleccionados.</p>
+        </div>
+        <div class="footer-col"><h5>Catálogo</h5><ul>
+          <li><a href="catalogo.html">Todos</a></li><li><a href="catalogo.html?f=automaticos">Automáticos</a></li>
+          <li><a href="catalogo.html?f=hombre">Para hombre</a></li><li><a href="catalogo.html?f=mujer">Para mujer</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Marcas</h5><ul>
+          <li><a href="catalogo.html?marca=casio">Casio</a></li><li><a href="catalogo.html?marca=citizen">Citizen</a></li>
+          <li><a href="catalogo.html?marca=tissot">Tissot</a></li><li><a href="catalogo.html">Ver todas</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Cuenta</h5><ul>
+          <li><a href="login.html">Iniciar sesión</a></li><li><a href="mayorista.html">Mayoristas</a></li>
+          <li><a href="admin.html">Panel admin</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Servicio</h5><ul>
+          <li><a href="#">Contacto</a></li><li><a href="#">Envíos</a></li>
+          <li><a href="#">Garantía</a></li><li><a href="#">Términos</a></li>
+        </ul></div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Cronosfera · Demostración</div>
+        <div>Colombia · COP</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="cronos-store.js"></script>
+  <script src="cronos-auth.js"></script>
+  <script src="cronos-ui.js"></script>
+  <script src="cronos-cart.js"></script>
+  <script>
+    (function () {
+      function cop(v) { return Store.formatCOP(v); }
+      function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[c];
+        });
+      }
+
+      var params = new URLSearchParams(window.location.search);
+      var cfg = Store.getConfig();
+      var payments = cfg.payments || {};
+
+      // ---------- Vista de confirmación (retorno desde Wompi) ----------
+      if (params.has('orderId') && params.has('id')) {
+        renderConfirmView(params.get('orderId'), params.get('id'));
+        show('checkoutConfirm');
+        return;
+      }
+
+      var items = Store.getCartItems();
+      if (!items.length) {
+        show('checkoutEmpty');
+        return;
+      }
+      show('checkoutMain');
+      renderSummary(items);
+      setupPaymentAvailability();
+      bindShippingForm();
+
+      function show(id) {
+        ['checkoutEmpty', 'checkoutMain', 'checkoutConfirm'].forEach(function (s) {
+          document.getElementById(s).style.display = s === id ? '' : 'none';
+        });
+      }
+
+      function renderSummary(items) {
+        var mount = document.getElementById('summaryItems');
+        mount.innerHTML = items.map(function (p) {
+          var img = p.image ? '<img src="' + p.image + '" alt="">' : '';
+          return '<div class="summary-item">' + img
+            + '<div class="summary-item-info">'
+            +   '<div class="b">' + escapeHtml(p.brand) + '</div>'
+            +   '<div class="m">' + escapeHtml(p.model) + '</div>'
+            +   '<div class="q">Cantidad: ' + p.qty + '</div>'
+            + '</div>'
+            + '<div class="p">' + cop(p.lineTotal) + '</div>'
+            + '</div>';
+        }).join('');
+        var total = Store.getCartTotal();
+        document.getElementById('summarySubtotal').textContent = cop(total);
+        document.getElementById('summaryTotal').textContent = cop(total);
+      }
+
+      function setupPaymentAvailability() {
+        if (!payments.wompiPublicKey) {
+          document.getElementById('wompiPendingTag').style.display = '';
+          document.getElementById('wompiOfflineNote').style.display = '';
+        }
+        if (!payments.whatsappNumber) {
+          document.getElementById('whatsappPendingTag').style.display = '';
+          document.getElementById('whatsappBtn').disabled = true;
+        }
+      }
+
+      var draftOrder = null;
+
+      function bindShippingForm() {
+        var form = document.getElementById('shippingForm');
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var fd = new FormData(form);
+          var customer = {
+            name: (fd.get('name') || '').trim(),
+            phone: (fd.get('phone') || '').trim(),
+            email: (fd.get('email') || '').trim(),
+            address: (fd.get('address') || '').trim(),
+            city: (fd.get('city') || '').trim(),
+            state: (fd.get('state') || '').trim(),
+            notes: (fd.get('notes') || '').trim()
+          };
+          if (!customer.name || !customer.phone || !customer.address || !customer.city) {
+            alert('Completa los campos obligatorios (*) antes de continuar.');
+            return;
+          }
+
+          var cartItems = Store.getCartItems();
+          if (!cartItems.length) { show('checkoutEmpty'); return; }
+          var total = Store.getCartTotal();
+
+          draftOrder = Store.createOrder({
+            customer: customer,
+            items: cartItems.map(function (p) {
+              return { productId: p.id, brand: p.brand, model: p.model, ref: p.ref, price: p.price, qty: p.qty, lineTotal: p.lineTotal, image: p.image };
+            }),
+            total: total
+          });
+
+          document.getElementById('paymentCard').classList.remove('locked');
+          mountWompiWidget(draftOrder, total);
+          bindWhatsappButton(draftOrder, total, customer);
+          document.getElementById('paymentCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          form.querySelector('#continueToPayment').textContent = 'Datos guardados ✓';
+        });
+      }
+
+      function mountWompiWidget(order, total) {
+        if (!payments.wompiPublicKey) return;
+        var mount = document.getElementById('wompiWidgetMount');
+        mount.innerHTML = '';
+        var redirectUrl = window.location.origin + window.location.pathname + '?orderId=' + encodeURIComponent(order.id);
+        var script = document.createElement('script');
+        script.src = 'https://checkout.wompi.co/widget.js';
+        script.setAttribute('data-render', 'button');
+        script.setAttribute('data-public-key', payments.wompiPublicKey);
+        script.setAttribute('data-currency', 'COP');
+        script.setAttribute('data-amount-in-cents', String(Math.round(total * 100)));
+        script.setAttribute('data-reference', order.reference);
+        script.setAttribute('data-redirect-url', redirectUrl);
+        // Nota para quien conecte las credenciales reales: este widget no incluye
+        // firma de integridad (data-signature:integrity) porque calcularla requiere
+        // el secreto de integridad de Wompi, que nunca debe vivir en el navegador.
+        // Es el modo de integración soportado sin backend; si más adelante se agrega
+        // uno, vale la pena sumar la firma para blindar el monto contra manipulación.
+        mount.appendChild(script);
+        Store.updateOrder(order.id, { paymentMethod: 'wompi' });
+      }
+
+      function bindWhatsappButton(order, total, customer) {
+        var btn = document.getElementById('whatsappBtn');
+        if (!payments.whatsappNumber) return;
+        btn.addEventListener('click', function () {
+          var lines = order.items.map(function (it) {
+            return '• ' + it.brand + ' ' + it.model + ' ×' + it.qty + ' — ' + cop(it.lineTotal);
+          }).join('\n');
+          var text = 'Hola, quiero confirmar mi pedido ' + order.reference + ' en Cronosfera:\n\n'
+            + lines + '\n\nTotal: ' + cop(total) + '\n\n'
+            + 'Nombre: ' + customer.name + '\nDirección: ' + customer.address + ', ' + customer.city + '\n'
+            + (customer.notes ? 'Notas: ' + customer.notes + '\n' : '')
+            + '\n¿Cómo continuamos con el pago?';
+          Store.updateOrder(order.id, { paymentMethod: 'whatsapp', status: 'contactado' });
+          window.open('https://wa.me/' + payments.whatsappNumber + '?text=' + encodeURIComponent(text), '_blank');
+          Store.clearCart();
+          renderWhatsappConfirm(order);
+          show('checkoutConfirm');
+        });
+      }
+
+      function renderWhatsappConfirm(order) {
+        document.getElementById('confirmBox').innerHTML = ''
+          + '<div class="confirm-icon ok">'
+          +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Z" stroke-linejoin="round"/></svg>'
+          + '</div>'
+          + '<h2>Te esperamos en WhatsApp</h2>'
+          + '<p>Abrimos una conversación con el resumen de tu pedido. Confirma ahí el pago y los detalles del envío con la tienda.</p>'
+          + '<p class="confirm-ref">Referencia del pedido: ' + escapeHtml(order.reference) + '</p>'
+          + '<a href="catalogo.html" class="btn-primary">Seguir viendo el catálogo</a>';
+      }
+
+      // Wompi redirige de vuelta con "?id=<id de transacción>" agregado a la
+      // data-redirect-url que le dimos. Esta consulta usa el endpoint público
+      // de solo lectura de Wompi (no requiere el secreto de integridad, solo
+      // la llave pública para elegir sandbox vs producción). No hay backend en
+      // este sitio para verificar esto contra credenciales reales todavía —
+      // al conectar la llave de Wompi real, confirmar que el endpoint y el
+      // formato de respuesta (data.status: APPROVED/PENDING/DECLINED/...)
+      // siguen vigentes en la documentación actual de Wompi antes de confiar
+      // en este flujo para pagos reales.
+      function renderConfirmView(orderId, transactionId) {
+        var order = Store.getOrder(orderId);
+        document.getElementById('confirmBox').innerHTML = '<div class="spinner"></div><p>Verificando tu pago…</p>';
+
+        if (!payments.wompiPublicKey) {
+          renderConfirmResult('fail', 'No pudimos verificar el pago', 'Falta la conexión con Wompi. Contacta a la tienda con la referencia de tu pedido.', order);
+          return;
+        }
+        var isSandbox = payments.wompiPublicKey.indexOf('pub_test_') === 0;
+        var base = isSandbox ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1';
+
+        fetch(base + '/transactions/' + encodeURIComponent(transactionId))
+          .then(function (r) { return r.json(); })
+          .then(function (json) {
+            var status = json && json.data ? json.data.status : null;
+            if (status === 'APPROVED') {
+              if (order) Store.updateOrder(order.id, { status: 'pagado', wompiTransactionId: transactionId });
+              Store.clearCart();
+              renderConfirmResult('ok', '¡Pago aprobado!', 'Gracias por tu compra. Te contactaremos para coordinar el envío.', order);
+            } else if (status === 'PENDING') {
+              if (order) Store.updateOrder(order.id, { wompiTransactionId: transactionId });
+              renderConfirmResult('pending', 'Pago en proceso', 'Wompi todavía está confirmando tu pago. Te avisaremos apenas se apruebe.', order);
+            } else {
+              if (order) Store.updateOrder(order.id, { status: 'rechazado', wompiTransactionId: transactionId });
+              renderConfirmResult('fail', 'El pago no se completó', 'Tu pago fue rechazado o cancelado. Puedes intentarlo de nuevo desde el carrito.', order);
+            }
+          })
+          .catch(function () {
+            renderConfirmResult('fail', 'No pudimos verificar el pago', 'Ocurrió un problema consultando el estado con Wompi. Contacta a la tienda con la referencia de tu pedido.', order);
+          });
+      }
+
+      function renderConfirmResult(kind, title, msg, order) {
+        var icons = {
+          ok: '<path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>',
+          pending: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/>',
+          fail: '<line x1="6" y1="6" x2="18" y2="18" stroke-linecap="round"/><line x1="18" y1="6" x2="6" y2="18" stroke-linecap="round"/>'
+        };
+        document.getElementById('confirmBox').innerHTML = ''
+          + '<div class="confirm-icon ' + kind + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + icons[kind] + '</svg></div>'
+          + '<h2>' + title + '</h2>'
+          + '<p>' + msg + '</p>'
+          + (order ? '<p class="confirm-ref">Referencia del pedido: ' + escapeHtml(order.reference) + '</p>' : '')
+          + '<a href="catalogo.html" class="btn-primary">Seguir viendo el catálogo</a>';
+      }
+    })();
+  </script>
+</body>
+</html>

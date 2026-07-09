@@ -72,6 +72,7 @@
     dashboard: 'Dashboard',
     catalogo: 'Catálogo',
     subastas: 'Subastas',
+    pedidos: 'Pedidos',
     mayoristas: 'Solicitudes mayoristas',
     usuarios: 'Usuarios',
     config: 'Configuración'
@@ -79,7 +80,7 @@
 
   function renderTab(tab, pane) {
     pane.innerHTML = '';
-    ({ dashboard: renderDashboardV2, catalogo: renderCatalogo, subastas: renderSubastas, mayoristas: renderMayoristas, usuarios: renderUsuarios, config: renderConfig })[tab](pane);
+    ({ dashboard: renderDashboardV2, catalogo: renderCatalogo, subastas: renderSubastas, pedidos: renderPedidos, mayoristas: renderMayoristas, usuarios: renderUsuarios, config: renderConfig })[tab](pane);
   }
 
   // ============== DASHBOARD ==============
@@ -581,6 +582,68 @@
     });
   }
 
+  // ============== PEDIDOS ==============
+  var ORDER_STATUS_CLASS = { pendiente: 'pending', contactado: 'scheduled', pagado: 'approved', rechazado: 'rejected', cancelado: 'closed' };
+  var ORDER_STATUS_LABEL = { pendiente: 'Pendiente', contactado: 'Contactado', pagado: 'Pagado', rechazado: 'Rechazado', cancelado: 'Cancelado' };
+  var PAYMENT_METHOD_LABEL = { wompi: 'Tarjeta / PSE (Wompi)', whatsapp: 'WhatsApp' };
+
+  function renderPedidos(pane) {
+    var orders = Store.getOrders();
+
+    pane.innerHTML = ''
+      + '<div class="catalogo-head"><p class="page-desc">Pedidos creados desde el checkout de la tienda. Los pagos con Wompi actualizan el estado automáticamente; los coordinados por WhatsApp hay que confirmarlos acá manualmente cuando se cierre el pago.</p></div>'
+      + (orders.length === 0
+        ? '<div class="empty-state"><h3>Sin pedidos todavía</h3><p>Cuando un cliente complete el checkout en la tienda, el pedido aparecerá acá.</p></div>'
+        : '<div class="req-grid">' + orders.map(function (o) {
+            var c = o.customer || {};
+            return '<div class="req-card ' + (ORDER_STATUS_CLASS[o.status] || '') + '">'
+              + '<div class="req-card-head">'
+              +   '<div><strong>' + escapeHtml(c.name || 'Cliente sin nombre') + '</strong><span class="row-meta">' + escapeHtml(c.phone || '') + '</span></div>'
+              +   '<span class="status-pill ' + (ORDER_STATUS_CLASS[o.status] || '') + '">' + (ORDER_STATUS_LABEL[o.status] || o.status) + '</span>'
+              + '</div>'
+              + '<div class="req-card-meta">'
+              +   '<div><span>Referencia</span><strong class="mono">' + escapeHtml(o.reference) + '</strong></div>'
+              +   '<div><span>Total</span><strong>' + Store.formatCOP(o.total) + '</strong></div>'
+              +   '<div><span>Método</span><strong>' + (PAYMENT_METHOD_LABEL[o.paymentMethod] || '—') + '</strong></div>'
+              +   '<div><span>Fecha</span><strong>' + new Date(o.createdAt).toLocaleString('es-CO') + '</strong></div>'
+              + '</div>'
+              + '<div class="req-card-meta">'
+              +   '<div><span>Dirección</span><strong>' + escapeHtml((c.address || '—') + (c.city ? ' · ' + c.city : '')) + '</strong></div>'
+              +   '<div><span>Artículos</span><strong>' + (o.items || []).map(function (it) { return escapeHtml(it.brand + ' ' + it.model + ' ×' + it.qty); }).join(', ') + '</strong></div>'
+              + '</div>'
+              + (c.notes ? '<div class="req-card-foot" style="background:var(--surface-2); color:var(--muted);">Notas del cliente: ' + escapeHtml(c.notes) + '</div>' : '')
+              + '<div class="req-card-actions">'
+              +   (o.status !== 'pagado' ? '<button class="btn-primary mark-paid" data-id="' + o.id + '">Marcar pagado</button>' : '')
+              +   (o.status !== 'contactado' && o.status !== 'pagado' ? '<button class="btn-ghost mark-contacted" data-id="' + o.id + '">Marcar contactado</button>' : '')
+              +   (o.status !== 'cancelado' && o.status !== 'pagado' ? '<button class="btn-ghost cancel-order" data-id="' + o.id + '">Cancelar</button>' : '')
+              + '</div>'
+              + '</div>';
+          }).join('') + '</div>');
+
+    pane.querySelectorAll('.mark-paid').forEach(function (b) {
+      b.addEventListener('click', function () {
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'pagado' });
+        toast('Pedido marcado como pagado', 'success');
+        renderTab('pedidos', pane);
+      });
+    });
+    pane.querySelectorAll('.mark-contacted').forEach(function (b) {
+      b.addEventListener('click', function () {
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'contactado' });
+        toast('Pedido marcado como contactado', 'info');
+        renderTab('pedidos', pane);
+      });
+    });
+    pane.querySelectorAll('.cancel-order').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirmDialog('¿Cancelar este pedido?')) return;
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'cancelado' });
+        toast('Pedido cancelado', 'info');
+        renderTab('pedidos', pane);
+      });
+    });
+  }
+
   // ============== MAYORISTAS ==============
   function renderMayoristas(pane) {
     var reqs = Store.getWholesaleRequests().slice().sort(function (a, b) {
@@ -684,6 +747,11 @@
       +     '<label><span>Descuento mayorista (%)</span><input type="number" name="wholesaleDiscountPct" value="' + cfg.wholesaleDiscountPct + '" min="0" max="80" step="1"></label>'
       +     '<label><span>Cantidad mínima por orden</span><input type="number" name="wholesaleMinQty" value="' + cfg.wholesaleMinQty + '" min="1" step="1"></label>'
       +   '</fieldset>'
+      +   '<fieldset><legend>Pagos (checkout)</legend>'
+      +     '<label class="block"><span>Número de WhatsApp para pedidos</span><input name="whatsappNumber" placeholder="Ej. 573001234567 (con indicativo de país, sin + ni espacios)" value="' + escapeHtml(cfg.payments.whatsappNumber) + '"></label>'
+      +     '<label class="block"><span>Llave pública de Wompi</span><input name="wompiPublicKey" placeholder="pub_test_xxxxxxxxxxxx o pub_prod_xxxxxxxxxxxx" value="' + escapeHtml(cfg.payments.wompiPublicKey) + '"></label>'
+      +     '<p class="form-hint">Mientras estos campos estén vacíos, el checkout muestra esas opciones de pago como "pendientes de activación" en vez de simular que funcionan. La llave de Wompi se obtiene en el panel de comercio de Wompi (Configuración → Llaves API); usa la que empieza en <code>pub_test_</code> para probar y la de <code>pub_prod_</code> cuando esté lista para cobrar de verdad.</p>'
+      +   '</fieldset>'
       +   '<fieldset><legend>Subastas (valores por defecto)</legend>'
       +     '<div class="form-grid">'
       +       '<label><span>Duración (horas)</span><input type="number" name="durationHours" value="' + cfg.auctionDefaults.durationHours + '" min="0.1" step="0.1"></label>'
@@ -713,6 +781,10 @@
         tagline: fd.get('tagline'),
         wholesaleDiscountPct: Number(fd.get('wholesaleDiscountPct')),
         wholesaleMinQty: Number(fd.get('wholesaleMinQty')),
+        payments: {
+          whatsappNumber: (fd.get('whatsappNumber') || '').trim(),
+          wompiPublicKey: (fd.get('wompiPublicKey') || '').trim()
+        },
         auctionDefaults: {
           durationHours: Number(fd.get('durationHours')),
           minIncrementPct: Number(fd.get('minIncrementPct')),

@@ -18,7 +18,8 @@
     config: 'cronos:config',
     counters: 'cronos:counters',
     meta: 'cronos:meta',
-    cart: 'cronos:cart'
+    cart: 'cronos:cart',
+    orders: 'cronos:orders'
   };
 
   // Al subir SEED_VERSION se regenera el catálogo demo en navegadores que ya
@@ -194,6 +195,13 @@
       lead: 'Descubre relojes originales seleccionados por su diseño, precisión y carácter. Piezas verificadas, envíos a toda Colombia y atención antes y después de la compra.',
       ctaPrimary: { label: 'Explorar relojes', href: 'catalogo.html' },
       ctaSecondary: { label: 'Ver subastas en vivo', href: 'subastas.html' }
+    },
+    // Datos de la pasarela de pago. Mientras estén vacíos, el checkout muestra
+    // esas opciones como "pendientes de activación" en vez de simular que
+    // funcionan. Se completan desde Admin → Configuración → Pagos.
+    payments: {
+      whatsappNumber: '',
+      wompiPublicKey: ''
     }
   };
 
@@ -573,8 +581,41 @@
     var next = Object.assign({}, cur, partial);
     if (partial.auctionDefaults) next.auctionDefaults = Object.assign({}, cur.auctionDefaults || {}, partial.auctionDefaults);
     if (partial.hero) next.hero = Object.assign({}, cur.hero || {}, partial.hero);
+    if (partial.payments) next.payments = Object.assign({}, cur.payments || {}, partial.payments);
     write(NS.config, next);
     return next;
+  }
+
+  // ---------- pedidos ----------
+
+  function getOrders() {
+    return read(NS.orders, []).slice().sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+  }
+
+  function getOrder(id) { return find(read(NS.orders, []), function (o) { return o.id === id; }) || null; }
+
+  function createOrder(data) {
+    var orders = read(NS.orders, []);
+    var order = Object.assign({
+      id: uid('ORD'),
+      reference: 'CRONOS-' + Date.now().toString(36).toUpperCase(),
+      status: 'pendiente', // pendiente | contactado | pagado | rechazado | cancelado
+      paymentMethod: null, // 'wompi' | 'whatsapp'
+      wompiTransactionId: null,
+      createdAt: nowIso()
+    }, data);
+    orders.push(order);
+    write(NS.orders, orders);
+    return order;
+  }
+
+  function updateOrder(id, patch) {
+    var orders = read(NS.orders, []);
+    var order = find(orders, function (o) { return o.id === id; });
+    if (!order) return null;
+    Object.assign(order, patch, { updatedAt: nowIso() });
+    write(NS.orders, orders);
+    return order;
   }
 
   // ---------- pub/sub ----------
@@ -641,6 +682,11 @@
     setCartQty: setCartQty,
     removeFromCart: removeFromCart,
     clearCart: clearCart,
+    // pedidos
+    getOrders: getOrders,
+    getOrder: getOrder,
+    createOrder: createOrder,
+    updateOrder: updateOrder,
     // config
     getConfig: getConfig,
     saveConfig: saveConfig,

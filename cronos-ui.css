@@ -1201,7 +1201,8 @@ textarea::placeholder {
   line-height: 1.4;
 }
 
-.cart-panel-continue {
+.cart-panel-checkout {
+  display: block;
   width: 100%;
   padding: 13px;
   border-radius: 8px;
@@ -1209,6 +1210,21 @@ textarea::placeholder {
   color: var(--bg, #14161c);
   font-weight: 600;
   font-size: 14px;
+  text-align: center;
+  margin-bottom: 8px;
+  transition: opacity .2s;
+}
+.cart-panel-checkout:hover { opacity: 0.88; }
+
+.cart-panel-continue {
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-soft, rgba(255,255,255,.14));
+  color: var(--fg, #fff);
+  font-weight: 500;
+  font-size: 13px;
   text-align: center;
 }
 
