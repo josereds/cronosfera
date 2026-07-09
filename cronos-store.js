@@ -200,7 +200,7 @@
     // esas opciones como "pendientes de activación" en vez de simular que
     // funcionan. Se completan desde Admin → Configuración → Pagos.
     payments: {
-      whatsappNumber: '',
+      whatsappNumber: '573107764080',
       wompiPublicKey: ''
     }
   };
