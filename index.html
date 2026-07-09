@@ -1012,12 +1012,34 @@
       50% { opacity: .4; transform: scale(1.35); }
     }
     .auctions-band {
+      position: relative;
       padding: 80px 0;
-      background:
-        radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent),
-        var(--bg);
+      background: var(--bg);
       border-top: 1px solid var(--border-soft);
       border-bottom: 1px solid var(--border-soft);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .auctions-band-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Escalado un poco por encima del 100% para que el desenfoque no
+         deje ver el borde nítido del video contra el recuadro. */
+      transform: scale(1.08);
+      filter: blur(6px) saturate(1.05);
+      z-index: -2;
+      pointer-events: none;
+    }
+    .auctions-band::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent),
+        color-mix(in oklab, var(--bg) 72%, transparent);
+      z-index: -1;
     }
     .auctions-band .section-head { margin-bottom: 36px; }
     .auctions-strip {
@@ -1188,6 +1210,7 @@
 
     <!-- ============================== AUCTIONS LIVE ============================== -->
     <section class="bay auctions-band" id="auctions">
+      <video class="auctions-band-video" src="media/auctions-bg.mp4" poster="media/auctions-bg-poster.jpg" autoplay muted loop playsinline aria-hidden="true"></video>
       <div class="container-wide">
         <div class="section-head reveal">
           <div>
@@ -1597,6 +1620,18 @@
     }
     renderBrandIndex();
     if (window.Store && Store.subscribe) Store.subscribe(renderBrandIndex);
+
+    // Algunos navegadores no disparan el atributo autoplay del video de
+    // fondo de subastas si la página tarda en quedar "interactiva"; forzamos
+    // play() como respaldo (silencioso si el navegador igual lo bloquea).
+    var auctionsVideo = document.querySelector('.auctions-band-video');
+    if (auctionsVideo) {
+      var tryPlayAuctionsVideo = function () { auctionsVideo.play().catch(function () {}); };
+      tryPlayAuctionsVideo();
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) tryPlayAuctionsVideo();
+      });
+    }
 
     // ============== Live auctions strip ==============
     function escapeHtml(s) {
