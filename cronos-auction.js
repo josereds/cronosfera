@@ -58,6 +58,14 @@
     return global.Store.getProduct(auction.productId);
   }
 
+  // Foto real del producto si existe; si no, el reloj SVG genérico como respaldo.
+  function mediaHtml(p) {
+    if (p && p.image) {
+      return '<img class="auc-photo" src="' + p.image + '" alt="' + escapeHtml((p.brand || '') + ' ' + (p.model || '')) + '" loading="lazy">';
+    }
+    return '<div class="ph-img">' + watchSVG(p ? p.tone : 'ink', p ? p.brand : '') + '</div>';
+  }
+
   // ---------- Card render ----------
 
   function renderAuctionCard(auction, opts) {
@@ -66,7 +74,6 @@
     var status = global.Store.getAuctionStatus(auction);
     var remaining = new Date(auction.endsAt).getTime() - Date.now();
     var href = 'subastas.html?id=' + encodeURIComponent(auction.id);
-    var img = p ? watchSVG(p.tone, p.brand) : watchSVG('ink');
 
     var productTitle = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
     var ref = p ? p.ref : '';
@@ -87,7 +94,7 @@
     return ''
       + '<article class="auc-card ' + status + '"' + (opts.compact ? '' : ' data-aos') + '>'
       +   '<a href="' + href + '" class="auc-media">'
-      +     '<div class="ph-img">' + img + '</div>'
+      +     mediaHtml(p)
       +     statusBadge(status)
       +   '</a>'
       +   '<div class="auc-body">'
@@ -115,7 +122,6 @@
     var user = global.Store.currentUser();
     var minNext = global.Store.minNextBid(auction);
 
-    var img = p ? watchSVG(p.tone, p.brand) : watchSVG('ink');
     var title = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
     var ref = p ? p.ref : '';
 
@@ -146,7 +152,7 @@
     container.innerHTML = ''
       + '<div class="auc-detail">'
       +   '<div class="auc-detail-media">'
-      +     '<div class="ph-img">' + img + '</div>'
+      +     mediaHtml(p)
       +     statusBadge(status)
       +   '</div>'
       +   '<div class="auc-detail-info">'
@@ -241,7 +247,8 @@
     renderDetail: renderAuctionDetail,
     formatCountdown: formatCountdown,
     startTicker: startTicker,
-    watchSVG: watchSVG
+    watchSVG: watchSVG,
+    mediaHtml: mediaHtml
   };
 
   if (document.readyState !== 'loading') startTicker();

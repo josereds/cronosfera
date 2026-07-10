@@ -305,12 +305,19 @@
       + '</div>'
       + '<div class="admin-table-wrap">'
       +   '<table class="admin-table" id="prodTable">'
-      +     '<thead><tr><th>Ref</th><th>Producto</th><th>Precio</th><th>Stock</th><th>Mayorista</th><th></th></tr></thead>'
+      +     '<thead><tr><th></th><th>Producto</th><th>Ref</th><th>Precio</th><th>Stock</th><th>Mayorista</th><th></th></tr></thead>'
       +     '<tbody></tbody>'
       +   '</table>'
       + '</div>';
 
     var tbody = pane.querySelector('#prodTable tbody');
+
+    function thumbCell(p) {
+      if (p.image) {
+        return '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(p.image) + '" alt="" loading="lazy"></td>';
+      }
+      return '<td class="thumb-cell"><span class="admin-thumb placeholder">◷</span></td>';
+    }
 
     function draw(filter) {
       var products = Store.getProducts();
@@ -320,19 +327,37 @@
         return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
       });
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No se encontraron productos.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No se encontraron productos.</td></tr>';
         return;
       }
-      tbody.innerHTML = list.map(function (p) {
-        var w = Store.wholesalePriceFor(p);
-        return '<tr data-id="' + p.id + '">'
-          + '<td class="mono small">' + escapeHtml(p.ref) + '</td>'
-          + '<td><strong>' + escapeHtml(p.model) + '</strong><div class="row-meta">' + escapeHtml(p.brand) + '</div></td>'
-          + '<td class="mono">' + Store.formatCOP(p.price) + '</td>'
-          + '<td><span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></td>'
-          + '<td class="mono accent">' + Store.formatCOP(w) + '</td>'
-          + '<td class="actions"><button class="icon-action edit" title="Editar">✎</button><button class="icon-action delete" title="Eliminar">×</button></td>'
-          + '</tr>';
+
+      // Agrupar por marca (orden alfabético de marca, y por modelo dentro de cada una).
+      var groups = {};
+      list.forEach(function (p) {
+        var key = p.brand || 'Sin marca';
+        (groups[key] = groups[key] || []).push(p);
+      });
+      var brandNames = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+
+      tbody.innerHTML = brandNames.map(function (brand) {
+        var items = groups[brand].slice().sort(function (a, b) { return (a.model || '').localeCompare(b.model || '', 'es'); });
+        var header = '<tr class="brand-group-row"><td colspan="7"><span class="brand-group-label">'
+          + escapeHtml(brand)
+          + '<span class="brand-group-count">' + items.length + (items.length === 1 ? ' referencia' : ' referencias') + '</span>'
+          + '</span></td></tr>';
+        var rows = items.map(function (p) {
+          var w = Store.wholesalePriceFor(p);
+          return '<tr data-id="' + p.id + '">'
+            + thumbCell(p)
+            + '<td><strong>' + escapeHtml(p.model) + '</strong><div class="row-meta">' + escapeHtml(p.brand) + '</div></td>'
+            + '<td class="mono small">' + escapeHtml(p.ref) + '</td>'
+            + '<td class="mono">' + Store.formatCOP(p.price) + '</td>'
+            + '<td><span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></td>'
+            + '<td class="mono accent">' + Store.formatCOP(w) + '</td>'
+            + '<td class="actions"><button class="icon-action edit" title="Editar">✎</button><button class="icon-action delete" title="Eliminar">×</button></td>'
+            + '</tr>';
+        }).join('');
+        return header + rows;
       }).join('');
     }
 
@@ -462,16 +487,21 @@
       + '</div>'
       + '<div class="admin-table-wrap">'
       +   '<table class="admin-table" id="aucTable">'
-      +     '<thead><tr><th>Producto</th><th>Puja actual</th><th>Pujas</th><th>Estado</th><th>Termina</th><th></th></tr></thead>'
+      +     '<thead><tr><th></th><th>Producto</th><th>Puja actual</th><th>Pujas</th><th>Estado</th><th>Termina</th><th></th></tr></thead>'
       +     '<tbody></tbody>'
       +   '</table>'
       + '</div>';
 
     var tbody = pane.querySelector('#aucTable tbody');
 
+    function aucThumb(p) {
+      if (p && p.image) return '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(p.image) + '" alt="" loading="lazy"></td>';
+      return '<td class="thumb-cell"><span class="admin-thumb placeholder">◷</span></td>';
+    }
+
     function draw() {
       if (sorted.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Aún no has creado subastas.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Aún no has creado subastas.</td></tr>';
         return;
       }
       tbody.innerHTML = sorted.map(function (a) {
@@ -479,13 +509,19 @@
         var status = Store.getAuctionStatus(a);
         var bids = Store.getBidsForAuction(a.id).length;
         var ends = new Date(a.endsAt);
+        var leader = a.currentBidderId ? Store.getUser(a.currentBidderId) : null;
+        var leaderMeta = bids > 0
+          ? '<div class="row-meta">Va ganando: ' + escapeHtml(leader ? leader.name : 'Postor') + '</div>'
+          : '<div class="row-meta">Sin pujas aún</div>';
         return '<tr data-id="' + a.id + '">'
-          + '<td><strong>' + escapeHtml(p ? p.model : '— producto eliminado') + '</strong><div class="row-meta">' + escapeHtml(p ? p.ref : '') + '</div></td>'
-          + '<td class="mono accent">' + Store.formatCOP(a.currentBid) + '</td>'
+          + aucThumb(p)
+          + '<td><strong>' + escapeHtml(p ? p.brand + ' · ' + p.model : '— producto eliminado') + '</strong><div class="row-meta">' + escapeHtml(p ? p.ref : '') + '</div></td>'
+          + '<td class="mono accent">' + Store.formatCOP(a.currentBid) + leaderMeta + '</td>'
           + '<td class="mono">' + bids + '</td>'
           + '<td><span class="status-pill ' + status + '">' + status + '</span></td>'
           + '<td class="mono small">' + ends.toLocaleString('es-CO') + '</td>'
           + '<td class="actions">'
+          +    '<button class="icon-action bids" title="Ver pujas">☰</button>'
           +    (status === 'live' ? '<button class="icon-action close" title="Cerrar ahora">■</button>' : '')
           +    '<button class="icon-action delete" title="Eliminar">×</button>'
           + '</td>'
@@ -501,6 +537,10 @@
       var id = tr.getAttribute('data-id');
       var a = Store.getAuction(id);
       if (!a) return;
+      if (e.target.matches('.bids') || (!e.target.closest('.actions') && !e.target.closest('.thumb-cell'))) {
+        openAuctionBidsModal(id);
+        return;
+      }
       if (e.target.matches('.close')) {
         if (confirmDialog('¿Cerrar la subasta ahora? El ganador será el último postor.')) {
           Store.closeAuction(id);
@@ -519,6 +559,52 @@
         }
       }
     });
+  }
+
+  function openAuctionBidsModal(auctionId) {
+    var a = Store.getAuction(auctionId);
+    if (!a) return;
+    var p = Store.getProduct(a.productId);
+    var status = Store.getAuctionStatus(a);
+    var bids = Store.getBidsForAuction(auctionId); // ya ordenadas por monto desc
+    // Historial cronológico (más reciente primero) para "quién pujó y cuándo".
+    var chrono = bids.slice().sort(function (x, y) { return new Date(y.at) - new Date(x.at); });
+
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal' });
+
+    var rowsHtml = chrono.length === 0
+      ? '<tr><td colspan="4" class="empty-row">Aún no hay pujas en esta subasta.</td></tr>'
+      : chrono.map(function (b, i) {
+          var u = Store.getUser(b.userId);
+          var isLeader = b.userId === a.currentBidderId && b.amount === a.currentBid;
+          return '<tr>'
+            + '<td class="mono">' + Store.formatCOP(b.amount) + (isLeader ? ' <span class="status-pill approved" style="margin-left:6px">líder</span>' : '') + '</td>'
+            + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">' + escapeHtml(u ? u.email : b.userId) + '</div></td>'
+            + '<td class="mono small">' + new Date(b.at).toLocaleString('es-CO') + '</td>'
+            + '</tr>';
+        }).join('');
+
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>Pujas · ' + escapeHtml(p ? p.brand + ' · ' + p.model : 'Subasta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<div class="req-card-meta" style="border:0;padding:0 0 16px">'
+      +   '<div><span>Estado</span><strong><span class="status-pill ' + status + '">' + status + '</span></strong></div>'
+      +   '<div><span>Puja actual</span><strong class="mono accent">' + Store.formatCOP(a.currentBid) + '</strong></div>'
+      +   '<div><span>Total de pujas</span><strong>' + bids.length + '</strong></div>'
+      +   '<div><span>Termina</span><strong class="mono small">' + new Date(a.endsAt).toLocaleString('es-CO') + '</strong></div>'
+      + '</div>'
+      + '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Puja</th><th>Postor</th><th>Cuándo</th></tr></thead>'
+      +   '<tbody>' + rowsHtml + '</tbody></table></div>'
+      + '<p class="form-hint" style="margin-top:14px">El postor debe tener cuenta para pujar, así que cada puja queda asociada a un nombre y correo verificables.</p>'
+      + '<div class="modal-actions"><button type="button" class="btn-primary close-modal">Cerrar</button></div>';
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.close-modal').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
   }
 
   function openAuctionModal() {

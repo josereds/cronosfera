@@ -1073,6 +1073,8 @@
       background: radial-gradient(ellipse at 50% 65%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 70%);
     }
     .auc-mini-media .ph-img { width: 56%; position: relative; z-index: 1; filter: drop-shadow(0 14px 28px rgba(0,0,0,.4)); }
+    .auc-mini-media .auc-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .auc-mini:hover .auc-mini-media .auc-photo { transform: scale(1.05); }
     .auc-mini-badge {
       position: absolute; top: 12px; left: 12px;
       padding: 4px 10px;
@@ -1665,15 +1667,19 @@
         var p = Store.getProduct(a.productId);
         var status = Store.getAuctionStatus(a);
         var title = p ? p.brand + ' · ' + p.model : a.title || 'Pieza Cronosfera';
-        var img = window.Auction ? Auction.watchSVG(p ? p.tone : 'ink') : watchSVG(p ? p.tone : 'ink');
+        // Foto real si el producto la tiene; el SVG genérico solo como respaldo.
+        var media = window.Auction ? Auction.mediaHtml(p) : '<div class="ph-img">' + watchSVG(p ? p.tone : 'ink') + '</div>';
         var countdown = status === 'live'
           ? (window.Auction ? Auction.formatCountdown(new Date(a.endsAt).getTime() - Date.now()) : 'En vivo')
           : 'Programada';
+        // Sin clase .reveal: estas tarjetas se inyectan después de que el
+        // IntersectionObserver ya recorrió el DOM, así que nunca recibirían
+        // la clase .in y quedarían invisibles (opacity:0).
         return ''
-          + '<a class="auc-mini reveal" href="subastas.html?id=' + encodeURIComponent(a.id) + '">'
+          + '<a class="auc-mini" href="subastas.html?id=' + encodeURIComponent(a.id) + '">'
           +   '<div class="auc-mini-media">'
           +     '<span class="auc-mini-badge"><span class="pulse-dot"></span>' + (status === 'live' ? 'EN VIVO' : 'PROGRAMADA') + '</span>'
-          +     '<div class="ph-img">' + img + '</div>'
+          +     media
           +   '</div>'
           +   '<div class="auc-mini-body">'
           +     '<div class="auc-mini-title">' + escapeHtml(title) + '</div>'
