@@ -295,92 +295,130 @@
   }
 
   // ============== CATÁLOGO CRUD ==============
+  // Estado de navegación del catálogo: qué marca está abierta (persiste entre
+  // re-render dentro de la misma sesión del panel).
+  var catalogOpenBrand = null;
+
   function renderCatalogo(pane) {
     pane.innerHTML = ''
       + '<div class="catalogo-head">'
       +   '<div class="catalogo-search">'
-      +     '<input type="search" id="prodSearch" placeholder="Buscar por nombre, referencia…">'
+      +     '<input type="search" id="prodSearch" placeholder="Buscar en todo el catálogo…">'
       +   '</div>'
       +   '<button class="btn-primary" id="newProduct">+ Nuevo producto</button>'
       + '</div>'
-      + '<div class="admin-table-wrap">'
-      +   '<table class="admin-table" id="prodTable">'
-      +     '<thead><tr><th></th><th>Producto</th><th>Ref</th><th>Precio</th><th>Stock</th><th>Mayorista</th><th></th></tr></thead>'
-      +     '<tbody></tbody>'
-      +   '</table>'
-      + '</div>';
+      + '<div id="catalogBody"></div>';
 
-    var tbody = pane.querySelector('#prodTable tbody');
+    var body = pane.querySelector('#catalogBody');
+    var search = pane.querySelector('#prodSearch');
 
-    function thumbCell(p) {
-      if (p.image) {
-        return '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(p.image) + '" alt="" loading="lazy"></td>';
-      }
-      return '<td class="thumb-cell"><span class="admin-thumb placeholder">◷</span></td>';
+    function coverImg(items) {
+      var withImg = items.filter(function (p) { return p.image; });
+      return withImg.length ? withImg[0].image : null;
     }
 
-    function draw(filter) {
-      var products = Store.getProducts();
-      filter = (filter || '').toLowerCase();
-      var list = products.filter(function (p) {
-        if (!filter) return true;
-        return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
-      });
-      if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No se encontraron productos.</td></tr>';
+    function prodCard(p) {
+      var w = Store.wholesalePriceFor(p);
+      var cover = p.image
+        ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">'
+        : '<span class="admin-prod-ph">◷</span>';
+      return '<div class="admin-prod-card" data-id="' + p.id + '">'
+        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></div>'
+        + '<div class="admin-prod-body">'
+        +   '<div class="admin-prod-model">' + escapeHtml(p.model) + '</div>'
+        +   '<div class="admin-prod-ref mono">' + escapeHtml(p.ref) + '</div>'
+        +   '<div class="admin-prod-prices"><span class="pr">' + Store.formatCOP(p.price) + '</span><span class="wpr">May. ' + Store.formatCOP(w) + '</span></div>'
+        + '</div>'
+        + '<div class="admin-prod-actions"><button class="btn-ghost edit">Editar</button><button class="icon-action delete" title="Eliminar">×</button></div>'
+        + '</div>';
+    }
+
+    function groupByBrand(products) {
+      var groups = {};
+      products.forEach(function (p) { var k = p.brand || 'Sin marca'; (groups[k] = groups[k] || []).push(p); });
+      return groups;
+    }
+
+    var folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke-linejoin="round"/></svg>';
+
+    function drawBrandGrid() {
+      var groups = groupByBrand(Store.getProducts());
+      var names = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+      if (names.length === 0) {
+        body.innerHTML = '<div class="empty-state"><h3>Sin productos todavía</h3><p>Crea el primero con “+ Nuevo producto”.</p></div>';
         return;
       }
-
-      // Agrupar por marca (orden alfabético de marca, y por modelo dentro de cada una).
-      var groups = {};
-      list.forEach(function (p) {
-        var key = p.brand || 'Sin marca';
-        (groups[key] = groups[key] || []).push(p);
-      });
-      var brandNames = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b, 'es'); });
-
-      tbody.innerHTML = brandNames.map(function (brand) {
-        var items = groups[brand].slice().sort(function (a, b) { return (a.model || '').localeCompare(b.model || '', 'es'); });
-        var header = '<tr class="brand-group-row"><td colspan="7"><span class="brand-group-label">'
-          + escapeHtml(brand)
-          + '<span class="brand-group-count">' + items.length + (items.length === 1 ? ' referencia' : ' referencias') + '</span>'
-          + '</span></td></tr>';
-        var rows = items.map(function (p) {
-          var w = Store.wholesalePriceFor(p);
-          return '<tr data-id="' + p.id + '">'
-            + thumbCell(p)
-            + '<td><strong>' + escapeHtml(p.model) + '</strong><div class="row-meta">' + escapeHtml(p.brand) + '</div></td>'
-            + '<td class="mono small">' + escapeHtml(p.ref) + '</td>'
-            + '<td class="mono">' + Store.formatCOP(p.price) + '</td>'
-            + '<td><span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></td>'
-            + '<td class="mono accent">' + Store.formatCOP(w) + '</td>'
-            + '<td class="actions"><button class="icon-action edit" title="Editar">✎</button><button class="icon-action delete" title="Eliminar">×</button></td>'
-            + '</tr>';
-        }).join('');
-        return header + rows;
-      }).join('');
+      body.innerHTML = '<div class="brand-folder-grid">' + names.map(function (brand) {
+        var items = groups[brand];
+        var cover = coverImg(items);
+        return '<button class="brand-folder" data-brand="' + escapeHtml(brand) + '">'
+          + '<span class="brand-folder-cover">'
+          +   (cover ? '<img src="' + escapeHtml(cover) + '" alt="" loading="lazy">' : '<span class="brand-folder-ph">◷</span>')
+          +   '<span class="brand-folder-count">' + items.length + '</span>'
+          + '</span>'
+          + '<span class="brand-folder-body">' + folderSvg + '<span class="brand-folder-name">' + escapeHtml(brand) + '</span></span>'
+          + '</button>';
+      }).join('') + '</div>';
     }
 
-    draw('');
-    pane.querySelector('#prodSearch').addEventListener('input', function (e) { draw(e.target.value); });
-    pane.querySelector('#newProduct').addEventListener('click', function () { openProductModal(null); });
+    function drawBrandView(brand) {
+      var items = Store.getProducts()
+        .filter(function (p) { return (p.brand || 'Sin marca') === brand; })
+        .sort(function (a, b) { return (a.model || '').localeCompare(b.model || '', 'es'); });
+      body.innerHTML = ''
+        + '<div class="folder-bar">'
+        +   '<button class="folder-back" id="folderBack">← Todas las marcas</button>'
+        +   '<span class="folder-title">' + escapeHtml(brand) + '<span class="count">' + items.length + (items.length === 1 ? ' referencia' : ' referencias') + '</span></span>'
+        + '</div>'
+        + '<div class="admin-prod-grid">' + items.map(prodCard).join('') + '</div>';
+    }
 
-    tbody.addEventListener('click', function (e) {
-      var tr = e.target.closest('tr[data-id]'); if (!tr) return;
-      var id = tr.getAttribute('data-id');
-      if (e.target.matches('.edit')) openProductModal(id);
-      if (e.target.matches('.delete')) {
+    function drawSearch(filter) {
+      var list = Store.getProducts().filter(function (p) {
+        return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
+      }).sort(function (a, b) {
+        return (a.brand + a.model).localeCompare(b.brand + b.model, 'es');
+      });
+      if (list.length === 0) {
+        body.innerHTML = '<div class="empty-state"><h3>Sin resultados</h3><p>No hay productos que coincidan con “' + escapeHtml(filter) + '”.</p></div>';
+        return;
+      }
+      body.innerHTML = '<div class="catalog-count">' + list.length + (list.length === 1 ? ' resultado' : ' resultados') + ' para “' + escapeHtml(filter) + '”</div>'
+        + '<div class="admin-prod-grid">' + list.map(prodCard).join('') + '</div>';
+    }
+
+    function drawBody() {
+      var filter = (search.value || '').toLowerCase().trim();
+      if (filter) { drawSearch(filter); return; }
+      if (catalogOpenBrand && groupByBrand(Store.getProducts())[catalogOpenBrand]) drawBrandView(catalogOpenBrand);
+      else { catalogOpenBrand = null; drawBrandGrid(); }
+    }
+
+    body.addEventListener('click', function (e) {
+      var folder = e.target.closest('.brand-folder');
+      if (folder) { catalogOpenBrand = folder.getAttribute('data-brand'); drawBody(); return; }
+      if (e.target.closest('#folderBack')) { catalogOpenBrand = null; search.value = ''; drawBody(); return; }
+      var card = e.target.closest('.admin-prod-card');
+      if (!card) return;
+      var id = card.getAttribute('data-id');
+      if (e.target.closest('.edit')) { openProductModal(id, drawBody); return; }
+      if (e.target.closest('.delete')) {
         var p = Store.getProduct(id);
         if (confirmDialog('¿Eliminar "' + (p ? p.model : '') + '"? Esta acción no se puede deshacer.')) {
           Store.deleteProduct(id);
           toast('Producto eliminado', 'success');
-          draw(pane.querySelector('#prodSearch').value);
+          drawBody();
         }
       }
     });
+
+    search.addEventListener('input', function () { drawBody(); });
+    pane.querySelector('#newProduct').addEventListener('click', function () { openProductModal(null, drawBody); });
+
+    drawBody();
   }
 
-  function openProductModal(id) {
+  function openProductModal(id, onDone) {
     var p = id ? Store.getProduct(id) : { brand: '', brandSlug: '', model: '', ref: '', price: 0, wasPrice: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026'], gender: '', mechanism: '', crystal: '', strap: '' };
     if (p.brand && !p.brandSlug) p.brandSlug = Store.productBrandSlug(p);
     var overlay = el('div', { class: 'modal-overlay' });
@@ -464,7 +502,10 @@
       Store.saveProduct(Object.assign({}, p, data));
       toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
       close();
-      renderTab('catalogo', document.getElementById('tab-catalogo'));
+      // Tras guardar, aterrizar en la carpeta de la marca del producto para ver el cambio.
+      if (data.brand) catalogOpenBrand = data.brand;
+      if (typeof onDone === 'function') onDone();
+      else renderTab('catalogo', document.getElementById('tab-catalogo'));
     });
   }
 
