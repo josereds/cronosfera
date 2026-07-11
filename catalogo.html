@@ -1232,8 +1232,11 @@
 
     // Algunos logos blancos traen mucho margen dentro de su propio PNG y se
     // ven chicos junto a los demás a igual max-height; se acercan más.
-    var BRAND_LOGO_SCALE = { mulco: 2.55, orient: 1.5, festina: 1.38, 'mount-royal': 1.2, bulova: 1.3, seiko: 1.3, cat: 1.2, tissot: 1.2, diesel: 1.15, fossil: 1.15, guess: 1.15 };
-    var BRAND_LOGO_OFFSET_Y = { fossil: 3, mulco: -6, seiko: 4 };
+    var BRAND_LOGO_SCALE = { orient: 1.5, festina: 1.38, 'mount-royal': 1.2, bulova: 1.3, seiko: 1.3, cat: 1.2, tissot: 1.2, diesel: 1.15, fossil: 1.15, guess: 1.15 };
+    // Logos anchos: se dimensionan por ancho relativo al contenedor (responsivo),
+    // no por scale fijo, para que no se recorten en columnas angostas.
+    var BRAND_LOGO_WIDTH = { mulco: '82%' };
+    var BRAND_LOGO_OFFSET_Y = { fossil: 3, mulco: -4, seiko: 4 };
     function renderBrandTile(b) {
       var meta = b.count > 0 ? b.count + (b.count === 1 ? ' referencia' : ' referencias') : 'Próximamente';
       var emptyAttr = b.count ? '' : ' data-empty="true"';
@@ -1244,9 +1247,11 @@
           + '</a>';
       }
       var scale = BRAND_LOGO_SCALE[b.slug];
+      var width = BRAND_LOGO_WIDTH[b.slug];
       var offsetY = BRAND_LOGO_OFFSET_Y[b.slug];
       var vars = [];
-      if (scale) vars.push('--logo-scale:' + scale);
+      if (width) vars.push('--logo-width:' + width);
+      else if (scale) vars.push('--logo-scale:' + scale);
       if (offsetY) vars.push('--logo-offset-y:' + offsetY + 'px');
       var logo = b.image
         ? '<img class="brand-tile-logo" src="' + b.image + '" alt="' + b.name + '" loading="lazy"' + (vars.length ? ' style="' + vars.join(';') + '"' : '') + '>'

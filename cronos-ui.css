@@ -926,6 +926,16 @@ textarea::placeholder {
   transform: scale(var(--logo-scale, 1)) translateY(var(--logo-offset-y, 0));
 }
 
+/* Logos anchos (ej. Mulco) se dimensionan por ancho relativo al contenedor
+   en vez de por scale fijo, para que crezcan/encogan con el tile y nunca se
+   recorten en columnas angostas. La altura se deriva sola (aspect-ratio). */
+.brand-tile-logo[style*="--logo-width"] {
+  width: var(--logo-width);
+  max-width: var(--logo-width);
+  max-height: none;
+  transform: translateY(var(--logo-offset-y, 0));
+}
+
 .brand-tile-title {
   font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
   font-size: 16px;
