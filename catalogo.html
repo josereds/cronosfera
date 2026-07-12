@@ -474,7 +474,7 @@
     .product-tag .new { background: var(--fg); color: var(--surface); }
     .product-tag .special { background: var(--accent); color: var(--surface); }
     .product-tag .best { background: var(--surface); color: var(--accent-deep); border: 1px solid var(--accent); }
-    .product-fav {
+    .product-ask-wa {
       position: absolute; top: 12px; right: 12px;
       width: 36px; height: 36px;
       display: grid; place-items: center;
@@ -484,9 +484,8 @@
       transition: all 0.2s;
       z-index: 2;
     }
-    .product-fav:hover { color: var(--accent-deep); transform: scale(1.05); }
-    .product-fav.active { color: var(--accent); }
-    .product-fav svg { width: 18px; height: 18px; }
+    .product-ask-wa:hover { color: oklch(60% 0.14 150); transform: scale(1.05); }
+    .product-ask-wa svg { width: 18px; height: 18px; }
     .product-info { padding: 20px; display: flex; flex-direction: column; gap: 6px; }
     .product-brand { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
     .product-model { font-size: 16px; font-weight: 500; color: var(--fg); line-height: 1.3; }
@@ -691,9 +690,6 @@
         </button>
         <button class="icon-btn" aria-label="Cuenta">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/></svg>
-        </button>
-        <button class="icon-btn" aria-label="Favoritos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg>
         </button>
         <button class="icon-btn cart-btn" aria-label="Carrito">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
@@ -942,6 +938,28 @@
       activeBrand = Store.getBrand(urlParams.get('marca'));
     }
     function cop(v){ return '$' + v.toLocaleString('es-CO'); }
+    function buildAskWhatsappUrl(p) {
+      var num = window.Store ? (Store.getConfig().payments || {}).whatsappNumber : '';
+      if (!num) return null;
+      var titulo = [p.brand, p.model].filter(Boolean).join(' ');
+      var url = window.location.origin + '/producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : '');
+      var msg = 'Hola, quiero preguntar por este reloj de Cronosfera:\n\n'
+        + (titulo ? titulo + '\n' : '')
+        + (p.ref ? 'Referencia: ' + p.ref + '\n' : '')
+        + (p.price ? 'Precio: ' + cop(p.price) + '\n' : '')
+        + '\n' + url;
+      return 'https://api.whatsapp.com/send?phone=' + encodeURIComponent(num) + '&text=' + encodeURIComponent(msg);
+    }
+    // Navegación real (no window.open, para que no lo bloquee el navegador como
+    // popup) sin anidar un <a> dentro de la tarjeta que ya es un <a>.
+    function openWhatsApp(url) {
+      if (!url) return;
+      var a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
     function watchSVG(tone, brandName){
       var bg = ({ink:'#1a1c20', cool:'#323a42', bronze:'#6a5340', fog:'#dcd6cc', steel:'#a8a298', green:'#344a3a'})[tone] || '#1a1c20';
       var fg = (tone === 'fog' || tone === 'steel') ? '#3a342a' : '#e9e6df';
@@ -988,7 +1006,7 @@
         + '<div class="product-media">'
         +   '<div class="ph-img">' + media + '</div>'
         +   '<div class="product-tag">' + tag + '</div>'
-        +   '<button class="product-fav" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-4.3-9-9c-1.3-3.2.6-6.5 4-6.5 2 0 3.5 1.4 5 3.5 1.5-2.1 3-3.5 5-3.5 3.4 0 5.3 3.3 4 6.5-2 4.7-9 9-9 9z" stroke-linejoin="round"/></svg></button>'
+        +   '<button class="product-ask-wa" aria-label="Preguntar por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.7.8-.9 1c-.2.2-.3.2-.6.1s-1.2-.4-2.2-1.4c-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.5.1-.6l.4-.5c.1-.1.2-.3.2-.4.1-.1.1-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.7 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg></button>'
         + '</div>'
         + '<div class="product-info">'
         +   '<div class="product-brand">' + p.brand + ' · <span class="mono" style="color:var(--muted-2);text-transform:none;letter-spacing:0">' + p.ref + '</span></div>'
@@ -1002,8 +1020,8 @@
         +     '<button class="icon-mini" aria-label="Vista rápida"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>'
         +   '</div>'
         + '</div>';
-      var fav = card.querySelector('.product-fav');
-      fav.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); fav.classList.toggle('active'); });
+      var askWa = card.querySelector('.product-ask-wa');
+      askWa.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openWhatsApp(buildAskWhatsappUrl(p)); });
       var cta = card.querySelector('.product-cta .btn');
       cta.addEventListener('click', function(e){
         e.preventDefault(); e.stopPropagation();

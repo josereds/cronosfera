@@ -588,7 +588,7 @@ textarea::placeholder {
     scroll-margin-bottom: calc(var(--mobile-nav-h) + 28px);
   }
 
-  /* Product cards: keep badges away from favorite button on narrow cards. */
+  /* Product cards: keep badges away from the ask-WhatsApp button on narrow cards. */
   .product-media .product-tag {
     top: 10px !important;
     left: 10px !important;
@@ -608,7 +608,7 @@ textarea::placeholder {
     letter-spacing: .08em !important;
   }
 
-  .product-media .product-fav {
+  .product-media .product-ask-wa {
     top: 9px !important;
     right: 9px !important;
     width: 32px !important;
