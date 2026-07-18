@@ -201,7 +201,10 @@
     // funcionan. Se completan desde Admin → Configuración → Pagos.
     payments: {
       whatsappNumber: '573107764080',
-      wompiPublicKey: ''
+      // Llave de PRUEBAS de Wompi activa mientras se verifica el flujo de pago
+      // end-to-end. Cristian ya envió la de producción (pub_prod_...); se
+      // cambia a esa solo cuando confirme que quiere empezar a cobrar de verdad.
+      wompiPublicKey: 'pub_test_4vSzA3WLfIFWpXhyt0dxJXNVAhNue4F1'
     }
   };
 
