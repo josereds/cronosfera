@@ -204,7 +204,11 @@
       // Llave de PRUEBAS de Wompi activa mientras se verifica el flujo de pago
       // end-to-end. Cristian ya envió la de producción (pub_prod_...); se
       // cambia a esa solo cuando confirme que quiere empezar a cobrar de verdad.
-      wompiPublicKey: 'pub_test_4vSzA3WLfIFWpXhyt0dxJXNVAhNue4F1'
+      wompiPublicKey: 'pub_test_4vSzA3WLfIFWpXhyt0dxJXNVAhNue4F1',
+      // "Secreto de integridad" del dashboard de Wompi (Desarrolladores → Llaves
+      // API), distinto de la llave pública/privada. Sin esto, Wompi rechaza el
+      // pago con "Firma de integridad requerida no enviada" si la cuenta lo exige.
+      wompiIntegritySecret: ''
     }
   };
 

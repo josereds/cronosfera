@@ -877,7 +877,8 @@
       +   '<fieldset><legend>Pagos (checkout)</legend>'
       +     '<label class="block"><span>Número de WhatsApp para pedidos</span><input name="whatsappNumber" placeholder="Ej. 573001234567 (con indicativo de país, sin + ni espacios)" value="' + escapeHtml(cfg.payments.whatsappNumber) + '"></label>'
       +     '<label class="block"><span>Llave pública de Wompi</span><input name="wompiPublicKey" placeholder="pub_test_xxxxxxxxxxxx o pub_prod_xxxxxxxxxxxx" value="' + escapeHtml(cfg.payments.wompiPublicKey) + '"></label>'
-      +     '<p class="form-hint">Mientras estos campos estén vacíos, el checkout muestra esas opciones de pago como "pendientes de activación" en vez de simular que funcionan. La llave de Wompi se obtiene en el panel de comercio de Wompi (Configuración → Llaves API); usa la que empieza en <code>pub_test_</code> para probar y la de <code>pub_prod_</code> cuando esté lista para cobrar de verdad.</p>'
+      +     '<label class="block"><span>Secreto de integridad de Wompi (opcional)</span><input name="wompiIntegritySecret" placeholder="Solo si tu cuenta de Wompi exige firma de integridad" value="' + escapeHtml(cfg.payments.wompiIntegritySecret || '') + '"></label>'
+      +     '<p class="form-hint">Mientras estos campos estén vacíos, el checkout muestra esas opciones de pago como "pendientes de activación" en vez de simular que funcionan. La llave pública y el secreto de integridad están juntos en el panel de comercio de Wompi (Desarrolladores → Llaves API); usa la llave que empieza en <code>pub_test_</code> para probar y la de <code>pub_prod_</code> cuando esté lista para cobrar de verdad. Si al pagar Wompi muestra el error "Firma de integridad requerida no enviada", pega aquí el secreto de integridad (no la llave privada).</p>'
       +   '</fieldset>'
       +   '<fieldset><legend>Subastas (valores por defecto)</legend>'
       +     '<div class="form-grid">'
@@ -910,7 +911,8 @@
         wholesaleMinQty: Number(fd.get('wholesaleMinQty')),
         payments: {
           whatsappNumber: (fd.get('whatsappNumber') || '').trim(),
-          wompiPublicKey: (fd.get('wompiPublicKey') || '').trim()
+          wompiPublicKey: (fd.get('wompiPublicKey') || '').trim(),
+          wompiIntegritySecret: (fd.get('wompiIntegritySecret') || '').trim()
         },
         auctionDefaults: {
           durationHours: Number(fd.get('durationHours')),

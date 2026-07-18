@@ -559,26 +559,46 @@
         });
       }
 
+      // Firma de integridad de Wompi: SHA-256(referencia + montoEnCentavos + moneda + secreto),
+      // en hexadecimal. Es la fórmula que Wompi documenta para el Widget de pago
+      // cuando no hay backend; el secreto vive en el navegador (visible en el
+      // código fuente), lo cual reduce la protección de la firma frente a un
+      // atacante que inspeccione la página, pero es el modo que Wompi soporta
+      // para integraciones sin servidor y es obligatorio si la cuenta lo exige
+      // (como la de Cristian: "Firma de integridad requerida no enviada").
+      function sha256Hex(text) {
+        var enc = new TextEncoder().encode(text);
+        return crypto.subtle.digest('SHA-256', enc).then(function (buf) {
+          return Array.prototype.map.call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        });
+      }
+
       function mountWompiWidget(order, total) {
         if (!payments.wompiPublicKey) return;
         var mount = document.getElementById('wompiWidgetMount');
         mount.innerHTML = '';
         var redirectUrl = window.location.origin + window.location.pathname + '?orderId=' + encodeURIComponent(order.id);
-        var script = document.createElement('script');
-        script.src = 'https://checkout.wompi.co/widget.js';
-        script.setAttribute('data-render', 'button');
-        script.setAttribute('data-public-key', payments.wompiPublicKey);
-        script.setAttribute('data-currency', 'COP');
-        script.setAttribute('data-amount-in-cents', String(Math.round(total * 100)));
-        script.setAttribute('data-reference', order.reference);
-        script.setAttribute('data-redirect-url', redirectUrl);
-        // Nota para quien conecte las credenciales reales: este widget no incluye
-        // firma de integridad (data-signature:integrity) porque calcularla requiere
-        // el secreto de integridad de Wompi, que nunca debe vivir en el navegador.
-        // Es el modo de integración soportado sin backend; si más adelante se agrega
-        // uno, vale la pena sumar la firma para blindar el monto contra manipulación.
-        mount.appendChild(script);
-        Store.updateOrder(order.id, { paymentMethod: 'wompi' });
+        var amountInCents = String(Math.round(total * 100));
+
+        function appendScript(signature) {
+          var script = document.createElement('script');
+          script.src = 'https://checkout.wompi.co/widget.js';
+          script.setAttribute('data-render', 'button');
+          script.setAttribute('data-public-key', payments.wompiPublicKey);
+          script.setAttribute('data-currency', 'COP');
+          script.setAttribute('data-amount-in-cents', amountInCents);
+          script.setAttribute('data-reference', order.reference);
+          script.setAttribute('data-redirect-url', redirectUrl);
+          if (signature) script.setAttribute('data-signature:integrity', signature);
+          mount.appendChild(script);
+          Store.updateOrder(order.id, { paymentMethod: 'wompi' });
+        }
+
+        if (payments.wompiIntegritySecret) {
+          sha256Hex(order.reference + amountInCents + 'COP' + payments.wompiIntegritySecret).then(appendScript);
+        } else {
+          appendScript(null);
+        }
       }
 
       function bindWhatsappButton(order, total, customer) {
