@@ -574,8 +574,43 @@
     }
     .stock-banner::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
 
+    /* HIGHLIGHTS — especificaciones destacadas con ícono (datos reales) */
+    .highlights {
+      margin-top: 64px;
+      padding: 30px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-lg);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 26px;
+    }
+    .highlights[hidden] { display: none; }
+    .hl-item { display: flex; align-items: flex-start; gap: 13px; }
+    .hl-ico {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 11px;
+      background: color-mix(in oklab, var(--accent) 14%, var(--surface-2, var(--bg-warm)));
+      color: var(--accent-deep);
+      display: grid; place-items: center;
+    }
+    .hl-ico svg { width: 19px; height: 19px; }
+    .hl-k {
+      display: block;
+      font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+    }
+    .hl-v { display: block; font-size: 15px; font-weight: 600; color: var(--fg); line-height: 1.25; }
+
+    @media (max-width: 700px) {
+      .highlights { padding: 22px; gap: 20px; grid-template-columns: 1fr 1fr; }
+      .hl-ico { width: 34px; height: 34px; border-radius: 9px; }
+      .hl-ico svg { width: 16px; height: 16px; }
+      .hl-v { font-size: 13.5px; }
+    }
+
     /* DETAILS TABS */
-    .details { margin-top: 96px; }
+    .details { margin-top: 72px; }
     .tabs-nav {
       display: flex; gap: 0;
       border-bottom: 1px solid var(--border);
@@ -1046,6 +1081,11 @@
         </div>
       </div>
 
+      <!-- ============ HIGHLIGHTS ============ -->
+      <!-- Se llena por JS con las especificaciones reales del producto; si no
+           hay datos (vista estática sin ?id=) queda oculta. -->
+      <section class="highlights" id="highlights" hidden></section>
+
       <!-- ============ DETAILS TABS ============ -->
       <section class="details">
         <div class="tabs-nav" role="tablist">
@@ -1255,11 +1295,17 @@
     function currentProductId() { return new URLSearchParams(window.location.search).get('id'); }
     addBtn.addEventListener('click', function(){
       var id = currentProductId();
+      // La foto "vuela" al carrito antes de abrir el panel, para que se vea
+      // de dónde salió el producto.
+      if (window.CronosCart && CronosCart.flyToCart) {
+        CronosCart.flyToCart(document.querySelector('.main-shot img'));
+      }
       if (id && window.Store) Store.addToCart(id, q);
       var orig = addBtn.innerHTML;
       addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20,6 9,17 4,12" stroke-linecap="round" stroke-linejoin="round"/></svg> Añadido (' + q + ')';
       setTimeout(function(){ addBtn.innerHTML = orig; }, 1800);
-      if (window.CronosCart) CronosCart.open();
+      // Dar tiempo a que se vea la animación antes de abrir el panel.
+      setTimeout(function () { if (window.CronosCart) CronosCart.open(); }, 780);
     });
     if (buyNowBtn) {
       buyNowBtn.addEventListener('click', function () {
@@ -1486,6 +1532,38 @@
           + '<p>' + p.brand + ' ' + p.model + ' (referencia <span class="mono">' + p.ref + '</span>): ' + specBits.join(', ') + '.</p>'
           + '<h3>Sobre la verificación</h3>'
           + '<p>Cada pieza pasa por una verificación de funcionamiento antes de publicarse y una segunda verificación antes de despacharse. La garantía específica de esta referencia está definida por el administrador y aparece en el apartado correspondiente.</p>');
+      }
+
+      // Franja de especificaciones destacadas (solo campos que existan de verdad)
+      var highlights = document.getElementById('highlights');
+      if (highlights) {
+        var HL_ICONS = {
+          mecanismo: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/>',
+          cristal: '<path d="M12 3 4 9l8 12 8-12-8-6Z" stroke-linejoin="round"/><path d="M4 9h16" stroke-linecap="round"/>',
+          agua: '<path d="M12 3s6 6.4 6 10.2A6 6 0 0 1 6 13.2C6 9.4 12 3 12 3Z" stroke-linejoin="round"/>',
+          caja: '<circle cx="12" cy="12" r="6.5"/><path d="M12 2v3M12 19v3" stroke-linecap="round"/>',
+          pulso: '<path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M8 17v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2" stroke-linecap="round"/><rect x="6" y="7" width="12" height="10" rx="2"/>',
+          genero: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/>'
+        };
+        var caja = [p.caseSize, p.caseMaterial].filter(Boolean).join(' · ');
+        var hlRows = [
+          ['Mecanismo', p.mechanism, 'mecanismo'],
+          ['Caja', caja, 'caja'],
+          ['Cristal', p.crystal, 'cristal'],
+          ['Resistencia al agua', p.waterResistance, 'agua'],
+          ['Pulso', p.strap, 'pulso'],
+          ['Género', p.gender, 'genero']
+        ].filter(function (r) { return r[1]; });
+
+        if (hlRows.length) {
+          highlights.innerHTML = hlRows.map(function (r) {
+            return '<div class="hl-item">'
+              + '<span class="hl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' + HL_ICONS[r[2]] + '</svg></span>'
+              + '<span><span class="hl-k">' + r[0] + '</span><span class="hl-v">' + r[1] + '</span></span>'
+              + '</div>';
+          }).join('');
+          highlights.hidden = false;
+        }
       }
 
       // Ficha técnica con los campos reales del producto

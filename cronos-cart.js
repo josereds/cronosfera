@@ -143,11 +143,91 @@
     });
   }
 
+  // ---- Dock flotante: carrito siempre visible + contacto por WhatsApp ----
+  // El header no siempre muestra el carrito (en móvil desaparece del todo al
+  // hacer scroll), así que el carrito vive también aquí, fijo en pantalla.
+  // El botón lleva la clase .cart-btn para heredar el badge y el toggle.
+  function buildDock() {
+    if (document.querySelector('.cronos-dock')) return;
+    var cfg = global.Store.getConfig ? global.Store.getConfig() : {};
+    var num = (cfg.payments || {}).whatsappNumber;
+
+    var dock = document.createElement('div');
+    dock.className = 'cronos-dock';
+
+    if (num) {
+      var msg = 'Hola, quiero más información sobre los relojes de Cronosfera.';
+      var wa = document.createElement('a');
+      wa.className = 'dock-btn dock-wa';
+      wa.href = 'https://api.whatsapp.com/send?phone=' + encodeURIComponent(num) + '&text=' + encodeURIComponent(msg);
+      wa.target = '_blank';
+      wa.rel = 'noopener';
+      wa.setAttribute('aria-label', 'Escríbenos por WhatsApp');
+      wa.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.6-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.7.8-.9 1c-.2.2-.3.2-.6.1s-1.2-.4-2.2-1.4c-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.5.1-.6l.4-.5c.1-.1.2-.3.2-.4.1-.1.1-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.7 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>'
+        + '<span class="dock-tip">Escríbenos</span>';
+      dock.appendChild(wa);
+    }
+
+    var cart = document.createElement('button');
+    cart.type = 'button';
+    cart.className = 'dock-btn dock-cart cart-btn';
+    cart.setAttribute('aria-label', 'Ver carrito');
+    cart.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>'
+      + '<span class="dock-tip">Carrito</span>';
+    dock.appendChild(cart);
+
+    document.body.appendChild(dock);
+  }
+
+  // Animación "volar al carrito": clona la foto del producto y la lleva
+  // hasta el botón del carrito, que rebota al recibirla.
+  function flyToCart(sourceEl) {
+    var target = document.querySelector('.cronos-dock .dock-cart');
+    if (!sourceEl || !target) { pulseCart(); return; }
+    var from = sourceEl.getBoundingClientRect();
+    var to = target.getBoundingClientRect();
+    if (!from.width || !to.width) { pulseCart(); return; }
+
+    var ghost = document.createElement('div');
+    ghost.className = 'cart-fly-ghost';
+    var src = sourceEl.tagName === 'IMG' ? sourceEl.src : '';
+    if (src) ghost.style.backgroundImage = 'url("' + src + '")';
+    ghost.style.left = from.left + 'px';
+    ghost.style.top = from.top + 'px';
+    ghost.style.width = from.width + 'px';
+    ghost.style.height = from.height + 'px';
+    document.body.appendChild(ghost);
+
+    // Forzar reflow para que la transición arranque desde la posición inicial.
+    ghost.getBoundingClientRect();
+    var dx = (to.left + to.width / 2) - (from.left + from.width / 2);
+    var dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+    ghost.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(0.12)';
+    ghost.style.opacity = '0.25';
+    ghost.style.borderRadius = '50%';
+
+    setTimeout(function () {
+      if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      pulseCart();
+    }, 750);
+  }
+
+  function pulseCart() {
+    var els = document.querySelectorAll('.cart-btn');
+    Array.prototype.forEach.call(els, function (el) {
+      el.classList.remove('cart-pop');
+      void el.offsetWidth; // reinicia la animación
+      el.classList.add('cart-pop');
+      setTimeout(function () { el.classList.remove('cart-pop'); }, 700);
+    });
+  }
+
   function init() {
     if (!global.Store) {
       console.warn('[Cart] Store no disponible — ¿falta cronos-store.js?');
       return;
     }
+    buildDock();
     bindTriggers();
     renderBadges();
     global.Store.subscribe(function () {
@@ -162,5 +242,5 @@
     init();
   }
 
-  global.CronosCart = { open: open, close: close, toggle: toggle };
+  global.CronosCart = { open: open, close: close, toggle: toggle, flyToCart: flyToCart, pulse: pulseCart };
 })(window);

@@ -529,6 +529,9 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     }
     .product-cta .btn:hover { background: var(--fg-soft); }
+    .product-cta .btn.added {
+      background: oklch(60% 0.14 150); color: #fff;
+    }
     .product-cta .icon-mini {
       width: 42px;
       background: var(--surface); color: var(--fg);
@@ -1026,9 +1029,18 @@
       cta.addEventListener('click', function(e){
         e.preventDefault(); e.stopPropagation();
         if (p.stockOut) return;
+        // La animación arranca antes de mutar el Store para que la foto salga
+        // desde su posición original en la tarjeta.
+        if (window.CronosCart && CronosCart.flyToCart) {
+          CronosCart.flyToCart(card.querySelector('.product-media img'));
+        }
         if (window.Store) Store.addToCart(p.id, 1);
-        cta.textContent = '✓ En el carrito';
-        setTimeout(function(){ cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg> Agregar'; }, 1600);
+        cta.classList.add('added');
+        cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20,6 9,17 4,12" stroke-linecap="round" stroke-linejoin="round"/></svg> En el carrito';
+        setTimeout(function(){
+          cta.classList.remove('added');
+          cta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 7h14l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H8a1.6 1.6 0 0 1-1.6-1.4L5 7z" stroke-linejoin="round"/><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg> Agregar';
+        }, 1800);
       });
       var quick = card.querySelector('.icon-mini');
       quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });

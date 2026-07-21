@@ -1246,3 +1246,126 @@ body.cart-panel-locked { overflow: hidden; }
 }
 
 .page-head .sub #backToBrands:hover { text-decoration: underline; }
+
+/* ============================================================
+   Dock flotante: carrito siempre a la vista + contacto WhatsApp
+   ============================================================ */
+.cronos-dock {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+body.has-mobile-nav .cronos-dock {
+  bottom: calc(var(--mobile-nav-h, 74px) + 18px + env(safe-area-inset-bottom, 0px));
+}
+
+body.cart-panel-locked .cronos-dock { display: none; }
+
+.cronos-dock .dock-btn {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.cronos-dock .dock-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(0, 0, 0, .55); }
+.cronos-dock .dock-btn svg { width: 25px; height: 25px; }
+
+.cronos-dock .dock-wa {
+  background: oklch(60% 0.14 150);
+  color: #fff;
+  text-decoration: none;
+}
+.cronos-dock .dock-wa:hover { background: oklch(66% 0.15 150); }
+
+.cronos-dock .dock-cart {
+  background: var(--surface, #1b1d24);
+  color: var(--fg, #fff);
+  border-color: color-mix(in oklab, var(--accent, #c9a86a) 40%, var(--border, #333));
+}
+.cronos-dock .dock-cart:hover { background: var(--surface-2, #23262e); }
+
+/* Etiqueta que aparece al pasar el mouse (solo escritorio) */
+.cronos-dock .dock-tip {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg, #fff);
+  background: var(--surface, #1b1d24);
+  border: 1px solid var(--border, #333);
+  padding: 6px 11px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.cronos-dock .dock-btn:hover .dock-tip { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+@media (max-width: 700px) {
+  .cronos-dock { right: 14px; gap: 10px; }
+  .cronos-dock .dock-btn { width: 50px; height: 50px; }
+  .cronos-dock .dock-btn svg { width: 23px; height: 23px; }
+  .cronos-dock .dock-tip { display: none; }
+}
+
+/* El badge del carrito dentro del dock se ve un poco más grande */
+.cronos-dock .dock-cart .cart-badge {
+  top: -2px;
+  right: -2px;
+  min-width: 20px;
+  height: 20px;
+  font-size: 11px;
+  border: 2px solid var(--bg, #14161c);
+}
+
+/* ---- Animación al agregar al carrito ---- */
+.cart-fly-ghost {
+  position: fixed;
+  z-index: 300;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface, #1b1d24);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+  transition: transform .72s cubic-bezier(0.55, -0.35, 0.35, 1),
+              opacity .72s ease,
+              border-radius .72s ease;
+}
+
+@keyframes cartPop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.28); }
+  55%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+.cart-btn.cart-pop { animation: cartPop .65s cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes cartBadgePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+.cart-btn.cart-pop .cart-badge { animation: cartBadgePop .65s cubic-bezier(0.22, 1, 0.36, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-fly-ghost { display: none; }
+  .cart-btn.cart-pop, .cart-btn.cart-pop .cart-badge { animation: none; }
+}
