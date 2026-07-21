@@ -471,6 +471,11 @@
     var a = getAuction(auctionId);
     if (!a) throw new Error('Subasta no encontrada');
     if (getAuctionStatus(a) !== 'live') throw new Error('La subasta no está abierta');
+    // Toda puja debe quedar atribuida a una cuenta real y activa: sin esto,
+    // la interfaz exige sesión pero la capa de datos aceptaba pujas anónimas.
+    var bidder = userId ? getUser(userId) : null;
+    if (!bidder) throw new Error('Necesitas una cuenta para pujar');
+    if (bidder.status !== 'active') throw new Error('Tu cuenta no está activa para pujar');
     amount = Number(amount);
     if (!amount || amount <= 0) throw new Error('Puja inválida');
     var min = minNextBid(a);
@@ -498,12 +503,21 @@
     return a;
   }
 
+  // Solo hay ganador si se alcanzó el precio de reserva. Sin esto, una pieza
+  // podía "venderse" por debajo del mínimo aceptable definido por la tienda.
+  function reserveMet(a) {
+    if (a.currentBidderId == null) return false;
+    var reserve = a.reservePrice || 0;
+    return (a.currentBid || 0) >= reserve;
+  }
+
   function closeAuction(id) {
     var a = getAuction(id);
     if (!a) return null;
     a.status = 'closed';
     a.closedAt = nowIso();
-    a.winnerId = a.currentBidderId;
+    a.winnerId = reserveMet(a) ? a.currentBidderId : null;
+    a.reserveMet = reserveMet(a);
     return updateAuction(id, a);
   }
 
@@ -514,7 +528,8 @@
       if (a.status !== 'closed' && getAuctionStatus(a) === 'closed') {
         a.status = 'closed';
         a.closedAt = nowIso();
-        a.winnerId = a.currentBidderId;
+        a.winnerId = reserveMet(a) ? a.currentBidderId : null;
+        a.reserveMet = reserveMet(a);
         changed = true;
       }
     });
