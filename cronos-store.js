@@ -208,7 +208,8 @@
       // "Secreto de integridad" del dashboard de Wompi (Desarrolladores → Llaves
       // API), distinto de la llave pública/privada. Sin esto, Wompi rechaza el
       // pago con "Firma de integridad requerida no enviada" si la cuenta lo exige.
-      wompiIntegritySecret: ''
+      // Este es el de PRUEBAS (test_integrity_...), pareja de la llave pub_test_ de arriba.
+      wompiIntegritySecret: 'test_integrity_VaVN7f1KujfqHp7u6Blp7Q0mVYNr2Z1N'
     }
   };
 
