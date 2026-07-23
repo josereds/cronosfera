@@ -1759,35 +1759,30 @@
     })();
 
     // ============== Subcategorías de accesorios ==============
-    // Cristian también vende accesorios. Todavía no hay inventario cargado de
-    // estas categorías, así que cada tarjeta abre WhatsApp preguntando por
-    // ella; cuando lleguen fotos y referencias se enlazan al catálogo real.
+    // Cristian también vende accesorios. Cada tarjeta lleva a su página de
+    // categoría real (accesorios.html?cat=), que muestra los productos que
+    // haya cargados o un aviso de "muy pronto" si todavía no hay ninguno.
     (function () {
       var mount = document.getElementById('subcats');
       if (!mount) return;
-      var num = window.Store ? (Store.getConfig().payments || {}).whatsappNumber : '';
       var ICONS = {
         gorras: '<path d="M3 15a9 9 0 0 1 18 0" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 6a5 5 0 0 0-5 5c0 1.6.6 3 1.6 4h6.8c1-1 1.6-2.4 1.6-4a5 5 0 0 0-5-5Z" stroke-linejoin="round"/><path d="M2.5 15h19a1.5 1.5 0 0 1 0 3h-19a1.5 1.5 0 0 1 0-3Z" stroke-linejoin="round"/>',
         billeteras: '<rect x="3" y="6" width="18" height="13" rx="2.5" stroke-linejoin="round"/><path d="M3 9.5h13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3" stroke-linejoin="round"/><circle cx="16.5" cy="12.5" r="1.1" fill="currentColor" stroke="none"/>',
         correas: '<rect x="8.5" y="8.5" width="7" height="7" rx="1.6" stroke-linejoin="round"/><path d="M10 8.5V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3.5M10 15.5V19a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 11.5h1.6" stroke-linecap="round"/>'
       };
-      var CATS = [
-        { key: 'gorras', name: 'Gorras', msg: 'Hola, quiero ver las gorras que tienen disponibles.' },
-        { key: 'billeteras', name: 'Billeteras', msg: 'Hola, quiero ver las billeteras que tienen disponibles.' },
-        { key: 'correas', name: 'Correas', msg: 'Hola, quiero ver las correas que tienen disponibles.' }
+      var CATS = window.Store ? Store.getAccessoryCategories() : [
+        { slug: 'gorras', name: 'Gorras' },
+        { slug: 'billeteras', name: 'Billeteras' },
+        { slug: 'correas', name: 'Correas' }
       ];
       var arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
       mount.innerHTML = CATS.map(function (c) {
-        var href = num
-          ? 'https://api.whatsapp.com/send?phone=' + encodeURIComponent(num) + '&text=' + encodeURIComponent(c.msg)
-          : 'mayorista.html';
-        var target = num ? ' target="_blank" rel="noopener"' : '';
-        return '<a class="subcat" href="' + href + '"' + target + ' aria-label="' + c.name + '">'
-          + '<span class="subcat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' + ICONS[c.key] + '</svg></span>'
+        return '<a class="subcat" href="accesorios.html?cat=' + encodeURIComponent(c.slug) + '" aria-label="' + c.name + '">'
+          + '<span class="subcat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' + (ICONS[c.slug] || '') + '</svg></span>'
           + '<span class="subcat-body">'
           +   '<span class="subcat-name">' + c.name + '</span>'
-          +   '<span class="subcat-cta">Consultar ' + arrow + '</span>'
+          +   '<span class="subcat-cta">Ver ' + arrow + '</span>'
           + '</span>'
           + '</a>';
       }).join('');

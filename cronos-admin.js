@@ -802,9 +802,14 @@
     modal.querySelector('#accProductForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(this);
+      var accCat = Store.getAccessoryCategories().filter(function (c) { return c.slug === (p.accessoryType || categorySlug); })[0];
       var next = Object.assign({}, p, {
         category: 'accesorio',
         accessoryType: p.accessoryType || categorySlug,
+        // Se guarda también como `brand` (nombre de la categoría) para que el
+        // carrito y los mensajes de WhatsApp, que leen p.brand, se vean bien
+        // sin tener que tocar ese código para accesorios.
+        brand: accCat ? accCat.name : '',
         model: fd.get('model'),
         ref: (fd.get('ref') || '').trim(),
         price: Number(fd.get('price')) || 0,
