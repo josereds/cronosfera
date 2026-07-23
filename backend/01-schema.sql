@@ -68,10 +68,12 @@ $$;
 -- ---------- PRODUCTOS ----------
 create table if not exists public.products (
   id                uuid primary key default gen_random_uuid(),
-  brand             text not null,
+  category          text not null default 'reloj' check (category in ('reloj','accesorio')),
+  accessory_type    text check (accessory_type in ('gorras','correas','billeteras')),
+  brand             text not null default '',
   brand_slug        text,
   model             text not null,
-  ref               text not null,
+  ref               text default '',
   price             bigint not null check (price >= 0),
   was_price         bigint default 0,
   off               int default 0,
@@ -88,10 +90,12 @@ create table if not exists public.products (
   case_size         text,
   case_material     text,
   water_resistance  text,
+  description       text,
   image             text,
   created_at        timestamptz not null default now()
 );
 create index if not exists products_brand_slug_idx on public.products (brand_slug);
+create index if not exists products_category_idx on public.products (category, accessory_type);
 
 -- ---------- SOLICITUDES MAYORISTAS ----------
 create table if not exists public.wholesale_requests (
