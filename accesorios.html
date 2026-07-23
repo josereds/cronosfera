@@ -306,7 +306,8 @@
         <div class="footer-col"><h5>Catálogo</h5><ul>
           <li><a href="catalogo.html">Todos los relojes</a></li><li><a href="subastas.html">Subastas</a></li>
           <li><a href="accesorios.html?cat=gorras">Gorras</a></li><li><a href="accesorios.html?cat=correas">Correas</a></li>
-          <li><a href="accesorios.html?cat=billeteras">Billeteras</a></li>
+          <li><a href="accesorios.html?cat=billeteras">Billeteras</a></li><li><a href="accesorios.html?cat=camisetas-buzos">Camisetas y buzos</a></li>
+          <li><a href="accesorios.html?cat=perfumes-joyas">Perfumes y joyas</a></li>
         </ul></div>
         <div class="footer-col"><h5>Marcas</h5><ul>
           <li><a href="catalogo.html?marca=casio">Casio</a></li><li><a href="catalogo.html?marca=citizen">Citizen</a></li>
@@ -361,14 +362,20 @@
       var num = waNumber();
       if (!num) return null;
       var msg = p
-        ? 'Hola, quiero preguntar por este producto de Cronosfera:\n\n' + p.model + (p.ref ? '\nReferencia: ' + p.ref : '') + '\nPrecio: ' + cop(p.price) + '\n\n' + window.location.origin + '/accesorios.html?cat=' + cat.slug
+        ? 'Hola, quiero preguntar por este producto de Cronosfera:\n\n' + p.model + (p.ref ? '\nReferencia: ' + p.ref : '') + '\nPrecio: ' + cop(window.Store ? Store.getPriceDisplay(p).price : p.price) + '\n\n' + window.location.origin + '/accesorios.html?cat=' + cat.slug
         : 'Hola, quiero ver las ' + cat.name.toLowerCase() + ' que tienen disponibles.';
       return 'https://api.whatsapp.com/send?phone=' + encodeURIComponent(num) + '&text=' + encodeURIComponent(msg);
     }
 
     var urlParams = new URLSearchParams(window.location.search);
     var slug = urlParams.get('cat') || 'gorras';
-    var cats = window.Store ? Store.getAccessoryCategories() : [{ slug: 'gorras', name: 'Gorras', count: 0 }, { slug: 'correas', name: 'Correas', count: 0 }, { slug: 'billeteras', name: 'Billeteras', count: 0 }];
+    var cats = window.Store ? Store.getAccessoryCategories() : [
+      { slug: 'gorras', name: 'Gorras', count: 0 },
+      { slug: 'correas', name: 'Correas', count: 0 },
+      { slug: 'billeteras', name: 'Billeteras', count: 0 },
+      { slug: 'camisetas-buzos', name: 'Camisetas y buzos', count: 0 },
+      { slug: 'perfumes-joyas', name: 'Perfumes y joyas', count: 0 }
+    ];
     var cat = cats.filter(function (c) { return c.slug === slug; })[0] || cats[0];
     slug = cat.slug;
 
@@ -396,11 +403,12 @@
     } else {
       grid.innerHTML = '';
       items.forEach(function (p) {
+        var pd = window.Store ? Store.getPriceDisplay(p) : { price: p.price, wasPrice: p.wasPrice || 0 };
         var w = window.Store ? Store.wholesalePriceFor(p) : 0;
         var stockOut = p.stockStatus === 'out';
         var stockLow = p.stockStatus === 'low';
         var media = p.image ? '<img src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(p.model) + '" loading="lazy">' : '<div class="ph-img">' + phIcon() + '</div>';
-        var was = p.wasPrice ? '<span class="was">' + cop(p.wasPrice) + '</span>' : '';
+        var was = pd.wasPrice ? '<span class="was">' + cop(pd.wasPrice) + '</span>' : '';
         var wholesale = (isWholesale && !stockOut)
           ? '<div class="product-wholesale"><span>Mayorista</span><span class="price">' + cop(w) + '</span></div>'
           : '';
@@ -413,7 +421,7 @@
           + '<div class="product-info">'
           +   '<div class="product-brand">' + escapeHtml(cat.name) + '</div>'
           +   '<div class="product-model">' + escapeHtml(p.model) + '</div>'
-          +   '<div class="product-price"><span class="now">' + cop(p.price) + '</span>' + was + '</div>'
+          +   '<div class="product-price"><span class="now">' + cop(pd.price) + '</span>' + was + '</div>'
           +   '<div class="product-stock' + (stockOut ? ' out' : stockLow ? ' low' : '') + '">' + escapeHtml(p.stock || '') + '</div>'
           +   wholesale
           +   '<div class="product-cta"><button class="btn">' + (stockOut ? 'Agotado' : 'Agregar al carrito') + '</button></div>'

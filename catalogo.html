@@ -909,15 +909,19 @@
       { brand: 'Cronosfera', model: 'Vega Smart Active', ref: 'CR-VG-44-KSL', price: 1290000, was: 1499000, off: 14, tone: 'ink', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Agotado', stockOut: true, variants: ['#1c1e22','#7a7468'] }
     ];
     function mapProduct(p) {
+      // getPriceDisplay() resuelve si hay un descuento promocional vigente
+      // (general, por marca o por producto) y devuelve el precio ya
+      // rebajado; si no hay ninguno, cae al "antes/ahora" manual de siempre.
+      var pd = window.Store ? Store.getPriceDisplay(p) : { price: p.price, wasPrice: p.wasPrice || p.was || 0, off: p.off || 0 };
       return {
         id: p.id,
         brand: p.brand,
         brandSlug: p.brandSlug || (window.Store ? Store.productBrandSlug(p) : ''),
         model: p.model,
         ref: p.ref,
-        price: p.price,
-        was: p.wasPrice || p.was || 0,
-        off: p.off || 0,
+        price: pd.price,
+        was: pd.wasPrice || 0,
+        off: pd.off || 0,
         tone: p.tone,
         tag: p.tag,
         stock: p.stock,

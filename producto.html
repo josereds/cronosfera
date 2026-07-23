@@ -1406,7 +1406,7 @@
         + '<div class="info-m">'
         +   '<div class="br">' + p.brand + '</div>'
         +   '<div class="md">' + p.model + '</div>'
-        +   '<div class="pr">' + cop(p.price) + '</div>'
+        +   '<div class="pr">' + cop(Store.getPriceDisplay(p).price) + '</div>'
         + '</div>';
       rg.appendChild(a);
     });
@@ -1499,6 +1499,7 @@
         var caja = [p.caseSize, p.caseMaterial].filter(Boolean).join(' ');
         var simpleRows = [
           ['Referencia', p.ref],
+          ['Precio', Store.formatCOP(Store.getPriceDisplay(p).price)],
           ['Tamaño y material de la caja', caja],
           ['Mecanismo', p.mechanism],
           ['Material del cristal', p.crystal],
@@ -1585,16 +1586,18 @@
         }).join('');
       }
 
-      // Precio principal
+      // Precio principal (ya resuelto con cualquier descuento promocional vigente)
+      var pd = Store.getPriceDisplay(p);
+
       var priceNow = document.querySelector('.title-price-row .now, .product-price .now');
-      if (priceNow) priceNow.textContent = '$ ' + p.price.toLocaleString('es-CO');
+      if (priceNow) priceNow.textContent = '$ ' + pd.price.toLocaleString('es-CO');
 
       var priceWas = document.querySelector('.title-price-row .was, .product-price .was');
-      if (priceWas && p.wasPrice) priceWas.textContent = '$ ' + p.wasPrice.toLocaleString('es-CO');
+      if (priceWas && pd.wasPrice) priceWas.textContent = '$ ' + pd.wasPrice.toLocaleString('es-CO');
       else if (priceWas) priceWas.style.display = 'none';
 
       var priceOff = document.querySelector('.title-price-row .off, .product-price .off');
-      if (priceOff && p.off) priceOff.textContent = '-' + p.off + '%';
+      if (priceOff && pd.off) priceOff.textContent = '-' + pd.off + '%';
       else if (priceOff) priceOff.style.display = 'none';
 
       // Enlace "Preguntar por WhatsApp" con los datos reales del producto.
@@ -1603,7 +1606,7 @@
           brand: p.brand,
           model: p.model,
           ref: p.ref,
-          price: '$ ' + p.price.toLocaleString('es-CO'),
+          price: '$ ' + pd.price.toLocaleString('es-CO'),
           url: window.location.href
         });
       }

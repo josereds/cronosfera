@@ -572,6 +572,45 @@
     .status-pill.scheduled, .status-pill.pending { background: color-mix(in oklab, var(--info) 14%, transparent); color: oklch(82% 0.10 230); }
     .status-pill.closed, .status-pill.rejected, .status-pill.suspended { background: var(--surface-2); color: var(--muted); }
 
+    /* ===== Descuentos (general / categoría / producto) ===== */
+    .discount-field { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
+    .discount-field > span:first-child { display: block; font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+    .discount-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .discount-toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      transition: all .15s;
+    }
+    .discount-toggle::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted-2); transition: background .15s;
+    }
+    .discount-toggle:hover { border-color: var(--fg-soft); color: var(--fg-soft); }
+    .discount-toggle.active {
+      background: color-mix(in oklab, var(--success) 16%, transparent);
+      border-color: color-mix(in oklab, var(--success) 45%, transparent);
+      color: oklch(82% 0.10 155);
+    }
+    .discount-toggle.active::before { background: oklch(82% 0.10 155); }
+    .discount-pct-field {
+      display: inline-flex; align-items: center; gap: 4px;
+      border: 1px solid var(--border); border-radius: var(--r);
+      padding: 6px 10px; opacity: .5; transition: opacity .15s;
+    }
+    .discount-pct-field.enabled { opacity: 1; }
+    .discount-pct-field input {
+      width: 46px; background: none; border: 0; text-align: right;
+      font-family: var(--font-mono); font-size: 13px; color: var(--fg);
+    }
+    .discount-pct-field span { font-size: 12px; color: var(--muted); }
+    .discount-badge {
+      position: absolute; top: 8px; right: 8px; z-index: 2;
+      padding: 3px 9px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; letter-spacing: .02em;
+      background: oklch(60% 0.19 25); color: #fff;
+    }
+
     /* ===== Catalogo head ===== */
     .catalogo-head {
       display: flex; align-items: center; justify-content: space-between;
