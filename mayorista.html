@@ -1439,6 +1439,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="cronos-store.js"></script>
 <script src="cronos-auth.js"></script>
 <script src="cronos-ui.js"></script>
@@ -1471,7 +1472,7 @@
     if (banner) banner.remove();
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearInlineError();
     let valid = true;
@@ -1513,7 +1514,7 @@
         channel: form.business_type ? form.business_type.value : null,
         message: form.message ? form.message.value : null
       };
-      const user = Store.register(data);
+      const user = await Store.register(data);
       const req = Store.getWholesaleRequests().find((r) => r.userId === user.id);
       modalRef.textContent = req ? req.reference : genRef();
       modal.classList.add('open');

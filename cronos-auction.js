@@ -145,8 +145,10 @@
     } else if (status === 'scheduled') {
       bidFormHtml = '<div class="bid-guest"><p>Esta subasta aún no comienza.</p><p class="muted">Empieza el ' + new Date(auction.startsAt).toLocaleString('es-CO') + '.</p></div>';
     } else {
-      var winner = auction.winnerId ? global.Store.getUser(auction.winnerId) : null;
-      bidFormHtml = '<div class="bid-guest ended"><p>Subasta finalizada.</p>' + (winner ? '<p class="muted">Ganador: <strong>' + escapeHtml(winner.name) + '</strong> · ' + global.Store.formatCOP(auction.currentBid) + '</p>' : '<p class="muted">No alcanzó el precio de reserva.</p>') + '</div>';
+      // El nombre del ganador viene ya guardado en la propia subasta
+      // (winnerName): el historial de pujas es público, pero la tabla de
+      // perfiles no, así que no se puede resolver con Store.getUser() aquí.
+      bidFormHtml = '<div class="bid-guest ended"><p>Subasta finalizada.</p>' + (auction.winnerName ? '<p class="muted">Ganador: <strong>' + escapeHtml(auction.winnerName) + '</strong> · ' + global.Store.formatCOP(auction.currentBid) + '</p>' : '<p class="muted">No alcanzó el precio de reserva.</p>') + '</div>';
     }
 
     container.innerHTML = ''
@@ -180,8 +182,7 @@
       +   (bids.length === 0 ? '<p class="empty">Aún no hay pujas. ¡Sé el primero!</p>'
             : '<table class="bid-table"><thead><tr><th>Puja</th><th>Pujador</th><th>Cuándo</th></tr></thead><tbody>'
       +       bids.map(function (b) {
-                var u = global.Store.getUser(b.userId);
-                var name = u ? u.name : 'Anónimo';
+                var name = b.bidderName || 'Anónimo';
                 // ocultar apellido completo por privacidad
                 var parts = name.split(' ');
                 var masked = parts.length > 1 ? parts[0] + ' ' + parts[1][0] + '.' : name;
@@ -202,15 +203,17 @@
       var user = global.Store.currentUser();
       if (!user) { window.location.href = 'login.html?next=subastas.html%3Fid%3D' + encodeURIComponent(auction.id); return; }
       var amount = Number(new FormData(form).get('amount'));
-      try {
-        var updated = global.Store.placeBid(auction.id, user.id, amount);
+      var submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+      global.Store.placeBid(auction.id, amount).then(function (updated) {
         // Re-render para actualizar historial y minNext
         renderAuctionDetail(updated, container);
         var nextMsg = container.querySelector('.bid-msg');
         if (nextMsg) nextMsg.innerHTML = '<div class="bid-ok">✓ Puja registrada: ' + global.Store.formatCOP(amount) + '</div>';
-      } catch (ex) {
+      }).catch(function (ex) {
         msg.innerHTML = '<div class="bid-err">' + escapeHtml(ex.message) + '</div>';
-      }
+        if (submitBtn) submitBtn.disabled = false;
+      });
     });
   }
 

@@ -407,6 +407,8 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
   <script src="cronos-store.js"></script>
   <script src="cronos-auth.js"></script>
   <script src="cronos-ui.js"></script>
@@ -422,13 +424,13 @@
       var regRole = document.getElementById('regRole');
       var next = new URLSearchParams(window.location.search).get('next') || 'index.html';
 
-      // Si ya hay sesión, ir al next
-      var cur = Store.currentUser();
-      if (cur) {
-        var target = cur.role === 'admin' ? 'admin.html' : next;
-        window.location.href = target;
-        return;
-      }
+      // Si ya hay sesión, ir al next. Se espera a Store.ready() porque justo
+      // al cargar la página, currentUser() todavía no sabe si Supabase tiene
+      // una sesión válida (la promesa de sesión no ha resuelto).
+      (Store.ready ? Store.ready() : Promise.resolve()).then(function () {
+        var cur = Store.currentUser();
+        if (cur) window.location.href = cur.role === 'admin' ? 'admin.html' : next;
+      });
 
       function showErr(msg) { err.textContent = msg; err.classList.add('show'); ok.classList.remove('show'); }
       function showOk(msg) { ok.textContent = msg; ok.classList.add('show'); err.classList.remove('show'); }
@@ -458,16 +460,18 @@
         clearMsgs();
         var email = document.getElementById('loginEmail').value;
         var pwd = document.getElementById('loginPassword').value;
-        try {
-          var u = Store.login(email, pwd);
+        var submitBtn = loginForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        Store.login(email, pwd).then(function (u) {
           showOk('Bienvenido, ' + u.name + '. Redirigiendo…');
           setTimeout(function () {
             var target = u.role === 'admin' ? 'admin.html' : next;
             window.location.href = target;
           }, 700);
-        } catch (ex) {
+        }).catch(function (ex) {
           showErr(ex.message);
-        }
+          if (submitBtn) submitBtn.disabled = false;
+        });
       });
 
       registerForm.addEventListener('submit', function (e) {
@@ -488,10 +492,13 @@
           showErr('Para cuenta mayorista necesitamos empresa y NIT');
           return;
         }
-        try {
-          var u = Store.register(data);
+        var submitBtn = registerForm.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        Store.register(data).then(function (u) {
           if (u.role === 'wholesale' && u.status === 'pending') {
-            showOk('Solicitud registrada · referencia ' + (Store.getWholesaleRequests().find(function (r) { return r.userId === u.id; }) || {}).reference + '. Queda pendiente de aprobación manual.');
+            var reqs = Store.getWholesaleRequests().filter(function (r) { return r.userId === u.id; });
+            var ref = reqs.length ? reqs[0].reference : '';
+            showOk('Solicitud registrada · referencia ' + ref + '. Queda pendiente de aprobación manual.');
             registerForm.reset();
             wholesaleFields.style.display = 'none';
           } else {
@@ -501,9 +508,11 @@
               document.getElementById('loginEmail').value = data.email;
             }, 1200);
           }
-        } catch (ex) {
+        }).catch(function (ex) {
           showErr(ex.message);
-        }
+        }).then(function () {
+          if (submitBtn) submitBtn.disabled = false;
+        });
       });
 
       document.getElementById('autofillAdmin').addEventListener('click', function () {

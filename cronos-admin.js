@@ -479,9 +479,10 @@
       if (e.target.closest('.delete')) {
         var p = Store.getProduct(id);
         if (confirmDialog('¿Eliminar "' + (p ? p.model : '') + '"? Esta acción no se puede deshacer.')) {
-          Store.deleteProduct(id);
-          toast('Producto eliminado', 'success');
-          drawBody();
+          Store.deleteProduct(id).then(function () {
+            toast('Producto eliminado', 'success');
+            drawBody();
+          }).catch(function (err) { toast(err.message, 'danger'); });
         }
       }
     });
@@ -676,9 +677,10 @@
       if (e.target.closest('.delete')) {
         var p = Store.getProduct(id);
         if (confirmDialog('¿Eliminar "' + (p ? p.model : '') + '"? Esta acción no se puede deshacer.')) {
-          Store.deleteProduct(id);
-          toast('Producto eliminado', 'success');
-          drawBody();
+          Store.deleteProduct(id).then(function () {
+            toast('Producto eliminado', 'success');
+            drawBody();
+          }).catch(function (err) { toast(err.message, 'danger'); });
         }
       }
     });
@@ -820,12 +822,11 @@
         description: fd.get('description')
       });
       if (pendingImage !== undefined) next.image = pendingImage;
-      try {
-        Store.saveProduct(next);
+      Store.saveProduct(next).then(function () {
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
         close();
         if (typeof onDone === 'function') onDone();
-      } catch (err) { toast(err.message, 'danger'); }
+      }).catch(function (err) { toast(err.message, 'danger'); });
     });
   }
 
@@ -943,13 +944,14 @@
         tag: fd.get('tagLabel') ? { kind: 'special', label: fd.get('tagLabel') } : null,
         variants: String(fd.get('variants') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean)
       };
-      Store.saveProduct(Object.assign({}, p, data));
-      toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
-      close();
-      // Tras guardar, aterrizar en la carpeta de la marca del producto para ver el cambio.
-      if (data.brand) catalogOpenBrand = data.brand;
-      if (typeof onDone === 'function') onDone();
-      else renderTab('catalogo', document.getElementById('tab-catalogo'));
+      Store.saveProduct(Object.assign({}, p, data)).then(function () {
+        toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
+        close();
+        // Tras guardar, aterrizar en la carpeta de la marca del producto para ver el cambio.
+        if (data.brand) catalogOpenBrand = data.brand;
+        if (typeof onDone === 'function') onDone();
+        else renderTab('catalogo', document.getElementById('tab-catalogo'));
+      }).catch(function (err) { toast(err.message, 'danger'); });
     });
   }
 
@@ -1028,19 +1030,18 @@
       }
       if (e.target.matches('.close')) {
         if (confirmDialog('¿Cerrar la subasta ahora? El ganador será el último postor.')) {
-          Store.closeAuction(id);
-          toast('Subasta cerrada', 'success');
-          renderTab('subastas', pane);
+          Store.closeAuction(id).then(function () {
+            toast('Subasta cerrada', 'success');
+            renderTab('subastas', pane);
+          }).catch(function (err) { toast(err.message, 'danger'); });
         }
       }
       if (e.target.matches('.delete')) {
         if (confirmDialog('¿Eliminar esta subasta? Se perderá el historial de pujas.')) {
-          Store.updateAuction(id, { status: 'closed', closedAt: Store.now(), winnerId: null, _deleted: true });
-          // soft delete: quitamos de la lista
-          var all = Store.getAuctions().filter(function (x) { return x.id !== id; });
-          localStorage.setItem('cronos:auctions', JSON.stringify(all));
-          toast('Subasta eliminada', 'success');
-          renderTab('subastas', pane);
+          Store.deleteAuction(id).then(function () {
+            toast('Subasta eliminada', 'success');
+            renderTab('subastas', pane);
+          }).catch(function (err) { toast(err.message, 'danger'); });
         }
       }
     });
@@ -1146,10 +1147,11 @@
         antiSnipeSeconds: Number(fd.get('antiSnipeSeconds')),
         extensionSeconds: Number(fd.get('extensionSeconds')),
         startsAt: startsAt ? new Date(startsAt).toISOString() : undefined
-      });
-      toast('Subasta creada', 'success');
-      close();
-      renderTab('subastas', document.getElementById('tab-subastas'));
+      }).then(function () {
+        toast('Subasta creada', 'success');
+        close();
+        renderTab('subastas', document.getElementById('tab-subastas'));
+      }).catch(function (err) { toast(err.message, 'danger'); });
     });
   }
 
@@ -1193,24 +1195,27 @@
 
     pane.querySelectorAll('.mark-paid').forEach(function (b) {
       b.addEventListener('click', function () {
-        Store.updateOrder(b.getAttribute('data-id'), { status: 'pagado' });
-        toast('Pedido marcado como pagado', 'success');
-        renderTab('pedidos', pane);
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'pagado' }).then(function () {
+          toast('Pedido marcado como pagado', 'success');
+          renderTab('pedidos', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
     pane.querySelectorAll('.mark-contacted').forEach(function (b) {
       b.addEventListener('click', function () {
-        Store.updateOrder(b.getAttribute('data-id'), { status: 'contactado' });
-        toast('Pedido marcado como contactado', 'info');
-        renderTab('pedidos', pane);
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'contactado' }).then(function () {
+          toast('Pedido marcado como contactado', 'info');
+          renderTab('pedidos', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
     pane.querySelectorAll('.cancel-order').forEach(function (b) {
       b.addEventListener('click', function () {
         if (!confirmDialog('¿Cancelar este pedido?')) return;
-        Store.updateOrder(b.getAttribute('data-id'), { status: 'cancelado' });
-        toast('Pedido cancelado', 'info');
-        renderTab('pedidos', pane);
+        Store.updateOrder(b.getAttribute('data-id'), { status: 'cancelado' }).then(function () {
+          toast('Pedido cancelado', 'info');
+          renderTab('pedidos', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
   }
@@ -1245,7 +1250,6 @@
               + '</div>'
               + (r.status === 'pending'
                   ? '<div class="req-card-actions">'
-                  +     '<label class="temp-pwd"><span>Contraseña temporal</span><input type="text" class="temp-pwd-input" placeholder="ej. cronos2024" data-id="' + r.id + '"></label>'
                   +     '<button class="btn-primary approve" data-id="' + r.id + '">Aprobar</button>'
                   +     '<button class="btn-ghost reject" data-id="' + r.id + '">Rechazar</button>'
                   +   '</div>'
@@ -1258,21 +1262,22 @@
     pane.querySelectorAll('.approve').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-id');
-        var pwdInput = pane.querySelector('.temp-pwd-input[data-id="' + id + '"]');
-        var pwd = pwdInput && pwdInput.value ? pwdInput.value.trim() : null;
-        if (!pwd || pwd.length < 6) { toast('Define una contraseña temporal (mín. 6 caracteres)', 'danger'); return; }
-        Store.approveWholesale(id, pwd);
-        toast('Solicitud aprobada · contraseña: ' + pwd, 'success');
-        renderTab('mayoristas', pane);
+        // No hace falta contraseña temporal: ya es una cuenta real y la
+        // persona eligió su propia contraseña al registrarse.
+        Store.approveWholesale(id).then(function () {
+          toast('Solicitud aprobada · ya puede iniciar sesión', 'success');
+          renderTab('mayoristas', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
     pane.querySelectorAll('.reject').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-id');
         var reason = prompt('Motivo del rechazo (opcional):') || '';
-        Store.rejectWholesale(id, reason);
-        toast('Solicitud rechazada', 'info');
-        renderTab('mayoristas', pane);
+        Store.rejectWholesale(id, reason).then(function () {
+          toast('Solicitud rechazada', 'info');
+          renderTab('mayoristas', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
   }
@@ -1299,8 +1304,9 @@
 
     pane.querySelectorAll('.role-select').forEach(function (sel) {
       sel.addEventListener('change', function () {
-        Store.setUserRole(sel.getAttribute('data-id'), sel.value);
-        toast('Rol actualizado', 'success');
+        Store.setUserRole(sel.getAttribute('data-id'), sel.value).then(function () {
+          toast('Rol actualizado', 'success');
+        }).catch(function (err) { toast(err.message, 'danger'); });
       });
     });
   }
@@ -1370,13 +1376,23 @@
           ctaPrimary: { label: fd.get('heroCtaPrimaryLabel'), href: fd.get('heroCtaPrimaryHref') },
           ctaSecondary: { label: fd.get('heroCtaSecondaryLabel'), href: fd.get('heroCtaSecondaryHref') }
         }
-      });
-      toast('Configuración guardada', 'success');
+      }).then(function () {
+        toast('Configuración guardada', 'success');
+      }).catch(function (err) { toast(err.message, 'danger'); });
     });
   }
 
   // ============== INIT ==============
   function init() {
+    // Espera a que Store confirme contra Supabase si hay sesión antes de
+    // decidir si expulsa: justo al cargar, currentUser() todavía no sabe la
+    // respuesta (la promesa de sesión no ha resuelto) y expulsaría a un
+    // admin real que solo estaba recargando la página.
+    var ready = Store.ready ? Store.ready() : Promise.resolve();
+    ready.then(function () { initGated(); });
+  }
+
+  function initGated() {
     if (!Auth.requireAdmin()) return;
     document.querySelectorAll('.nav-item[data-tab], .mobile-admin-tab[data-tab]').forEach(function (n) {
       n.addEventListener('click', function (e) { e.preventDefault(); go(n.getAttribute('data-tab')); });
@@ -1391,6 +1407,19 @@
         renderTab('dashboard', document.getElementById('tab-dashboard'));
       }
     }, 30000);
+    // Re-pintar la pestaña activa cuando llegue algo nuevo por Realtime
+    // (pedido, puja, solicitud mayorista...), sin esperar a los 30s del
+    // dashboard. Si está escribiendo en un campo del panel (ej. el buscador),
+    // se salta el repintado para no perderle lo que está tecleando.
+    if (Store.subscribe) {
+      Store.subscribe(function () {
+        if (!currentTab) return;
+        var pane = document.getElementById('tab-' + currentTab);
+        if (!pane) return;
+        if (document.activeElement && pane.contains(document.activeElement)) return;
+        renderTab(currentTab, pane);
+      });
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

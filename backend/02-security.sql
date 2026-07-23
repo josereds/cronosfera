@@ -146,8 +146,8 @@ begin
     raise exception 'Tu puja debe ser al menos %', v_min;
   end if;
 
-  insert into public.bids (auction_id, user_id, amount)
-  values (p_auction_id, auth.uid(), p_amount);
+  insert into public.bids (auction_id, user_id, bidder_name, amount)
+  values (p_auction_id, auth.uid(), prof.name, p_amount);
 
   -- Anti-snipe: si entra en el último tramo, se extiende el cierre.
   if a.anti_snipe_seconds > 0
@@ -183,17 +183,25 @@ declare
   n int := 0;
 begin
   with cerradas as (
-    update public.auctions
+    update public.auctions a
        set status      = 'closed',
            closed_at   = coalesce(closed_at, now()),
-           reserve_met = (current_bidder_id is not null and current_bid >= reserve_price),
+           reserve_met = (a.current_bidder_id is not null and a.current_bid >= a.reserve_price),
            winner_id   = case
-                           when current_bidder_id is not null and current_bid >= reserve_price
-                           then current_bidder_id else null
+                           when a.current_bidder_id is not null and a.current_bid >= a.reserve_price
+                           then a.current_bidder_id else null
+                         end,
+           -- Se copia aquí (no con un join en el select) porque el historial
+           -- de pujas es público pero profiles no, así que el nombre del
+           -- ganador debe quedar guardado en la propia fila de la subasta.
+           winner_name = case
+                           when a.current_bidder_id is not null and a.current_bid >= a.reserve_price
+                           then (select p.name from public.profiles p where p.id = a.current_bidder_id)
+                           else null
                          end
-     where status <> 'closed'
-       and closed_at is null
-       and ends_at <= now()
+     where a.status <> 'closed'
+       and a.closed_at is null
+       and a.ends_at <= now()
      returning 1
   )
   select count(*) into n from cerradas;
@@ -203,9 +211,53 @@ $$;
 grant execute on function public.close_expired_auctions() to anon, authenticated;
 
 -- ============================================================
+--  CIERRE MANUAL (admin): mismo criterio de reserva, para la
+--  acción "Cerrar ahora" del panel, sin esperar a que expire sola.
+-- ============================================================
+create or replace function public.close_auction(p_auction_id uuid)
+returns public.auctions
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  a public.auctions;
+begin
+  if not public.is_admin() then
+    raise exception 'Solo el administrador puede cerrar subastas';
+  end if;
+
+  select * into a from public.auctions where id = p_auction_id for update;
+  if a is null then
+    raise exception 'Subasta no encontrada';
+  end if;
+
+  update public.auctions
+     set status      = 'closed',
+         closed_at   = coalesce(closed_at, now()),
+         reserve_met = (current_bidder_id is not null and current_bid >= reserve_price),
+         winner_id   = case
+                         when current_bidder_id is not null and current_bid >= reserve_price
+                         then current_bidder_id else null
+                       end,
+         winner_name = case
+                         when current_bidder_id is not null and current_bid >= reserve_price
+                         then (select p.name from public.profiles p where p.id = current_bidder_id)
+                         else null
+                       end
+   where id = p_auction_id
+   returning * into a;
+
+  return a;
+end;
+$$;
+revoke all on function public.close_auction(uuid) from public;
+grant execute on function public.close_auction(uuid) to authenticated;
+
+-- ============================================================
 --  TIEMPO REAL: que las pujas se vean al instante en todos lados
 -- ============================================================
 alter publication supabase_realtime add table public.auctions;
 alter publication supabase_realtime add table public.bids;
 alter publication supabase_realtime add table public.products;
 alter publication supabase_realtime add table public.orders;
+alter publication supabase_realtime add table public.wholesale_requests;

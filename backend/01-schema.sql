@@ -125,6 +125,10 @@ create table if not exists public.auctions (
   status             text not null default 'scheduled' check (status in ('scheduled','live','closed')),
   closed_at          timestamptz,
   winner_id          uuid references public.profiles(id) on delete set null,
+  -- Nombre del ganador copiado al cerrar: el historial de pujas es público,
+  -- pero la tabla profiles no lo es (cada quien solo lee su propia fila), así
+  -- que sin este dato duplicado ningún visitante podría ver quién ganó.
+  winner_name        text,
   reserve_met        boolean default false,
   created_at         timestamptz not null default now()
 );
@@ -132,9 +136,12 @@ create index if not exists auctions_ends_at_idx on public.auctions (ends_at);
 
 -- ---------- PUJAS ----------
 create table if not exists public.bids (
-  id          uuid primary key default gen_random_uuid(),
-  auction_id  uuid not null references public.auctions(id) on delete cascade,
-  user_id     uuid not null references public.profiles(id) on delete cascade,
+  id           uuid primary key default gen_random_uuid(),
+  auction_id   uuid not null references public.auctions(id) on delete cascade,
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  -- Igual que winner_name: nombre del pujador copiado al insertar, para que
+  -- el historial público de pujas se pueda mostrar sin leer public.profiles.
+  bidder_name text,
   amount      bigint not null check (amount > 0),
   created_at  timestamptz not null default now()
 );

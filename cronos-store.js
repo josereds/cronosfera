@@ -14,6 +14,7 @@
     bids: 'cronos:bids',
     users: 'cronos:users',
     session: 'cronos:session',
+    profile: 'cronos:profile',
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
     brandsMeta: 'cronos:brands-meta',
@@ -23,6 +24,16 @@
     cart: 'cronos:cart',
     orders: 'cronos:orders'
   };
+
+  // ---------- Supabase (backend compartido) ----------
+  // Llave "anon public": segura de exponer en el navegador, todo el acceso
+  // real lo controla RLS del lado del servidor (ver backend/02-security.sql).
+  var SUPABASE_URL = 'https://bikmwxucsbbjouoqwknc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpa213eHVjc2Jiam91b3F3a25jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NjY5NjAsImV4cCI6MjEwMDM0Mjk2MH0.nfylTZ6pJoY15unrQVCgdiqma_dn9OXcBXiDjWLWIRQ';
+  var sb = (global.supabase && global.supabase.createClient)
+    ? global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+  if (!sb) console.warn('[Store] Supabase no cargó (¿falta el script @supabase/supabase-js antes de cronos-store.js?)');
 
   // Al subir SEED_VERSION se regenera el catálogo demo en navegadores que ya
   // tenían datos (se conservan usuarios y solicitudes; subastas/pujas se
@@ -84,6 +95,207 @@
   function find(arr, pred) {
     for (var i = 0; i < arr.length; i++) if (pred(arr[i], i)) return arr[i];
     return null;
+  }
+
+  // ============================================================
+  // ---------- Supabase: mapeos fila (snake_case) <-> JS ----------
+  // ============================================================
+  function mapProductFromDb(r) {
+    return {
+      id: r.id, category: r.category || 'reloj', accessoryType: r.accessory_type,
+      brand: r.brand || '', brandSlug: r.brand_slug, model: r.model, ref: r.ref || '',
+      price: r.price, wasPrice: r.was_price || 0, off: r.off || 0, wholesalePrice: r.wholesale_price,
+      tone: r.tone || 'ink', tag: r.tag, stock: r.stock, stockStatus: r.stock_status || 'in',
+      variants: r.variants || [], gender: r.gender, mechanism: r.mechanism, crystal: r.crystal,
+      strap: r.strap, caseSize: r.case_size, caseMaterial: r.case_material,
+      waterResistance: r.water_resistance, description: r.description, image: r.image,
+      createdAt: r.created_at
+    };
+  }
+  function mapProductToDb(p) {
+    return {
+      category: p.category || 'reloj', accessory_type: p.accessoryType || null,
+      brand: p.brand || '', brand_slug: p.brandSlug || null, model: p.model, ref: p.ref || '',
+      price: p.price, was_price: p.wasPrice || 0, off: p.off || 0,
+      wholesale_price: p.wholesalePrice || null, tone: p.tone || 'ink', tag: p.tag || null,
+      stock: p.stock || 'Disponible', stock_status: p.stockStatus || 'in', variants: p.variants || [],
+      gender: p.gender || null, mechanism: p.mechanism || null, crystal: p.crystal || null,
+      strap: p.strap || null, case_size: p.caseSize || null, case_material: p.caseMaterial || null,
+      water_resistance: p.waterResistance || null, description: p.description || null,
+      image: p.image || null
+    };
+  }
+  function mapAuctionFromDb(r) {
+    return {
+      id: r.id, productId: r.product_id, startPrice: r.start_price, currentBid: r.current_bid,
+      currentBidderId: r.current_bidder_id, reservePrice: r.reserve_price,
+      minIncrementPct: r.min_increment_pct, antiSnipeSeconds: r.anti_snipe_seconds,
+      extensionSeconds: r.extension_seconds, startsAt: r.starts_at, endsAt: r.ends_at,
+      status: r.status, closedAt: r.closed_at, winnerId: r.winner_id, winnerName: r.winner_name,
+      reserveMet: r.reserve_met, createdAt: r.created_at
+    };
+  }
+  function mapBidFromDb(r) {
+    return { id: r.id, auctionId: r.auction_id, userId: r.user_id, bidderName: r.bidder_name, amount: r.amount, at: r.created_at };
+  }
+  function mapProfileFromDb(r) {
+    return {
+      id: r.id, name: r.name, email: r.email, role: r.role, status: r.status,
+      company: r.company, taxId: r.tax_id, phone: r.phone, city: r.city, createdAt: r.created_at
+    };
+  }
+  function mapWholesaleFromDb(r) {
+    return {
+      id: r.id, userId: r.user_id, reference: r.reference, businessData: r.business_data,
+      status: r.status, rejectReason: r.reject_reason, createdAt: r.created_at, reviewedAt: r.reviewed_at
+    };
+  }
+  function mapOrderFromDb(r) {
+    return {
+      id: r.id, reference: r.reference, userId: r.user_id, customer: r.customer, items: r.items,
+      total: r.total, status: r.status, paymentMethod: r.payment_method,
+      wompiTransactionId: r.wompi_transaction_id, createdAt: r.created_at, updatedAt: r.updated_at
+    };
+  }
+  function mapOrderToDb(o) {
+    return {
+      reference: o.reference, user_id: o.userId || null, customer: o.customer || {},
+      items: o.items || [], total: o.total || 0, status: o.status || 'pendiente',
+      payment_method: o.paymentMethod || null, wompi_transaction_id: o.wompiTransactionId || null
+    };
+  }
+
+  // Traduce los mensajes en inglés de Supabase Auth a algo que un cliente entienda.
+  function mapAuthError(err) {
+    var m = (err && err.message) || '';
+    if (/Invalid login credentials/i.test(m)) return 'Correo o contraseña incorrectos';
+    if (/User already registered/i.test(m)) return 'Ya existe una cuenta con ese correo';
+    if (/Password should be/i.test(m)) return 'La contraseña debe tener al menos 6 caracteres';
+    if (/rate limit/i.test(m)) return 'Demasiados intentos. Espera un momento e intenta de nuevo';
+    return m || 'No se pudo completar la operación';
+  }
+
+  // ============================================================
+  // ---------- Supabase: hidratación (llena la caché local) ----------
+  // ============================================================
+  // Todas las páginas siguen leyendo de forma síncrona (getProducts(),
+  // getAuctions()...) desde localStorage; estas funciones lo mantienen al
+  // día trayendo la verdad compartida de Supabase y avisando a los
+  // suscriptores (Store.subscribe) para que la UI se vuelva a pintar.
+  function hydrateProducts() {
+    if (!sb) return Promise.resolve();
+    return sb.from('products').select('*').then(function (res) {
+      if (res.error) { console.error('[Store] hidratando products', res.error); return; }
+      write(NS.products, res.data.map(mapProductFromDb));
+    });
+  }
+  function hydrateAuctions() {
+    if (!sb) return Promise.resolve();
+    return sb.from('auctions').select('*').then(function (res) {
+      if (res.error) { console.error('[Store] hidratando auctions', res.error); return; }
+      write(NS.auctions, res.data.map(mapAuctionFromDb));
+    });
+  }
+  function hydrateBids() {
+    if (!sb) return Promise.resolve();
+    return sb.from('bids').select('*').then(function (res) {
+      if (res.error) { console.error('[Store] hidratando bids', res.error); return; }
+      write(NS.bids, res.data.map(mapBidFromDb));
+    });
+  }
+  function hydrateConfig() {
+    if (!sb) return Promise.resolve();
+    return sb.from('config').select('data').eq('id', 1).single().then(function (res) {
+      if (res.error) { console.error('[Store] hidratando config', res.error); return; }
+      write(NS.config, (res.data && res.data.data) || {});
+    });
+  }
+  // Solicitudes mayoristas y pedidos: RLS solo deja ver "las mías" (cliente) o
+  // "todas" (admin). Sin sesión, ambas quedan vacías — no hay nada que ocultar
+  // a propósito, simplemente no aplica a un visitante anónimo.
+  function hydrateWholesale() {
+    if (!sb) return Promise.resolve();
+    return sb.from('wholesale_requests').select('*').then(function (res) {
+      if (res.error) return;
+      write(NS.requests, res.data.map(mapWholesaleFromDb));
+    });
+  }
+  function hydrateOrders() {
+    if (!sb) return Promise.resolve();
+    return sb.from('orders').select('*').then(function (res) {
+      if (res.error) return;
+      write(NS.orders, res.data.map(mapOrderFromDb));
+    });
+  }
+  // Solo funciona para el admin (is_admin() en la política de profiles deja
+  // ver todas las filas); para cualquier otro, RLS solo devuelve la propia.
+  function hydrateUsers() {
+    if (!sb) return Promise.resolve();
+    return sb.from('profiles').select('*').then(function (res) {
+      if (res.error) return;
+      write(NS.users, res.data.map(mapProfileFromDb));
+    });
+  }
+
+  function hydrateAll() {
+    return Promise.all([
+      hydrateProducts(), hydrateAuctions(), hydrateBids(), hydrateConfig(),
+      hydrateWholesale(), hydrateOrders(), hydrateUsers()
+    ]);
+  }
+
+  // ============================================================
+  // ---------- Supabase: sesión (perfil actual, síncrono) ----------
+  // ============================================================
+  function applyProfile(profile) {
+    if (profile) write(NS.profile, profile);
+    else {
+      try { localStorage.removeItem(NS.profile); } catch (e) {}
+      scheduleEmit();
+    }
+  }
+
+  // Confirma contra Supabase quién tiene la sesión activa y actualiza la
+  // caché síncrona (NS.profile). Se llama al cargar la página y cada vez que
+  // Supabase avisa un cambio de sesión (login/logout/refresh de token).
+  function refreshProfile() {
+    if (!sb) return Promise.resolve(null);
+    return sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (!session) { applyProfile(null); return null; }
+      return sb.from('profiles').select('*').eq('id', session.user.id).single().then(function (r) {
+        if (r.error || !r.data) { applyProfile(null); return null; }
+        var profile = mapProfileFromDb(r.data);
+        applyProfile(profile);
+        if (profile.role === 'admin') hydrateUsers();
+        return profile;
+      });
+    });
+  }
+
+  // ============================================================
+  // ---------- Supabase: tiempo real ----------
+  // ============================================================
+  // Para no reconstruir el estado a mano por cada evento, ante cualquier
+  // cambio simplemente se vuelve a pedir la tabla completa: con el tamaño de
+  // catálogo/subastas de Cronosfera el costo es insignificante y el código
+  // queda mucho más simple y confiable que ir parchando fila por fila.
+  function initRealtime() {
+    if (!sb) return;
+    sb.channel('cronos-public-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, hydrateProducts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auctions' }, hydrateAuctions)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bids' }, hydrateBids)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, hydrateConfig)
+      .subscribe();
+    // Canal aparte: solo se entera de sus propios cambios vía RLS (pedidos y
+    // solicitudes mayoristas no son públicos), así que re-hidratar aquí no
+    // filtra datos de otros usuarios.
+    sb.channel('cronos-private-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, hydrateOrders)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wholesale_requests' }, hydrateWholesale)
+      .subscribe();
+    sb.auth.onAuthStateChange(function () { refreshProfile(); });
   }
 
   // ---------- marcas y especificaciones ----------
@@ -225,7 +437,10 @@
     }
   };
 
-  function ensureSeed() {
+  // Solo se usa si Supabase no está disponible (p. ej. falla el CDN): deja el
+  // sitio funcionando en modo local de un solo navegador, como antes de la
+  // migración, en vez de mostrar una tienda completamente vacía.
+  function ensureLocalFallbackSeed() {
     var meta = read(NS.meta, {});
     if (!read(NS.products, null) || (meta.seedVersion || 1) < SEED_VERSION) {
       write(NS.products, SEED_PRODUCTS.map(function (p) {
@@ -407,18 +622,33 @@
   }
 
   function saveProduct(p) {
-    var list = getProducts();
-    if (!p.id) p.id = uid('P');
     if (p.brand && !p.brandSlug) p.brandSlug = slugifyBrand(p.brand);
-    var idx = list.findIndex(function (x) { return x.id === p.id; });
-    if (idx >= 0) list[idx] = Object.assign({}, list[idx], p);
-    else { p.createdAt = nowIso(); list.push(p); }
-    write(NS.products, list);
-    return p;
+    if (!sb) {
+      // Solo se usa si Supabase no cargó (modo local de respaldo).
+      var list = getProducts();
+      if (!p.id) p.id = uid('P');
+      var idx = list.findIndex(function (x) { return x.id === p.id; });
+      if (idx >= 0) list[idx] = Object.assign({}, list[idx], p);
+      else { p.createdAt = nowIso(); list.push(p); }
+      write(NS.products, list);
+      return Promise.resolve(p);
+    }
+    var row = mapProductToDb(p);
+    var query = p.id
+      ? sb.from('products').update(row).eq('id', p.id).select().single()
+      : sb.from('products').insert(row).select().single();
+    return query.then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateProducts().then(function () { return mapProductFromDb(res.data); });
+    });
   }
 
   function deleteProduct(id) {
-    write(NS.products, getProducts().filter(function (p) { return p.id !== id; }));
+    if (!sb) { write(NS.products, getProducts().filter(function (p) { return p.id !== id; })); return Promise.resolve(); }
+    return sb.from('products').delete().eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateProducts();
+    });
   }
 
   function wholesalePriceFor(p) {
@@ -430,6 +660,9 @@
 
   // ---------- usuarios / auth ----------
 
+  // getUsers()/getUser() leen de la caché local: para el admin trae TODOS los
+  // perfiles (hydrateUsers, permitido por is_admin() en RLS); para cualquier
+  // otra persona solo puede contener su propio perfil (currentUser()).
   function getUsers() { return read(NS.users, []); }
   function getUser(id) { return find(getUsers(), function (u) { return u.id === id; }) || null; }
   function getUserByEmail(email) {
@@ -437,114 +670,132 @@
     return find(getUsers(), function (u) { return (u.email || '').toLowerCase() === e; }) || null;
   }
 
+  // register/login/logout hablan con Supabase Auth: son asíncronos y
+  // devuelven una Promise (a diferencia del resto del Store, que sigue
+  // siendo síncrono contra la caché local).
   function register(data) {
-    if (!data.email || !data.password) throw new Error('Faltan email o contraseña');
-    if (getUserByEmail(data.email)) throw new Error('Ya existe una cuenta con ese correo');
-    var user = {
-      id: uid('U'),
-      name: data.name || data.email.split('@')[0],
-      email: data.email.trim().toLowerCase(),
-      passwordHash: hash(data.password),
-      role: data.role || 'retail',
-      status: data.status || (data.role === 'wholesale' ? 'pending' : 'active'),
-      company: data.company || null,
-      taxId: data.taxId || null,
-      phone: data.phone || null,
-      city: data.city || null,
-      createdAt: nowIso()
-    };
-    var list = getUsers();
-    list.push(user);
-    write(NS.users, list);
-
-    if (data.role === 'wholesale') {
-      var reqs = getWholesaleRequests();
-      reqs.push({
-        id: uid('WR'),
-        userId: user.id,
-        reference: 'CR-MA-' + new Date().getFullYear() + '-' + String(reqs.length + 1).padStart(4, '0'),
-        businessData: {
-          company: data.company,
-          taxId: data.taxId,
-          phone: data.phone,
-          city: data.city,
-          channel: data.channel,
-          message: data.message
-        },
-        status: 'pending',
-        createdAt: nowIso()
-      });
-      write(NS.requests, reqs);
-    }
-    return user;
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    if (!data.email || !data.password) return Promise.reject(new Error('Faltan email o contraseña'));
+    return sb.auth.signUp({
+      email: String(data.email).trim().toLowerCase(),
+      password: data.password,
+      options: { data: {
+        name: data.name || data.email.split('@')[0],
+        role: data.role || 'retail',
+        company: data.company || null,
+        tax_id: data.taxId || null,
+        phone: data.phone || null,
+        city: data.city || null
+      } }
+    }).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      if (!res.data.session) {
+        // El proyecto tiene "confirmar correo" activado: la cuenta queda
+        // creada pero sin sesión hasta que confirme desde su email.
+        throw new Error('Te enviamos un correo de confirmación. Confírmalo y luego inicia sesión.');
+      }
+      return refreshProfile();
+    }).then(function (profile) {
+      if (!profile) throw new Error('No se pudo cargar tu perfil');
+      if (data.role === 'wholesale') {
+        return sb.from('wholesale_requests').insert({
+          user_id: profile.id,
+          reference: 'CR-MA-' + new Date().getFullYear() + '-' + Date.now().toString(36).toUpperCase(),
+          business_data: {
+            company: data.company, taxId: data.taxId, phone: data.phone,
+            city: data.city, channel: data.channel, message: data.message
+          }
+        }).then(function (r) {
+          if (r.error) console.error('[Store] wholesale_requests insert', r.error);
+          return profile;
+        });
+      }
+      return profile;
+    });
   }
 
   function login(email, password) {
-    var user = getUserByEmail(email);
-    if (!user) throw new Error('No existe cuenta con ese correo');
-    if (user.passwordHash !== hash(password)) throw new Error('Contraseña incorrecta');
-    if (user.status === 'pending') throw new Error('Tu cuenta está pendiente de aprobación manual');
-    if (user.status === 'rejected') throw new Error('Tu solicitud mayorista fue rechazada. Contáctanos para más información');
-    if (user.status === 'suspended') throw new Error('Tu cuenta está suspendida');
-    write(NS.session, { userId: user.id, at: nowIso() });
-    return user;
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.auth.signInWithPassword({
+      email: String(email || '').trim().toLowerCase(),
+      password: password
+    }).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return refreshProfile();
+    }).then(function (profile) {
+      if (!profile) throw new Error('No se pudo cargar tu perfil');
+      if (profile.status !== 'active') {
+        var msg = profile.status === 'pending' ? 'Tu cuenta está pendiente de aprobación manual'
+          : profile.status === 'rejected' ? 'Tu solicitud mayorista fue rechazada. Contáctanos para más información'
+          : 'Tu cuenta está suspendida';
+        return sb.auth.signOut().then(function () { applyProfile(null); throw new Error(msg); });
+      }
+      return profile;
+    });
   }
 
-  function logout() { localStorage.removeItem(NS.session); scheduleEmit(); }
-
-  function currentUser() {
-    var s = read(NS.session, null);
-    if (!s) return null;
-    return getUser(s.userId) || null;
+  function logout() {
+    applyProfile(null); // se limpia de inmediato; no hace falta esperar la red
+    if (sb) sb.auth.signOut();
   }
+
+  function currentUser() { return read(NS.profile, null); }
 
   function setUserRole(id, role) {
-    var list = getUsers();
-    var u = find(list, function (x) { return x.id === id; });
-    if (!u) return;
-    u.role = role;
-    write(NS.users, list);
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.from('profiles').update({ role: role }).eq('id', id).then(function (r) {
+      if (r.error) throw new Error(mapAuthError(r.error));
+      return hydrateUsers();
+    });
   }
 
   function setUserStatus(id, status) {
-    var list = getUsers();
-    var u = find(list, function (x) { return x.id === id; });
-    if (!u) return;
-    u.status = status;
-    write(NS.users, list);
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.from('profiles').update({ status: status }).eq('id', id).then(function (r) {
+      if (r.error) throw new Error(mapAuthError(r.error));
+      return hydrateUsers();
+    });
   }
 
   // ---------- solicitudes mayoristas ----------
 
   function getWholesaleRequests() { return read(NS.requests, []); }
 
-  function approveWholesale(id, tempPassword) {
-    var reqs = getWholesaleRequests();
-    var r = find(reqs, function (x) { return x.id === id; });
-    if (!r) return null;
-    r.status = 'approved';
-    r.reviewedAt = nowIso();
-    write(NS.requests, reqs);
-    setUserStatus(r.userId, 'active');
-    setUserRole(r.userId, 'wholesale');
-    if (tempPassword) {
-      var list = getUsers();
-      var u = find(list, function (x) { return x.id === r.userId; });
-      if (u) { u.passwordHash = hash(tempPassword); write(NS.users, list); }
-    }
-    return r;
+  // No hace falta contraseña temporal: la cuenta ya es real (Supabase Auth) y
+  // la persona ya eligió su propia contraseña al registrarse. Aprobar solo
+  // activa el acceso; ya puede iniciar sesión con lo que registró.
+  function approveWholesale(id) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var r = find(getWholesaleRequests(), function (x) { return x.id === id; });
+    if (!r) return Promise.reject(new Error('Solicitud no encontrada'));
+    return sb.from('wholesale_requests')
+      .update({ status: 'approved', reviewed_at: nowIso() })
+      .eq('id', id)
+      .then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return sb.from('profiles').update({ status: 'active', role: 'wholesale' }).eq('id', r.userId);
+      })
+      .then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return hydrateWholesale();
+      });
   }
 
   function rejectWholesale(id, reason) {
-    var reqs = getWholesaleRequests();
-    var r = find(reqs, function (x) { return x.id === id; });
-    if (!r) return null;
-    r.status = 'rejected';
-    r.reviewedAt = nowIso();
-    r.rejectReason = reason || null;
-    write(NS.requests, reqs);
-    setUserStatus(r.userId, 'rejected');
-    return r;
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var r = find(getWholesaleRequests(), function (x) { return x.id === id; });
+    if (!r) return Promise.reject(new Error('Solicitud no encontrada'));
+    return sb.from('wholesale_requests')
+      .update({ status: 'rejected', reviewed_at: nowIso(), reject_reason: reason || null })
+      .eq('id', id)
+      .then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return sb.from('profiles').update({ status: 'rejected' }).eq('id', r.userId);
+      })
+      .then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return hydrateWholesale();
+      });
   }
 
   // ---------- subastas ----------
@@ -562,41 +813,55 @@
   }
 
   function createAuction(data) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
     var cfg = getConfig();
     var ad = cfg.auctionDefaults || {};
     var durationMs = (data.durationHours != null ? data.durationHours : ad.durationHours) * 3600 * 1000;
     var startsAt = data.startsAt || nowIso();
     var endsAt = new Date(new Date(startsAt).getTime() + durationMs).toISOString();
-    var auction = {
-      id: uid('A'),
-      productId: data.productId,
-      startPrice: data.startPrice,
-      currentBid: data.startPrice,
-      currentBidderId: null,
-      reservePrice: data.reservePrice || data.startPrice,
-      minIncrementPct: data.minIncrementPct || ad.minIncrementPct || 5,
-      antiSnipeSeconds: data.antiSnipeSeconds != null ? data.antiSnipeSeconds : ad.antiSnipeSeconds,
-      extensionSeconds: data.extensionSeconds != null ? data.extensionSeconds : ad.extensionSeconds,
-      startsAt: startsAt,
-      endsAt: endsAt,
-      status: 'scheduled',
-      createdAt: nowIso(),
-      closedAt: null,
-      winnerId: null
+    var row = {
+      product_id: data.productId,
+      start_price: data.startPrice,
+      current_bid: data.startPrice,
+      reserve_price: data.reservePrice || data.startPrice,
+      min_increment_pct: data.minIncrementPct || ad.minIncrementPct || 5,
+      anti_snipe_seconds: data.antiSnipeSeconds != null ? data.antiSnipeSeconds : ad.antiSnipeSeconds,
+      extension_seconds: data.extensionSeconds != null ? data.extensionSeconds : ad.extensionSeconds,
+      starts_at: startsAt,
+      ends_at: endsAt,
+      status: 'scheduled'
     };
-    var list = getAuctions();
-    list.push(auction);
-    write(NS.auctions, list);
-    return auction;
+    return sb.from('auctions').insert(row).select().single().then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateAuctions().then(function () { return mapAuctionFromDb(res.data); });
+    });
   }
 
+  // Ediciones puntuales desde el panel (fechas, precios, parámetros); llega
+  // en forma JS (camelCase) y se traduce campo a campo a columnas reales.
   function updateAuction(id, patch) {
-    var list = getAuctions();
-    var a = find(list, function (x) { return x.id === id; });
-    if (!a) return null;
-    Object.assign(a, patch);
-    write(NS.auctions, list);
-    return a;
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var row = {};
+    if (patch.startPrice != null) row.start_price = patch.startPrice;
+    if (patch.reservePrice != null) row.reserve_price = patch.reservePrice;
+    if (patch.minIncrementPct != null) row.min_increment_pct = patch.minIncrementPct;
+    if (patch.antiSnipeSeconds != null) row.anti_snipe_seconds = patch.antiSnipeSeconds;
+    if (patch.extensionSeconds != null) row.extension_seconds = patch.extensionSeconds;
+    if (patch.startsAt != null) row.starts_at = patch.startsAt;
+    if (patch.endsAt != null) row.ends_at = patch.endsAt;
+    if (patch.status != null) row.status = patch.status;
+    return sb.from('auctions').update(row).eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateAuctions();
+    });
+  }
+
+  function deleteAuction(id) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.from('auctions').delete().eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateAuctions();
+    });
   }
 
   function minNextBid(a) {
@@ -605,73 +870,37 @@
     return base + inc;
   }
 
-  function placeBid(auctionId, userId, amount) {
-    var a = getAuction(auctionId);
-    if (!a) throw new Error('Subasta no encontrada');
-    if (getAuctionStatus(a) !== 'live') throw new Error('La subasta no está abierta');
-    // Toda puja debe quedar atribuida a una cuenta real y activa: sin esto,
-    // la interfaz exige sesión pero la capa de datos aceptaba pujas anónimas.
-    var bidder = userId ? getUser(userId) : null;
-    if (!bidder) throw new Error('Necesitas una cuenta para pujar');
-    if (bidder.status !== 'active') throw new Error('Tu cuenta no está activa para pujar');
-    amount = Number(amount);
-    if (!amount || amount <= 0) throw new Error('Puja inválida');
-    var min = minNextBid(a);
-    if (amount < min) throw new Error('Tu puja debe ser al menos ' + min.toLocaleString('es-CO'));
-
-    var bids = getBids();
-    bids.push({
-      id: uid('B'),
-      auctionId: auctionId,
-      userId: userId,
-      amount: amount,
-      at: nowIso()
+  // Toda la validación (sesión, cuenta activa, puja mínima, anti-snipe) ahora
+  // vive en el servidor (place_bid() en 02-security.sql), con bloqueo de fila
+  // para que dos pujas simultáneas no se pisen entre sí.
+  function placeBid(auctionId, amount) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.rpc('place_bid', { p_auction_id: auctionId, p_amount: Number(amount) }).then(function (res) {
+      if (res.error) throw new Error(res.error.message);
+      return Promise.all([hydrateAuctions(), hydrateBids()]).then(function () {
+        return mapAuctionFromDb(res.data);
+      });
     });
-    write(NS.bids, bids);
-
-    a.currentBid = amount;
-    a.currentBidderId = userId;
-
-    // anti-snipe
-    var remainingMs = new Date(a.endsAt).getTime() - Date.now();
-    if (remainingMs < (a.antiSnipeSeconds || 0) * 1000) {
-      a.endsAt = new Date(Date.now() + (a.extensionSeconds || 0) * 1000).toISOString();
-    }
-    write(NS.auctions, getAuctions().map(function (x) { return x.id === a.id ? a : x; }));
-    return a;
   }
 
-  // Solo hay ganador si se alcanzó el precio de reserva. Sin esto, una pieza
-  // podía "venderse" por debajo del mínimo aceptable definido por la tienda.
-  function reserveMet(a) {
-    if (a.currentBidderId == null) return false;
-    var reserve = a.reservePrice || 0;
-    return (a.currentBid || 0) >= reserve;
-  }
-
+  // Cierre manual desde el panel ("Cerrar ahora"): mismo criterio de reserva
+  // que el cierre automático, ejecutado en el servidor (close_auction()).
   function closeAuction(id) {
-    var a = getAuction(id);
-    if (!a) return null;
-    a.status = 'closed';
-    a.closedAt = nowIso();
-    a.winnerId = reserveMet(a) ? a.currentBidderId : null;
-    a.reserveMet = reserveMet(a);
-    return updateAuction(id, a);
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.rpc('close_auction', { p_auction_id: id }).then(function (res) {
+      if (res.error) throw new Error(res.error.message);
+      return hydrateAuctions().then(function () { return mapAuctionFromDb(res.data); });
+    });
   }
 
+  // Barre subastas vencidas y las cierra (close_expired_auctions() en el
+  // servidor); cualquier visitante puede disparar el barrido de forma
+  // inofensiva, por eso la función está otorgada a anon también.
   function autoCloseExpired() {
-    var list = getAuctions();
-    var changed = false;
-    list.forEach(function (a) {
-      if (a.status !== 'closed' && getAuctionStatus(a) === 'closed') {
-        a.status = 'closed';
-        a.closedAt = nowIso();
-        a.winnerId = reserveMet(a) ? a.currentBidderId : null;
-        a.reserveMet = reserveMet(a);
-        changed = true;
-      }
+    if (!sb) return Promise.resolve();
+    return sb.rpc('close_expired_auctions').then(function (res) {
+      if (!res.error && res.data > 0) hydrateAuctions();
     });
-    if (changed) write(NS.auctions, list);
   }
 
   // ---------- bids ----------
@@ -742,8 +971,11 @@
     if (partial.auctionDefaults) next.auctionDefaults = Object.assign({}, cur.auctionDefaults || {}, partial.auctionDefaults);
     if (partial.hero) next.hero = Object.assign({}, cur.hero || {}, partial.hero);
     if (partial.payments) next.payments = Object.assign({}, cur.payments || {}, partial.payments);
-    write(NS.config, next);
-    return next;
+    if (!sb) { write(NS.config, next); return Promise.resolve(next); }
+    return sb.from('config').update({ data: next }).eq('id', 1).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateConfig().then(function () { return next; });
+    });
   }
 
   // ---------- pedidos ----------
@@ -754,28 +986,37 @@
 
   function getOrder(id) { return find(read(NS.orders, []), function (o) { return o.id === id; }) || null; }
 
+  // Funciona sin sesión (compra como invitado): la política orders_insert
+  // permite user_id = auth.uid() o user_id nulo.
   function createOrder(data) {
-    var orders = read(NS.orders, []);
     var order = Object.assign({
-      id: uid('ORD'),
       reference: 'CRONOS-' + Date.now().toString(36).toUpperCase(),
       status: 'pendiente', // pendiente | contactado | pagado | rechazado | cancelado
       paymentMethod: null, // 'wompi' | 'whatsapp'
-      wompiTransactionId: null,
-      createdAt: nowIso()
+      wompiTransactionId: null
     }, data);
-    orders.push(order);
-    write(NS.orders, orders);
-    return order;
+    if (!sb) {
+      var orders = read(NS.orders, []);
+      order.id = uid('ORD'); order.createdAt = nowIso();
+      orders.push(order); write(NS.orders, orders);
+      return Promise.resolve(order);
+    }
+    return sb.from('orders').insert(mapOrderToDb(order)).select().single().then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateOrders().then(function () { return mapOrderFromDb(res.data); });
+    });
   }
 
   function updateOrder(id, patch) {
-    var orders = read(NS.orders, []);
-    var order = find(orders, function (o) { return o.id === id; });
-    if (!order) return null;
-    Object.assign(order, patch, { updatedAt: nowIso() });
-    write(NS.orders, orders);
-    return order;
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var row = {};
+    if (patch.status != null) row.status = patch.status;
+    if (patch.paymentMethod != null) row.payment_method = patch.paymentMethod;
+    if (patch.wompiTransactionId != null) row.wompi_transaction_id = patch.wompiTransactionId;
+    return sb.from('orders').update(row).eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateOrders();
+    });
   }
 
   // ---------- pub/sub ----------
@@ -789,7 +1030,24 @@
 
   // ---------- bootstrap ----------
 
-  ensureSeed();
+  // Store.ready() resuelve cuando ya se confirmó contra Supabase si hay
+  // sesión o no. Páginas que deciden algo importante con currentUser() antes
+  // de pintar (ej. el guard de admin.html) deben esperar esto primero: sin
+  // ello, en el primer instante currentUser() siempre da null (la promesa de
+  // getSession() todavía no resuelve) y expulsarían a un admin real.
+  var readyPromise;
+  if (sb) {
+    // La UI ya pinta con lo que haya en caché (localStorage de una visita
+    // anterior, o vacío la primera vez); hydrateAll()/refreshProfile() traen
+    // la verdad compartida y, junto con scheduleEmit(), hacen que todo lo que
+    // esté suscrito a Store.subscribe() se vuelva a pintar solo.
+    readyPromise = Promise.all([refreshProfile(), hydrateAll()]);
+    initRealtime();
+  } else {
+    ensureLocalFallbackSeed();
+    readyPromise = Promise.resolve();
+  }
+  function ready() { return readyPromise; }
 
   // ---------- API pública ----------
 
@@ -837,6 +1095,7 @@
     getAuctionStatus: getAuctionStatus,
     createAuction: createAuction,
     updateAuction: updateAuction,
+    deleteAuction: deleteAuction,
     minNextBid: minNextBid,
     placeBid: placeBid,
     closeAuction: closeAuction,
@@ -863,6 +1122,7 @@
     saveConfig: saveConfig,
     // utilidades
     subscribe: subscribe,
+    ready: ready,
     formatCOP: function (v) { return '$' + Number(v || 0).toLocaleString('es-CO'); },
     now: nowIso
   };

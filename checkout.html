@@ -446,6 +446,8 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
   <script src="cronos-store.js"></script>
   <script src="cronos-auth.js"></script>
   <script src="cronos-ui.js"></script>
@@ -465,8 +467,13 @@
 
       // ---------- Vista de confirmación (retorno desde Wompi) ----------
       if (params.has('orderId') && params.has('id')) {
-        renderConfirmView(params.get('orderId'), params.get('id'));
         show('checkoutConfirm');
+        // Se espera a que la caché local ya tenga los pedidos traídos de
+        // Supabase: si se lee Store.getOrder() antes de que resuelva, el
+        // pedido (creado en un paso anterior) todavía no está en memoria.
+        (Store.ready ? Store.ready() : Promise.resolve()).then(function () {
+          renderConfirmView(params.get('orderId'), params.get('id'));
+        });
         return;
       }
 
@@ -542,20 +549,29 @@
           var cartItems = Store.getCartItems();
           if (!cartItems.length) { show('checkoutEmpty'); return; }
           var total = Store.getCartTotal();
+          var user = window.Store && Store.currentUser ? Store.currentUser() : null;
 
-          draftOrder = Store.createOrder({
+          var continueBtn = form.querySelector('#continueToPayment');
+          if (continueBtn) { continueBtn.disabled = true; continueBtn.textContent = 'Guardando…'; }
+
+          Store.createOrder({
+            userId: user ? user.id : null,
             customer: customer,
             items: cartItems.map(function (p) {
               return { productId: p.id, brand: p.brand, model: p.model, ref: p.ref, price: p.price, qty: p.qty, lineTotal: p.lineTotal, image: p.image };
             }),
             total: total
+          }).then(function (order) {
+            draftOrder = order;
+            document.getElementById('paymentCard').classList.remove('locked');
+            mountWompiWidget(draftOrder, total);
+            bindWhatsappButton(draftOrder, total, customer);
+            document.getElementById('paymentCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (continueBtn) continueBtn.textContent = 'Datos guardados ✓';
+          }).catch(function (err) {
+            alert('No pudimos guardar tu pedido: ' + err.message);
+            if (continueBtn) { continueBtn.disabled = false; continueBtn.textContent = 'Continuar al pago'; }
           });
-
-          document.getElementById('paymentCard').classList.remove('locked');
-          mountWompiWidget(draftOrder, total);
-          bindWhatsappButton(draftOrder, total, customer);
-          document.getElementById('paymentCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-          form.querySelector('#continueToPayment').textContent = 'Datos guardados ✓';
         });
       }
 
@@ -591,7 +607,7 @@
           script.setAttribute('data-redirect-url', redirectUrl);
           if (signature) script.setAttribute('data-signature:integrity', signature);
           mount.appendChild(script);
-          Store.updateOrder(order.id, { paymentMethod: 'wompi' });
+          Store.updateOrder(order.id, { paymentMethod: 'wompi' }).catch(function (e) { console.error('[checkout] updateOrder', e); });
         }
 
         if (payments.wompiIntegritySecret) {
@@ -618,7 +634,7 @@
         var waUrl = 'https://api.whatsapp.com/send?phone=' + encodeURIComponent(payments.whatsappNumber) + '&text=' + encodeURIComponent(text);
         btn.setAttribute('href', waUrl);
         btn.onclick = function () {
-          Store.updateOrder(order.id, { paymentMethod: 'whatsapp', status: 'contactado' });
+          Store.updateOrder(order.id, { paymentMethod: 'whatsapp', status: 'contactado' }).catch(function (e) { console.error('[checkout] updateOrder', e); });
           Store.clearCart();
           renderWhatsappConfirm(order);
           show('checkoutConfirm');
@@ -662,14 +678,14 @@
           .then(function (json) {
             var status = json && json.data ? json.data.status : null;
             if (status === 'APPROVED') {
-              if (order) Store.updateOrder(order.id, { status: 'pagado', wompiTransactionId: transactionId });
+              if (order) Store.updateOrder(order.id, { status: 'pagado', wompiTransactionId: transactionId }).catch(function (e) { console.error('[checkout] updateOrder', e); });
               Store.clearCart();
               renderConfirmResult('ok', '¡Pago aprobado!', 'Gracias por tu compra. Te contactaremos para coordinar el envío.', order);
             } else if (status === 'PENDING') {
-              if (order) Store.updateOrder(order.id, { wompiTransactionId: transactionId });
+              if (order) Store.updateOrder(order.id, { wompiTransactionId: transactionId }).catch(function (e) { console.error('[checkout] updateOrder', e); });
               renderConfirmResult('pending', 'Pago en proceso', 'Wompi todavía está confirmando tu pago. Te avisaremos apenas se apruebe.', order);
             } else {
-              if (order) Store.updateOrder(order.id, { status: 'rechazado', wompiTransactionId: transactionId });
+              if (order) Store.updateOrder(order.id, { status: 'rechazado', wompiTransactionId: transactionId }).catch(function (e) { console.error('[checkout] updateOrder', e); });
               renderConfirmResult('fail', 'El pago no se completó', 'Tu pago fue rechazado o cancelado. Puedes intentarlo de nuevo desde el carrito.', order);
             }
           })
