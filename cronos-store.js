@@ -16,6 +16,7 @@
     session: 'cronos:session',
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
+    brandsMeta: 'cronos:brands-meta',
     counters: 'cronos:counters',
     meta: 'cronos:meta',
     cart: 'cronos:cart',
@@ -109,6 +110,16 @@
     { slug: 'tissot', name: 'Tissot', image: 'productos/marcas/tissot-white.png', photo: 'productos/marcas/tissot-foto.jpg' },
     { slug: 'tommy-hilfiger', name: 'Tommy Hilfiger', image: 'productos/marcas/tommy-hilfiger-white.png', photo: 'productos/marcas/tommy-hilfiger-foto.jpg' },
     { slug: 'multimarca', name: 'Multimarca', image: '', photo: 'productos/marcas/multimarca-foto.jpg', note: 'Otras marcas seleccionadas' }
+  ];
+
+  // Categorías de accesorios que vende Cristian aparte de relojes. Fijas
+  // (no se crean/borran desde el panel como las carpetas de marca): existen
+  // siempre, aunque todavía no tengan productos, para que el panel las
+  // muestre listas y él pueda ir subiendo fotos cuando las tenga.
+  var ACCESSORY_CATEGORIES = [
+    { slug: 'gorras', name: 'Gorras' },
+    { slug: 'correas', name: 'Correas' },
+    { slug: 'billeteras', name: 'Billeteras' }
   ];
 
   // Opciones cerradas para la ficha técnica (las usa el panel admin y los filtros).
@@ -247,26 +258,139 @@
   function getProducts() { return read(NS.products, []); }
   function getProduct(id) { return find(getProducts(), function (p) { return p.id === id; }) || null; }
   function getProductByRef(ref) { return find(getProducts(), function (p) { return p.ref === ref; }) || null; }
-
-  // ---------- marcas ----------
-
-  function getBrands() {
-    var products = getProducts();
-    var images = getConfig().brandImages || {};
-    return BRANDS.map(function (b) {
-      return Object.assign({}, b, {
-        image: images[b.slug] || b.image || '',
-        count: products.filter(function (p) { return productBrandSlug(p) === b.slug; }).length
-      });
+  // Relojes: todo lo que no esté marcado como accesorio (los productos del
+  // catálogo original no tienen `category`, así que siguen contando aquí).
+  function getWatchProducts() { return getProducts().filter(function (p) { return p.category !== 'accesorio'; }); }
+  function getAccessoryProducts(categorySlug) {
+    return getProducts().filter(function (p) {
+      return p.category === 'accesorio' && (!categorySlug || p.accessoryType === categorySlug);
+    });
+  }
+  function getAccessoryCategories() {
+    return ACCESSORY_CATEGORIES.map(function (c) {
+      var items = getAccessoryProducts(c.slug);
+      var withPhoto = find(items, function (p) { return !!p.image; });
+      return Object.assign({}, c, { count: items.length, cover: withPhoto ? withPhoto.image : '' });
     });
   }
 
+  // ---------- marcas ----------
+
+  // ---------- marcas: personalización desde el panel ----------
+  // Capa de overrides sobre BRANDS (fija, real): permite renombrar, poner
+  // portada propia y agregar marcas nuevas sin tocar código. `order` guarda
+  // el orden final de carpetas una vez que Daniela lo ajusta manualmente;
+  // mientras no lo toque, se ordena alfabético.
+  function getBrandsMeta() {
+    return read(NS.brandsMeta, { order: [], overrides: {}, custom: [] });
+  }
+
+  function saveBrandsMeta(patch) {
+    var cur = getBrandsMeta();
+    var next = Object.assign({}, cur, patch);
+    write(NS.brandsMeta, next);
+    return next;
+  }
+
+  function getBrands() {
+    var products = getProducts();
+    var meta = getBrandsMeta();
+    var overrides = meta.overrides || {};
+    var all = BRANDS.concat(meta.custom || []);
+    var list = all.map(function (b) {
+      var ov = overrides[b.slug] || {};
+      return Object.assign({}, b, {
+        name: ov.name || b.name,
+        photo: ov.cover || b.photo || '',
+        custom: !!b.custom,
+        count: products.filter(function (p) { return productBrandSlug(p) === b.slug; }).length
+      });
+    });
+    var order = meta.order || [];
+    list.sort(function (a, b) {
+      var ia = order.indexOf(a.slug), ib = order.indexOf(b.slug);
+      if (ia === -1 && ib === -1) return a.name.localeCompare(b.name, 'es');
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    return list;
+  }
+
   function getBrand(slug) {
-    return find(BRANDS, function (b) { return b.slug === slug; }) || null;
+    return find(getBrands(), function (b) { return b.slug === slug; }) || null;
   }
 
   function productBrandSlug(p) {
     return p.brandSlug || slugifyBrand(p.brand);
+  }
+
+  // Crea una marca/carpeta nueva. El slug se genera del nombre y se
+  // desambigua si ya existe (bulova, bulova-2, ...).
+  function addBrand(data) {
+    var name = String(data.name || '').trim();
+    if (!name) throw new Error('El nombre de la carpeta es obligatorio');
+    var base = slugifyBrand(name);
+    var existing = getBrands().map(function (b) { return b.slug; });
+    var slug = base, i = 2;
+    while (existing.indexOf(slug) !== -1) { slug = base + '-' + i; i++; }
+    var meta = getBrandsMeta();
+    var custom = (meta.custom || []).concat([{ slug: slug, name: name, photo: data.cover || '', custom: true }]);
+    var order = (meta.order && meta.order.length ? meta.order : getBrands().map(function (b) { return b.slug; })).concat([slug]);
+    saveBrandsMeta({ custom: custom, order: order });
+    return getBrand(slug);
+  }
+
+  // Renombra una carpeta (marca de fábrica o custom) y actualiza en cascada
+  // el nombre visible en los productos que ya la usan, para que la vista de
+  // carpetas (que agrupa por el texto de p.brand) quede consistente.
+  function renameBrand(slug, newName) {
+    var name = String(newName || '').trim();
+    if (!name) throw new Error('El nombre no puede quedar vacío');
+    var meta = getBrandsMeta();
+    var overrides = Object.assign({}, meta.overrides);
+    overrides[slug] = Object.assign({}, overrides[slug], { name: name });
+    saveBrandsMeta({ overrides: overrides });
+    var products = getProducts();
+    var changed = false;
+    products.forEach(function (p) {
+      if (productBrandSlug(p) === slug && p.brand !== name) { p.brand = name; changed = true; }
+    });
+    if (changed) write(NS.products, products);
+    return getBrand(slug);
+  }
+
+  function setBrandCover(slug, cover) {
+    var meta = getBrandsMeta();
+    var overrides = Object.assign({}, meta.overrides);
+    overrides[slug] = Object.assign({}, overrides[slug], { cover: cover || '' });
+    saveBrandsMeta({ overrides: overrides });
+    return getBrand(slug);
+  }
+
+  // Mueve una carpeta un puesto arriba/abajo (dir: -1 / +1) dentro del orden
+  // visible. La primera vez que se reordena, se fija el orden completo.
+  function moveBrand(slug, dir) {
+    var slugs = getBrands().map(function (b) { return b.slug; });
+    var idx = slugs.indexOf(slug);
+    var target = idx + dir;
+    if (idx === -1 || target < 0 || target >= slugs.length) return;
+    var tmp = slugs[idx]; slugs[idx] = slugs[target]; slugs[target] = tmp;
+    saveBrandsMeta({ order: slugs });
+  }
+
+  // Solo se pueden borrar carpetas creadas desde el panel, y solo si ya no
+  // tienen productos adentro (para no dejar productos huérfanos sin marca).
+  function deleteBrand(slug) {
+    var b = getBrand(slug);
+    if (!b || !b.custom) throw new Error('Solo se pueden eliminar carpetas creadas desde el panel');
+    if (b.count > 0) throw new Error('Esta carpeta todavía tiene productos adentro');
+    var meta = getBrandsMeta();
+    var custom = (meta.custom || []).filter(function (x) { return x.slug !== slug; });
+    var order = (meta.order || []).filter(function (x) { return x !== slug; });
+    var overrides = Object.assign({}, meta.overrides);
+    delete overrides[slug];
+    saveBrandsMeta({ custom: custom, order: order, overrides: overrides });
   }
 
   function saveProduct(p) {
@@ -659,14 +783,24 @@
   global.Store = {
     // productos
     getProducts: getProducts,
+    getWatchProducts: getWatchProducts,
     getProduct: getProduct,
     getProductByRef: getProductByRef,
     saveProduct: saveProduct,
     deleteProduct: deleteProduct,
     wholesalePriceFor: wholesalePriceFor,
+    // accesorios (gorras, correas, billeteras)
+    ACCESSORY_CATEGORIES: ACCESSORY_CATEGORIES,
+    getAccessoryCategories: getAccessoryCategories,
+    getAccessoryProducts: getAccessoryProducts,
     // marcas y especificaciones
     getBrands: getBrands,
     getBrand: getBrand,
+    addBrand: addBrand,
+    renameBrand: renameBrand,
+    setBrandCover: setBrandCover,
+    moveBrand: moveBrand,
+    deleteBrand: deleteBrand,
     productBrandSlug: productBrandSlug,
     SPECS: SPECS,
     // usuarios / auth

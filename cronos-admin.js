@@ -53,6 +53,31 @@
 
   function confirmDialog(msg) { return window.confirm(msg); }
 
+  // Redimensiona/comprime una foto elegida desde el input file antes de
+  // guardarla como data URL en localStorage (no hay servidor todavía: sin
+  // esto, fotos de celular de varios MB llenan la cuota del navegador rápido).
+  function resizeImageFile(file, maxDim, quality) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('No se pudo leer el archivo')); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('Archivo de imagen inválido')); };
+        img.onload = function () {
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var cw = Math.max(1, Math.round(img.width * scale));
+          var ch = Math.max(1, Math.round(img.height * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = cw; canvas.height = ch;
+          canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   // ============== TAB ROUTER ==============
   var currentTab = null;
   function go(tab) {
@@ -71,6 +96,7 @@
   var TAB_LABELS = {
     dashboard: 'Dashboard',
     catalogo: 'Catálogo',
+    accesorios: 'Accesorios',
     subastas: 'Subastas',
     pedidos: 'Pedidos',
     mayoristas: 'Solicitudes mayoristas',
@@ -80,7 +106,7 @@
 
   function renderTab(tab, pane) {
     pane.innerHTML = '';
-    ({ dashboard: renderDashboardV2, catalogo: renderCatalogo, subastas: renderSubastas, pedidos: renderPedidos, mayoristas: renderMayoristas, usuarios: renderUsuarios, config: renderConfig })[tab](pane);
+    ({ dashboard: renderDashboardV2, catalogo: renderCatalogo, accesorios: renderAccesorios, subastas: renderSubastas, pedidos: renderPedidos, mayoristas: renderMayoristas, usuarios: renderUsuarios, config: renderConfig })[tab](pane);
   }
 
   // ============== DASHBOARD ==============
@@ -305,7 +331,10 @@
       +   '<div class="catalogo-search">'
       +     '<input type="search" id="prodSearch" placeholder="Buscar en todo el catálogo…">'
       +   '</div>'
-      +   '<button class="btn-primary" id="newProduct">+ Nuevo producto</button>'
+      +   '<div class="catalogo-head-actions">'
+      +     '<button class="btn-ghost" id="newBrand">+ Carpeta</button>'
+      +     '<button class="btn-primary" id="newProduct">+ Nuevo producto</button>'
+      +   '</div>'
       + '</div>'
       + '<div id="catalogBody"></div>';
 
@@ -340,29 +369,50 @@
     }
 
     var folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke-linejoin="round"/></svg>';
+    var editSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" stroke-linejoin="round"/></svg>';
 
+    // Las carpetas visibles son las marcas conocidas (Store.getBrands(),
+    // fijas + creadas desde el panel, con su orden). Si hay productos con un
+    // p.brand suelto que no matchea ninguna marca conocida (dato viejo/atípico),
+    // igual se muestra su carpeta al final para no esconder productos.
     function drawBrandGrid() {
-      var groups = groupByBrand(Store.getProducts());
-      var names = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b, 'es'); });
-      if (names.length === 0) {
+      var groups = groupByBrand(Store.getWatchProducts());
+      var known = Store.getBrands();
+      var seen = {};
+      var tiles = known.map(function (b) {
+        seen[b.slug] = true;
+        var items = groups[b.name] || [];
+        return { slug: b.slug, name: b.name, items: items, cover: b.photo || coverImg(items), custom: b.custom, movable: true };
+      });
+      Object.keys(groups).forEach(function (name) {
+        var slug = Store.productBrandSlug({ brand: name });
+        if (seen[slug]) return;
+        tiles.push({ slug: slug, name: name, items: groups[name], cover: coverImg(groups[name]), custom: false, movable: false });
+      });
+      if (tiles.length === 0) {
         body.innerHTML = '<div class="empty-state"><h3>Sin productos todavía</h3><p>Crea el primero con “+ Nuevo producto”.</p></div>';
         return;
       }
-      body.innerHTML = '<div class="brand-folder-grid">' + names.map(function (brand) {
-        var items = groups[brand];
-        var cover = coverImg(items);
-        return '<button class="brand-folder" data-brand="' + escapeHtml(brand) + '">'
-          + '<span class="brand-folder-cover">'
-          +   (cover ? '<img src="' + escapeHtml(cover) + '" alt="" loading="lazy">' : '<span class="brand-folder-ph">◷</span>')
-          +   '<span class="brand-folder-count">' + items.length + '</span>'
-          + '</span>'
-          + '<span class="brand-folder-body">' + folderSvg + '<span class="brand-folder-name">' + escapeHtml(brand) + '</span></span>'
-          + '</button>';
+      body.innerHTML = '<div class="brand-folder-grid">' + tiles.map(function (t, i) {
+        return '<div class="brand-folder">'
+          + '<button class="brand-folder-cover" data-brand="' + escapeHtml(t.name) + '">'
+          +   (t.cover ? '<img src="' + escapeHtml(t.cover) + '" alt="" loading="lazy">' : '<span class="brand-folder-ph">◷</span>')
+          +   '<span class="brand-folder-count">' + t.items.length + '</span>'
+          + '</button>'
+          + '<div class="brand-folder-body">'
+          +   '<button class="brand-folder-name-btn" data-brand="' + escapeHtml(t.name) + '">' + folderSvg + '<span class="brand-folder-name">' + escapeHtml(t.name) + '</span></button>'
+          +   (t.movable ? ''
+                + '<button class="icon-action move-up" data-slug="' + t.slug + '" title="Mover antes"' + (i === 0 ? ' disabled' : '') + '>↑</button>'
+                + '<button class="icon-action move-down" data-slug="' + t.slug + '" title="Mover después"' + (i === tiles.length - 1 ? ' disabled' : '') + '>↓</button>'
+                + '<button class="icon-action edit-brand" data-slug="' + t.slug + '" title="Editar carpeta">' + editSvg + '</button>'
+              : '')
+          + '</div>'
+          + '</div>';
       }).join('') + '</div>';
     }
 
     function drawBrandView(brand) {
-      var items = Store.getProducts()
+      var items = Store.getWatchProducts()
         .filter(function (p) { return (p.brand || 'Sin marca') === brand; })
         .sort(function (a, b) { return (a.model || '').localeCompare(b.model || '', 'es'); });
       body.innerHTML = ''
@@ -374,7 +424,7 @@
     }
 
     function drawSearch(filter) {
-      var list = Store.getProducts().filter(function (p) {
+      var list = Store.getWatchProducts().filter(function (p) {
         return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
       }).sort(function (a, b) {
         return (a.brand + a.model).localeCompare(b.brand + b.model, 'es');
@@ -390,14 +440,20 @@
     function drawBody() {
       var filter = (search.value || '').toLowerCase().trim();
       if (filter) { drawSearch(filter); return; }
-      if (catalogOpenBrand && groupByBrand(Store.getProducts())[catalogOpenBrand]) drawBrandView(catalogOpenBrand);
+      if (catalogOpenBrand && groupByBrand(Store.getWatchProducts())[catalogOpenBrand]) drawBrandView(catalogOpenBrand);
       else { catalogOpenBrand = null; drawBrandGrid(); }
     }
 
     body.addEventListener('click', function (e) {
-      var folder = e.target.closest('.brand-folder');
-      if (folder) { catalogOpenBrand = folder.getAttribute('data-brand'); drawBody(); return; }
+      var opener = e.target.closest('.brand-folder-cover, .brand-folder-name-btn');
+      if (opener) { catalogOpenBrand = opener.getAttribute('data-brand'); drawBody(); return; }
       if (e.target.closest('#folderBack')) { catalogOpenBrand = null; search.value = ''; drawBody(); return; }
+      var moveUp = e.target.closest('.move-up');
+      if (moveUp) { Store.moveBrand(moveUp.getAttribute('data-slug'), -1); drawBody(); return; }
+      var moveDown = e.target.closest('.move-down');
+      if (moveDown) { Store.moveBrand(moveDown.getAttribute('data-slug'), 1); drawBody(); return; }
+      var editBrand = e.target.closest('.edit-brand');
+      if (editBrand) { openBrandModal(editBrand.getAttribute('data-slug'), drawBody); return; }
       var card = e.target.closest('.admin-prod-card');
       if (!card) return;
       var id = card.getAttribute('data-id');
@@ -414,8 +470,262 @@
 
     search.addEventListener('input', function () { drawBody(); });
     pane.querySelector('#newProduct').addEventListener('click', function () { openProductModal(null, drawBody); });
+    pane.querySelector('#newBrand').addEventListener('click', function () { openBrandModal(null, drawBody); });
 
     drawBody();
+  }
+
+  function openBrandModal(slug, onDone) {
+    var isNew = !slug;
+    var b = isNew ? { name: '', photo: '', custom: true, count: 0 } : Store.getBrand(slug);
+    if (!isNew && !b) return;
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal' });
+
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>' + (isNew ? 'Nueva carpeta' : 'Editar carpeta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<form id="brandForm">'
+      +   '<label class="block"><span>Nombre</span><input name="name" value="' + escapeHtml(b.name) + '" required placeholder="Ej. Michael Kors"></label>'
+      +   '<label class="block photo-field"><span>Foto de portada (opcional)</span>'
+      +     '<div class="photo-row">'
+      +       '<div class="photo-preview" id="brandPhotoPreview">' + (b.photo ? '<img src="' + escapeHtml(b.photo) + '" alt="">' : '<span class="admin-prod-ph">◷</span>') + '</div>'
+      +       '<div class="photo-actions">'
+      +         '<label class="btn-ghost photo-pick">Elegir foto<input type="file" accept="image/*" id="brandPhotoInput" hidden></label>'
+      +       '</div>'
+      +     '</div>'
+      +     '<p class="form-hint">Si no pones foto, se usa la primera foto de un producto de esta carpeta (o el nombre solo).</p>'
+      +   '</label>'
+      +   (!isNew && b.custom
+            ? '<p class="form-hint">' + (b.count > 0 ? 'Esta carpeta tiene ' + b.count + ' producto(s), así que no se puede eliminar.' : 'Esta carpeta está vacía, se puede eliminar.') + '</p>'
+            : '')
+      +   '<div class="modal-actions">'
+      +     (!isNew && b.custom && b.count === 0 ? '<button type="button" class="btn-ghost delete-brand" style="margin-right:auto">Eliminar carpeta</button>' : '')
+      +     '<button type="button" class="btn-ghost cancel">Cancelar</button>'
+      +     '<button type="submit" class="btn-primary">' + (isNew ? 'Crear carpeta' : 'Guardar cambios') + '</button>'
+      +   '</div>'
+      + '</form>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var pendingCover;
+    var preview = modal.querySelector('#brandPhotoPreview');
+    modal.querySelector('#brandPhotoInput').addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      resizeImageFile(file, 1000, 0.82).then(function (dataUrl) {
+        pendingCover = dataUrl;
+        preview.innerHTML = '<img src="' + dataUrl + '" alt="">';
+      }).catch(function () { toast('No se pudo procesar la foto', 'danger'); });
+    });
+
+    var deleteBtn = modal.querySelector('.delete-brand');
+    if (deleteBtn) deleteBtn.addEventListener('click', function () {
+      if (!confirmDialog('¿Eliminar la carpeta "' + b.name + '"?')) return;
+      try {
+        Store.deleteBrand(slug);
+        toast('Carpeta eliminada', 'success');
+        close();
+        if (typeof onDone === 'function') onDone();
+      } catch (err) { toast(err.message, 'danger'); }
+    });
+
+    modal.querySelector('#brandForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = new FormData(this).get('name');
+      try {
+        if (isNew) {
+          Store.addBrand({ name: name, cover: pendingCover || '' });
+          toast('Carpeta creada', 'success');
+        } else {
+          Store.renameBrand(slug, name);
+          if (pendingCover !== undefined) Store.setBrandCover(slug, pendingCover);
+          toast('Carpeta actualizada', 'success');
+        }
+        close();
+        if (typeof onDone === 'function') onDone();
+      } catch (err) { toast(err.message, 'danger'); }
+    });
+  }
+
+  // ============== ACCESORIOS (gorras, correas, billeteras) ==============
+  // Categorías fijas (no son marcas de reloj): mismo patrón visual de
+  // carpetas que el catálogo, pero sin ficha técnica de reloj y sin poder
+  // crear/borrar categorías desde aquí (ya vienen definidas en el Store).
+  var accessoryOpenCategory = null;
+
+  function renderAccesorios(pane) {
+    pane.innerHTML = ''
+      + '<div class="catalogo-head">'
+      +   '<p class="form-hint" style="margin:0">Gorras, correas y billeteras: categorías fijas para que Cristian suba fotos y precios cuando las tenga.</p>'
+      + '</div>'
+      + '<div id="accBody"></div>';
+
+    var body = pane.querySelector('#accBody');
+    var folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke-linejoin="round"/></svg>';
+
+    function accProdCard(p) {
+      var cover = p.image
+        ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">'
+        : '<span class="admin-prod-ph">◷</span>';
+      return '<div class="admin-prod-card" data-id="' + p.id + '">'
+        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></div>'
+        + '<div class="admin-prod-body">'
+        +   '<div class="admin-prod-model">' + escapeHtml(p.model) + '</div>'
+        +   (p.ref ? '<div class="admin-prod-ref mono">' + escapeHtml(p.ref) + '</div>' : '')
+        +   '<div class="admin-prod-prices"><span class="pr">' + Store.formatCOP(p.price) + '</span></div>'
+        + '</div>'
+        + '<div class="admin-prod-actions"><button class="btn-ghost edit">Editar</button><button class="icon-action delete" title="Eliminar">×</button></div>'
+        + '</div>';
+    }
+
+    function drawGrid() {
+      var cats = Store.getAccessoryCategories();
+      body.innerHTML = '<div class="brand-folder-grid">' + cats.map(function (c) {
+        return '<div class="brand-folder">'
+          + '<button class="brand-folder-cover" data-acc="' + c.slug + '">'
+          +   (c.cover ? '<img src="' + escapeHtml(c.cover) + '" alt="" loading="lazy">' : '<span class="brand-folder-ph">◷</span>')
+          +   '<span class="brand-folder-count">' + c.count + '</span>'
+          + '</button>'
+          + '<div class="brand-folder-body">'
+          +   '<button class="brand-folder-name-btn" data-acc="' + c.slug + '">' + folderSvg + '<span class="brand-folder-name">' + escapeHtml(c.name) + '</span></button>'
+          + '</div>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+
+    function drawCategory(slug) {
+      var cat = Store.getAccessoryCategories().filter(function (c) { return c.slug === slug; })[0];
+      if (!cat) { accessoryOpenCategory = null; drawGrid(); return; }
+      var items = Store.getAccessoryProducts(slug).sort(function (a, b) { return (a.model || '').localeCompare(b.model || '', 'es'); });
+      body.innerHTML = ''
+        + '<div class="folder-bar">'
+        +   '<button class="folder-back" id="accBack">← Todas las categorías</button>'
+        +   '<span class="folder-title">' + escapeHtml(cat.name) + '<span class="count">' + items.length + (items.length === 1 ? ' producto' : ' productos') + '</span></span>'
+        +   '<button class="btn-primary" id="accNewProduct" style="margin-left:auto">+ Nuevo producto</button>'
+        + '</div>'
+        + (items.length === 0
+              ? '<div class="empty-state"><h3>Todavía no hay productos aquí</h3><p>Crea el primero con “+ Nuevo producto”.</p></div>'
+              : '<div class="admin-prod-grid">' + items.map(accProdCard).join('') + '</div>');
+    }
+
+    function drawBody() {
+      if (accessoryOpenCategory) drawCategory(accessoryOpenCategory);
+      else drawGrid();
+    }
+
+    body.addEventListener('click', function (e) {
+      var opener = e.target.closest('[data-acc]');
+      if (opener) { accessoryOpenCategory = opener.getAttribute('data-acc'); drawBody(); return; }
+      if (e.target.closest('#accBack')) { accessoryOpenCategory = null; drawBody(); return; }
+      if (e.target.closest('#accNewProduct')) { openAccessoryModal(null, accessoryOpenCategory, drawBody); return; }
+      var card = e.target.closest('.admin-prod-card');
+      if (!card) return;
+      var id = card.getAttribute('data-id');
+      if (e.target.closest('.edit')) { openAccessoryModal(id, accessoryOpenCategory, drawBody); return; }
+      if (e.target.closest('.delete')) {
+        var p = Store.getProduct(id);
+        if (confirmDialog('¿Eliminar "' + (p ? p.model : '') + '"? Esta acción no se puede deshacer.')) {
+          Store.deleteProduct(id);
+          toast('Producto eliminado', 'success');
+          drawBody();
+        }
+      }
+    });
+
+    drawBody();
+  }
+
+  function openAccessoryModal(id, categorySlug, onDone) {
+    var p = id ? Store.getProduct(id) : {
+      category: 'accesorio', accessoryType: categorySlug,
+      model: '', ref: '', price: 0, wasPrice: 0,
+      stock: 'Disponible', stockStatus: 'in', description: ''
+    };
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal product-modal' });
+
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>' + (id ? 'Editar producto' : 'Nuevo producto') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<form id="accProductForm">'
+      +   '<label class="block photo-field"><span>Foto</span>'
+      +     '<div class="photo-row">'
+      +       '<div class="photo-preview" id="accPhotoPreview">' + (p.image ? '<img src="' + escapeHtml(p.image) + '" alt="">' : '<span class="admin-prod-ph">◷</span>') + '</div>'
+      +       '<div class="photo-actions">'
+      +         '<label class="btn-ghost photo-pick">Elegir foto<input type="file" accept="image/*" id="accPhotoInput" hidden></label>'
+      +         (p.image ? '<button type="button" class="btn-ghost photo-remove">Quitar</button>' : '')
+      +       '</div>'
+      +     '</div>'
+      +     '<p class="form-hint">Se guarda en este navegador. Se ajusta el tamaño automáticamente.</p>'
+      +   '</label>'
+      +   '<div class="form-grid">'
+      +     '<label><span>Nombre</span><input name="model" value="' + escapeHtml(p.model) + '" required placeholder="Ej. Gorra clásica negra"></label>'
+      +     '<label><span>Referencia (opcional)</span><input name="ref" value="' + escapeHtml(p.ref || '') + '"></label>'
+      +     '<label><span>Precio (COP)</span><input type="number" name="price" value="' + (p.price || 0) + '" required min="0" step="1000"></label>'
+      +     '<label><span>Precio antes (0 = sin descuento)</span><input type="number" name="wasPrice" value="' + (p.wasPrice || 0) + '" min="0" step="1000"></label>'
+      +     '<label><span>Stock (texto)</span><input name="stock" value="' + escapeHtml(p.stock || '') + '"></label>'
+      +     '<label><span>Estado stock</span><select name="stockStatus">'
+      +       '<option value="in"' + ((p.stockStatus || 'in') === 'in' ? ' selected' : '') + '>Disponible</option>'
+      +       '<option value="low"' + (p.stockStatus === 'low' ? ' selected' : '') + '>Bajo inventario</option>'
+      +       '<option value="out"' + (p.stockStatus === 'out' ? ' selected' : '') + '>Agotado</option>'
+      +     '</select></label>'
+      +   '</div>'
+      +   '<label class="block"><span>Descripción (opcional)</span><textarea name="description" rows="3">' + escapeHtml(p.description || '') + '</textarea></label>'
+      +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>'
+      + '</form>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var pendingImage;
+    var photoInput = modal.querySelector('#accPhotoInput');
+    var photoPreview = modal.querySelector('#accPhotoPreview');
+    photoInput.addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      resizeImageFile(file, 900, 0.82).then(function (dataUrl) {
+        pendingImage = dataUrl;
+        photoPreview.innerHTML = '<img src="' + dataUrl + '" alt="">';
+      }).catch(function () { toast('No se pudo procesar la foto', 'danger'); });
+    });
+    var photoRemove = modal.querySelector('.photo-remove');
+    if (photoRemove) photoRemove.addEventListener('click', function () {
+      pendingImage = null;
+      photoPreview.innerHTML = '<span class="admin-prod-ph">◷</span>';
+    });
+
+    modal.querySelector('#accProductForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(this);
+      var next = Object.assign({}, p, {
+        category: 'accesorio',
+        accessoryType: p.accessoryType || categorySlug,
+        model: fd.get('model'),
+        ref: (fd.get('ref') || '').trim(),
+        price: Number(fd.get('price')) || 0,
+        wasPrice: Number(fd.get('wasPrice')) || 0,
+        stock: fd.get('stock'),
+        stockStatus: fd.get('stockStatus'),
+        description: fd.get('description')
+      });
+      if (pendingImage !== undefined) next.image = pendingImage;
+      try {
+        Store.saveProduct(next);
+        toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
+        close();
+        if (typeof onDone === 'function') onDone();
+      } catch (err) { toast(err.message, 'danger'); }
+    });
   }
 
   function openProductModal(id, onDone) {
@@ -436,6 +746,16 @@
     modal.innerHTML = ''
       + '<div class="modal-head"><h3>' + (id ? 'Editar producto' : 'Nuevo producto') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
       + '<form id="productForm">'
+      +   '<label class="block photo-field"><span>Foto</span>'
+      +     '<div class="photo-row">'
+      +       '<div class="photo-preview" id="photoPreview">' + (p.image ? '<img src="' + escapeHtml(p.image) + '" alt="">' : '<span class="admin-prod-ph">◷</span>') + '</div>'
+      +       '<div class="photo-actions">'
+      +         '<label class="btn-ghost photo-pick">Elegir foto<input type="file" accept="image/*" id="photoInput" hidden></label>'
+      +         (p.image ? '<button type="button" class="btn-ghost photo-remove">Quitar</button>' : '')
+      +       '</div>'
+      +     '</div>'
+      +     '<p class="form-hint">Se guarda en este navegador. Se ajusta el tamaño automáticamente.</p>'
+      +   '</label>'
       +   '<div class="form-grid">'
       +     '<label><span>Marca</span><select name="brandSlug" required>'
       +       '<option value=""' + (p.brandSlug ? '' : ' selected') + ' disabled>Selecciona…</option>'
@@ -476,12 +796,33 @@
     modal.querySelector('.cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
+    // pendingImage: undefined = sin cambios (conserva la foto actual),
+    // null = se quitó, string = foto nueva (data URL ya comprimida).
+    var pendingImage;
+    var photoInput = modal.querySelector('#photoInput');
+    var photoPreview = modal.querySelector('#photoPreview');
+    photoInput.addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      resizeImageFile(file, 900, 0.82).then(function (dataUrl) {
+        pendingImage = dataUrl;
+        photoPreview.innerHTML = '<img src="' + dataUrl + '" alt="">';
+      }).catch(function () { toast('No se pudo procesar la foto', 'danger'); });
+    });
+    var photoRemove = modal.querySelector('.photo-remove');
+    if (photoRemove) photoRemove.addEventListener('click', function () {
+      pendingImage = null;
+      photoPreview.innerHTML = '<span class="admin-prod-ph">◷</span>';
+      photoRemove.remove();
+    });
+
     modal.querySelector('#productForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(this);
       var selectedBrand = Store.getBrand(fd.get('brandSlug'));
       var data = {
         id: id || undefined,
+        image: pendingImage !== undefined ? pendingImage : (p.image || null),
         brand: selectedBrand ? selectedBrand.name : fd.get('brandSlug'),
         brandSlug: fd.get('brandSlug'),
         model: fd.get('model'),
@@ -649,7 +990,7 @@
   }
 
   function openAuctionModal() {
-    var products = Store.getProducts();
+    var products = Store.getWatchProducts();
     var cfg = Store.getConfig();
     var overlay = el('div', { class: 'modal-overlay' });
     var modal = el('div', { class: 'modal auction-modal' });

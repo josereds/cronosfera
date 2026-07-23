@@ -932,7 +932,7 @@
         image: p.image || ''
       };
     }
-    var products = (window.Store ? Store.getProducts() : _legacy).map(mapProduct);
+    var products = (window.Store ? Store.getWatchProducts() : _legacy).map(mapProduct);
 
     // ---- Marca activa vía URL (?marca=slug) y filtros rápidos (?f=) ----
     var urlParams = new URLSearchParams(window.location.search);
@@ -1379,7 +1379,7 @@
     if (window.Store && Store.subscribe) Store.subscribe(function(){
       syncWholesaleFlag();
       isWholesale = !!(window.Auth && Auth.isWholesale());
-      products = (window.Store ? Store.getProducts() : _legacy).map(mapProduct);
+      products = (window.Store ? Store.getWatchProducts() : _legacy).map(mapProduct);
       prepareFilterPanel();
       renderBrandHub();
       renderProductList(applyFilters(products));

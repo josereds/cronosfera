@@ -1367,7 +1367,7 @@
     // Related: mismo id actual (?id=) excluido, prioriza misma marca
     var currentId = new URLSearchParams(window.location.search).get('id');
     var rel = window.Store ? (function () {
-      var all = Store.getProducts().filter(function (x) { return x.id !== currentId; });
+      var all = Store.getWatchProducts().filter(function (x) { return x.id !== currentId; });
       var current = currentId ? Store.getProduct(currentId) : null;
       if (current) {
         var sameBrand = all.filter(function (x) { return Store.productBrandSlug(x) === Store.productBrandSlug(current); });
