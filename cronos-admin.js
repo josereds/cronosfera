@@ -321,9 +321,11 @@
   }
 
   // ============== CATÁLOGO CRUD ==============
-  // Estado de navegación del catálogo: qué marca está abierta (persiste entre
-  // re-render dentro de la misma sesión del panel).
+  // Estado de navegación del catálogo: qué marca está abierta, o si se está
+  // viendo el listado plano de "todos" (persiste entre re-render dentro de
+  // la misma sesión del panel).
   var catalogOpenBrand = null;
+  var catalogViewAll = false;
 
   function renderCatalogo(pane) {
     pane.innerHTML = ''
@@ -332,6 +334,7 @@
       +     '<input type="search" id="prodSearch" placeholder="Buscar en todo el catálogo…">'
       +   '</div>'
       +   '<div class="catalogo-head-actions">'
+      +     '<button class="btn-ghost" id="viewAllProducts">Ver todos los productos</button>'
       +     '<button class="btn-ghost" id="newBrand">+ Carpeta</button>'
       +     '<button class="btn-primary" id="newProduct">+ Nuevo producto</button>'
       +   '</div>'
@@ -427,7 +430,7 @@
       var list = Store.getWatchProducts().filter(function (p) {
         return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
       }).sort(function (a, b) {
-        return (a.brand + a.model).localeCompare(b.brand + b.model, 'es');
+        return (a.model || '').localeCompare(b.model || '', 'es');
       });
       if (list.length === 0) {
         body.innerHTML = '<div class="empty-state"><h3>Sin resultados</h3><p>No hay productos que coincidan con “' + escapeHtml(filter) + '”.</p></div>';
@@ -437,17 +440,32 @@
         + '<div class="admin-prod-grid">' + list.map(prodCard).join('') + '</div>';
     }
 
+    function drawAll() {
+      var list = Store.getWatchProducts().slice().sort(function (a, b) {
+        return (a.model || '').localeCompare(b.model || '', 'es');
+      });
+      body.innerHTML = ''
+        + '<div class="folder-bar">'
+        +   '<button class="folder-back" id="folderBack">← Volver a carpetas</button>'
+        +   '<span class="folder-title">Todos los productos<span class="count">' + list.length + (list.length === 1 ? ' referencia' : ' referencias') + '</span></span>'
+        + '</div>'
+        + (list.length === 0
+              ? '<div class="empty-state"><h3>Sin productos todavía</h3><p>Crea el primero con “+ Nuevo producto”.</p></div>'
+              : '<div class="admin-prod-grid">' + list.map(prodCard).join('') + '</div>');
+    }
+
     function drawBody() {
       var filter = (search.value || '').toLowerCase().trim();
       if (filter) { drawSearch(filter); return; }
+      if (catalogViewAll) { drawAll(); return; }
       if (catalogOpenBrand && groupByBrand(Store.getWatchProducts())[catalogOpenBrand]) drawBrandView(catalogOpenBrand);
       else { catalogOpenBrand = null; drawBrandGrid(); }
     }
 
     body.addEventListener('click', function (e) {
       var opener = e.target.closest('.brand-folder-cover, .brand-folder-name-btn');
-      if (opener) { catalogOpenBrand = opener.getAttribute('data-brand'); drawBody(); return; }
-      if (e.target.closest('#folderBack')) { catalogOpenBrand = null; search.value = ''; drawBody(); return; }
+      if (opener) { catalogOpenBrand = opener.getAttribute('data-brand'); catalogViewAll = false; drawBody(); return; }
+      if (e.target.closest('#folderBack')) { catalogOpenBrand = null; catalogViewAll = false; search.value = ''; drawBody(); return; }
       var moveUp = e.target.closest('.move-up');
       if (moveUp) { Store.moveBrand(moveUp.getAttribute('data-slug'), -1); drawBody(); return; }
       var moveDown = e.target.closest('.move-down');
@@ -471,6 +489,9 @@
     search.addEventListener('input', function () { drawBody(); });
     pane.querySelector('#newProduct').addEventListener('click', function () { openProductModal(null, drawBody); });
     pane.querySelector('#newBrand').addEventListener('click', function () { openBrandModal(null, drawBody); });
+    pane.querySelector('#viewAllProducts').addEventListener('click', function () {
+      catalogViewAll = true; catalogOpenBrand = null; search.value = ''; drawBody();
+    });
 
     drawBody();
   }
@@ -558,18 +579,24 @@
   // carpetas que el catálogo, pero sin ficha técnica de reloj y sin poder
   // crear/borrar categorías desde aquí (ya vienen definidas en el Store).
   var accessoryOpenCategory = null;
+  var accessoryViewAll = false;
 
   function renderAccesorios(pane) {
     pane.innerHTML = ''
       + '<div class="catalogo-head">'
       +   '<p class="form-hint" style="margin:0">Gorras, correas y billeteras: categorías fijas para que Cristian suba fotos y precios cuando las tenga.</p>'
+      +   '<div class="catalogo-head-actions">'
+      +     '<button class="btn-ghost" id="viewAllAcc">Ver todos los accesorios</button>'
+      +   '</div>'
       + '</div>'
       + '<div id="accBody"></div>';
 
     var body = pane.querySelector('#accBody');
     var folderSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke-linejoin="round"/></svg>';
+    var editSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9" stroke-linecap="round"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" stroke-linejoin="round"/></svg>';
 
     function accProdCard(p) {
+      var w = Store.wholesalePriceFor(p);
       var cover = p.image
         ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">'
         : '<span class="admin-prod-ph">◷</span>';
@@ -578,7 +605,7 @@
         + '<div class="admin-prod-body">'
         +   '<div class="admin-prod-model">' + escapeHtml(p.model) + '</div>'
         +   (p.ref ? '<div class="admin-prod-ref mono">' + escapeHtml(p.ref) + '</div>' : '')
-        +   '<div class="admin-prod-prices"><span class="pr">' + Store.formatCOP(p.price) + '</span></div>'
+        +   '<div class="admin-prod-prices"><span class="pr">' + Store.formatCOP(p.price) + '</span><span class="wpr">May. ' + Store.formatCOP(w) + '</span></div>'
         + '</div>'
         + '<div class="admin-prod-actions"><button class="btn-ghost edit">Editar</button><button class="icon-action delete" title="Eliminar">×</button></div>'
         + '</div>';
@@ -594,6 +621,7 @@
           + '</button>'
           + '<div class="brand-folder-body">'
           +   '<button class="brand-folder-name-btn" data-acc="' + c.slug + '">' + folderSvg + '<span class="brand-folder-name">' + escapeHtml(c.name) + '</span></button>'
+          +   '<button class="icon-action edit-acc-cover" data-acc-cover="' + c.slug + '" title="Cambiar foto de categoría">' + editSvg + '</button>'
           + '</div>'
           + '</div>';
       }).join('') + '</div>';
@@ -614,20 +642,37 @@
               : '<div class="admin-prod-grid">' + items.map(accProdCard).join('') + '</div>');
     }
 
+    function drawAll() {
+      var list = Store.getAccessoryProducts().slice().sort(function (a, b) {
+        return (a.model || '').localeCompare(b.model || '', 'es');
+      });
+      body.innerHTML = ''
+        + '<div class="folder-bar">'
+        +   '<button class="folder-back" id="accBack">← Volver a categorías</button>'
+        +   '<span class="folder-title">Todos los accesorios<span class="count">' + list.length + (list.length === 1 ? ' producto' : ' productos') + '</span></span>'
+        + '</div>'
+        + (list.length === 0
+              ? '<div class="empty-state"><h3>Sin accesorios todavía</h3><p>Entra a una categoría y crea el primero.</p></div>'
+              : '<div class="admin-prod-grid">' + list.map(accProdCard).join('') + '</div>');
+    }
+
     function drawBody() {
+      if (accessoryViewAll) { drawAll(); return; }
       if (accessoryOpenCategory) drawCategory(accessoryOpenCategory);
       else drawGrid();
     }
 
     body.addEventListener('click', function (e) {
-      var opener = e.target.closest('[data-acc]');
-      if (opener) { accessoryOpenCategory = opener.getAttribute('data-acc'); drawBody(); return; }
-      if (e.target.closest('#accBack')) { accessoryOpenCategory = null; drawBody(); return; }
+      var coverEdit = e.target.closest('.edit-acc-cover');
+      if (coverEdit) { openAccessoryCoverModal(coverEdit.getAttribute('data-acc-cover'), drawBody); return; }
+      var opener = e.target.closest('.brand-folder-cover, .brand-folder-name-btn');
+      if (opener) { accessoryOpenCategory = opener.getAttribute('data-acc'); accessoryViewAll = false; drawBody(); return; }
+      if (e.target.closest('#accBack')) { accessoryOpenCategory = null; accessoryViewAll = false; drawBody(); return; }
       if (e.target.closest('#accNewProduct')) { openAccessoryModal(null, accessoryOpenCategory, drawBody); return; }
       var card = e.target.closest('.admin-prod-card');
       if (!card) return;
       var id = card.getAttribute('data-id');
-      if (e.target.closest('.edit')) { openAccessoryModal(id, accessoryOpenCategory, drawBody); return; }
+      if (e.target.closest('.edit')) { openAccessoryModal(id, Store.getProduct(id).accessoryType, drawBody); return; }
       if (e.target.closest('.delete')) {
         var p = Store.getProduct(id);
         if (confirmDialog('¿Eliminar "' + (p ? p.model : '') + '"? Esta acción no se puede deshacer.')) {
@@ -638,13 +683,62 @@
       }
     });
 
+    pane.querySelector('#viewAllAcc').addEventListener('click', function () {
+      accessoryViewAll = true; accessoryOpenCategory = null; drawBody();
+    });
+
     drawBody();
+  }
+
+  function openAccessoryCoverModal(slug, onDone) {
+    var cat = Store.getAccessoryCategories().filter(function (c) { return c.slug === slug; })[0];
+    if (!cat) return;
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal' });
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>Foto de "' + escapeHtml(cat.name) + '"</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<div class="photo-row">'
+      +   '<div class="photo-preview" id="accCoverPreview">' + (cat.cover ? '<img src="' + escapeHtml(cat.cover) + '" alt="">' : '<span class="admin-prod-ph">◷</span>') + '</div>'
+      +   '<div class="photo-actions">'
+      +     '<label class="btn-ghost photo-pick">Elegir foto<input type="file" accept="image/*" id="accCoverInput" hidden></label>'
+      +     (cat.cover ? '<button type="button" class="btn-ghost photo-remove">Quitar</button>' : '')
+      +   '</div>'
+      + '</div>'
+      + '<p class="form-hint">Si no pones foto, se usa la primera foto de un producto de esta categoría (o el nombre solo).</p>'
+      + '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button></div>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var preview = modal.querySelector('#accCoverPreview');
+    modal.querySelector('#accCoverInput').addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      resizeImageFile(file, 1000, 0.82).then(function (dataUrl) {
+        Store.setAccessoryCover(slug, dataUrl);
+        toast('Foto actualizada', 'success');
+        close();
+        if (typeof onDone === 'function') onDone();
+      }).catch(function () { toast('No se pudo procesar la foto', 'danger'); });
+    });
+    var removeBtn = modal.querySelector('.photo-remove');
+    if (removeBtn) removeBtn.addEventListener('click', function () {
+      Store.setAccessoryCover(slug, '');
+      toast('Foto quitada', 'success');
+      close();
+      if (typeof onDone === 'function') onDone();
+    });
   }
 
   function openAccessoryModal(id, categorySlug, onDone) {
     var p = id ? Store.getProduct(id) : {
       category: 'accesorio', accessoryType: categorySlug,
-      model: '', ref: '', price: 0, wasPrice: 0,
+      model: '', ref: '', price: 0, wasPrice: 0, wholesalePrice: 0,
       stock: 'Disponible', stockStatus: 'in', description: ''
     };
     var overlay = el('div', { class: 'modal-overlay' });
@@ -668,6 +762,7 @@
       +     '<label><span>Referencia (opcional)</span><input name="ref" value="' + escapeHtml(p.ref || '') + '"></label>'
       +     '<label><span>Precio (COP)</span><input type="number" name="price" value="' + (p.price || 0) + '" required min="0" step="1000"></label>'
       +     '<label><span>Precio antes (0 = sin descuento)</span><input type="number" name="wasPrice" value="' + (p.wasPrice || 0) + '" min="0" step="1000"></label>'
+      +     '<label><span>Precio mayorista (COP, vacío = usa el % general)</span><input type="number" name="wholesalePrice" value="' + (p.wholesalePrice || 0) + '" min="0" step="1000"></label>'
       +     '<label><span>Stock (texto)</span><input name="stock" value="' + escapeHtml(p.stock || '') + '"></label>'
       +     '<label><span>Estado stock</span><select name="stockStatus">'
       +       '<option value="in"' + ((p.stockStatus || 'in') === 'in' ? ' selected' : '') + '>Disponible</option>'
@@ -714,6 +809,7 @@
         ref: (fd.get('ref') || '').trim(),
         price: Number(fd.get('price')) || 0,
         wasPrice: Number(fd.get('wasPrice')) || 0,
+        wholesalePrice: Number(fd.get('wholesalePrice')) || 0,
         stock: fd.get('stock'),
         stockStatus: fd.get('stockStatus'),
         description: fd.get('description')
@@ -729,7 +825,7 @@
   }
 
   function openProductModal(id, onDone) {
-    var p = id ? Store.getProduct(id) : { brand: '', brandSlug: '', model: '', ref: '', price: 0, wasPrice: 0, off: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026'], gender: '', mechanism: '', crystal: '', strap: '' };
+    var p = id ? Store.getProduct(id) : { brand: '', brandSlug: '', model: '', ref: '', price: 0, wasPrice: 0, off: 0, wholesalePrice: 0, tone: 'ink', tag: null, stock: 'Disponible', stockStatus: 'in', variants: ['#1d2026'], gender: '', mechanism: '', crystal: '', strap: '' };
     if (p.brand && !p.brandSlug) p.brandSlug = Store.productBrandSlug(p);
     var overlay = el('div', { class: 'modal-overlay' });
     var modal = el('div', { class: 'modal product-modal' });
@@ -776,6 +872,7 @@
       +     specSelect('gender', 'Género', Store.SPECS.gender, p.gender)
       +     '<label><span>Precio (COP)</span><input type="number" name="price" value="' + (p.price || 0) + '" required min="0" step="1000"></label>'
       +     '<label><span>Precio antes (0 = sin descuento)</span><input type="number" name="wasPrice" value="' + (p.wasPrice || 0) + '" min="0" step="1000"></label>'
+      +     '<label><span>Precio mayorista (COP, vacío = usa el % general)</span><input type="number" name="wholesalePrice" value="' + (p.wholesalePrice || 0) + '" min="0" step="1000"></label>'
       +     '<label><span>Stock (texto)</span><input name="stock" value="' + escapeHtml(p.stock || '') + '"></label>'
       +     '<label><span>Estado stock</span><select name="stockStatus">'
       +       '<option value="in"' + ((p.stockStatus || 'in') === 'in' ? ' selected' : '') + '>Disponible</option>'
@@ -834,6 +931,7 @@
         gender: fd.get('gender'),
         price: Number(fd.get('price')),
         wasPrice: Number(fd.get('wasPrice')),
+        wholesalePrice: Number(fd.get('wholesalePrice')) || 0,
         off: Number(fd.get('wasPrice')) > 0 ? Math.round((1 - Number(fd.get('price')) / Number(fd.get('wasPrice'))) * 100) : 0,
         stock: fd.get('stock'),
         stockStatus: fd.get('stockStatus'),

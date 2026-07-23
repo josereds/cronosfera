@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#faf7f3">
+  <meta name="theme-color" content="#14161c">
   <meta name="robots" content="noindex,nofollow">
   <title>Admin · Cronosfera</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,29 +11,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:           oklch(97.5% 0.004 80);
-      --bg-warm:      oklch(95% 0.010 70);
-      --surface:      oklch(100% 0 0);
-      --surface-2:    oklch(96% 0.008 60);
-      --fg:           oklch(28% 0.012 30);
-      --fg-soft:      oklch(42% 0.012 30);
-      --muted:        oklch(56% 0.014 40);
-      --muted-2:      oklch(70% 0.012 50);
-      --border:       oklch(90% 0.008 60);
-      --border-soft:  oklch(93% 0.007 60);
-      --accent:       oklch(56% 0.12 38);
-      --accent-deep:  oklch(47% 0.13 36);
-      --accent-soft:  oklch(94% 0.03 45);
-      --danger:       oklch(58% 0.17 25);
-      --success:      oklch(56% 0.11 155);
-      --info:         oklch(58% 0.09 230);
-      --warning:      oklch(70% 0.13 80);
+      --bg:           oklch(14% 0.008 250);
+      --bg-warm:      oklch(17% 0.010 250);
+      --surface:      oklch(20% 0.010 250);
+      --surface-2:    oklch(24% 0.012 250);
+      --fg:           oklch(96% 0.005 80);
+      --fg-soft:      oklch(82% 0.005 80);
+      --muted:        oklch(60% 0.008 80);
+      --muted-2:      oklch(48% 0.008 80);
+      --border:       oklch(30% 0.008 250);
+      --border-soft:  oklch(24% 0.006 250);
+      --accent:       oklch(78% 0.10 75);
+      --accent-deep:  oklch(68% 0.12 70);
+      --accent-soft:  oklch(28% 0.06 70);
+      --danger:       oklch(64% 0.18 25);
+      --success:      oklch(70% 0.12 155);
+      --info:         oklch(70% 0.10 230);
+      --warning:      oklch(80% 0.13 80);
       --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
       --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
-      --shadow-sm: 0 1px 2px rgba(60,40,20,.05);
-      --shadow:    0 8px 30px rgba(60,40,20,.08);
-      --shadow-lg: 0 30px 80px rgba(60,40,20,.16);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+      --shadow:    0 8px 30px rgba(0,0,0,.4);
+      --shadow-lg: 0 30px 80px rgba(0,0,0,.55);
       --r-sm: 4px;
       --r:    8px;
       --r-lg: 14px;
@@ -137,7 +137,7 @@
       position: sticky; top: 0; z-index: 30;
       display: flex; align-items: center; gap: 20px;
       padding: 16px 28px;
-      background: rgba(250,247,243,.86);
+      background: rgba(18,19,24,.86);
       backdrop-filter: blur(20px) saturate(1.2);
       -webkit-backdrop-filter: blur(20px) saturate(1.2);
       border-bottom: 1px solid var(--border);
@@ -456,7 +456,7 @@
     .brand-folder:hover {
       transform: translateY(-3px);
       border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
-      box-shadow: 0 18px 40px rgba(60,40,20,.12);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     .brand-folder-cover {
       position: relative; aspect-ratio: 16/10; background: var(--bg-warm);
@@ -517,7 +517,7 @@
       border-radius: var(--r-lg); overflow: hidden;
       transition: border-color .2s ease, box-shadow .2s ease;
     }
-    .admin-prod-card:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--border)); box-shadow: 0 14px 32px rgba(60,40,20,.1); }
+    .admin-prod-card:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--border)); box-shadow: 0 14px 32px rgba(0,0,0,.3); }
     .admin-prod-cover {
       position: relative; aspect-ratio: 4/3; background: var(--bg-warm);
       display: grid; place-items: center; overflow: hidden;
@@ -805,7 +805,7 @@
         gap: 8px;
         overflow-x: auto;
         padding: 10px 14px;
-        background: rgba(250,247,243,.94);
+        background: rgba(18,19,24,.94);
         border-bottom: 1px solid var(--border);
         scrollbar-width: none;
       }

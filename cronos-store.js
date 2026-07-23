@@ -17,6 +17,7 @@
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
     brandsMeta: 'cronos:brands-meta',
+    accessoryMeta: 'cronos:accessory-meta',
     counters: 'cronos:counters',
     meta: 'cronos:meta',
     cart: 'cronos:cart',
@@ -266,11 +267,23 @@
       return p.category === 'accesorio' && (!categorySlug || p.accessoryType === categorySlug);
     });
   }
+  // Portada editable desde el panel por categoría de accesorio (independiente
+  // de las fotos de producto): si Cristian no sube una, se usa la primera
+  // foto de un producto de esa categoría, igual que en las carpetas de marca.
+  function getAccessoryMeta() { return read(NS.accessoryMeta, { covers: {} }); }
+  function setAccessoryCover(slug, cover) {
+    var meta = getAccessoryMeta();
+    var covers = Object.assign({}, meta.covers);
+    covers[slug] = cover || '';
+    write(NS.accessoryMeta, { covers: covers });
+  }
+
   function getAccessoryCategories() {
+    var covers = getAccessoryMeta().covers || {};
     return ACCESSORY_CATEGORIES.map(function (c) {
       var items = getAccessoryProducts(c.slug);
       var withPhoto = find(items, function (p) { return !!p.image; });
-      return Object.assign({}, c, { count: items.length, cover: withPhoto ? withPhoto.image : '' });
+      return Object.assign({}, c, { count: items.length, cover: covers[c.slug] || (withPhoto ? withPhoto.image : '') });
     });
   }
 
@@ -793,6 +806,7 @@
     ACCESSORY_CATEGORIES: ACCESSORY_CATEGORIES,
     getAccessoryCategories: getAccessoryCategories,
     getAccessoryProducts: getAccessoryProducts,
+    setAccessoryCover: setAccessoryCover,
     // marcas y especificaciones
     getBrands: getBrands,
     getBrand: getBrand,
