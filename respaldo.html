@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14161c">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Respaldo de datos · Cronosfera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: oklch(14% 0.008 250); --surface: oklch(20% 0.010 250); --surface-2: oklch(24% 0.012 250);
+      --fg: oklch(96% 0.005 80); --fg-soft: oklch(82% 0.005 80); --muted: oklch(60% 0.008 80);
+      --border: oklch(30% 0.008 250); --accent: oklch(78% 0.10 75); --accent-deep: oklch(68% 0.12 70);
+      --danger: oklch(64% 0.18 25); --success: oklch(70% 0.12 155); --warning: oklch(80% 0.13 80);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+      --r: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; padding: 32px 20px 80px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .logo { font-family: var(--font-display); font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+    .logo .dot { color: var(--accent); }
+    h1 { font-family: var(--font-display); font-size: 34px; font-weight: 500; margin: 28px 0 8px; line-height: 1.1; }
+    .lead { color: var(--muted); margin-bottom: 28px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 15px; font-weight: 600; letter-spacing: .02em; margin-bottom: 4px; }
+    .card p.sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .stat .n { font-family: var(--font-mono); font-size: 24px; font-weight: 500; color: var(--fg); }
+    .stat .n.warn { color: var(--warning); }
+    .stat .n.danger { color: oklch(78% 0.16 25); }
+    .stat .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .bar { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 6px 0 4px; }
+    .bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--success), var(--warning)); border-radius: 999px; }
+    .bar.full > span { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: var(--r); font-size: 15px; font-weight: 600; cursor: pointer; border: 0; transition: filter .15s; }
+    .btn:hover { filter: brightness(1.08); }
+    .btn-primary { background: var(--accent); color: #1a1c20; width: 100%; justify-content: center; }
+    .btn-ghost { background: var(--surface-2); color: var(--fg); border: 1px solid var(--border); }
+    .btn svg { width: 20px; height: 20px; }
+    .hint { font-size: 13px; color: var(--muted); margin-top: 14px; }
+    .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 12px 22px; font-size: 14px; font-weight: 500; opacity: 0; transition: all .25s; pointer-events: none; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok { border-color: color-mix(in oklab, var(--success) 50%, var(--border)); }
+    .toast.err { border-color: color-mix(in oklab, var(--danger) 50%, var(--border)); }
+    .callout { border-left: 3px solid var(--warning); background: color-mix(in oklab, var(--warning) 8%, transparent); padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--fg-soft); margin-bottom: 24px; }
+    .file-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    code { font-family: var(--font-mono); font-size: 13px; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+    .empty-note { color: oklch(78% 0.16 25); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">Cronosfera<span class="dot">.</span></div>
+    <h1>Respaldo de tus productos</h1>
+    <p class="lead">Esta página guarda en un archivo todo lo que has cargado en el panel desde <strong>este navegador</strong>. Descárgalo para no perder tu trabajo.</p>
+
+    <div class="callout">
+      <strong>Importante:</strong> ábrela en el <strong>mismo navegador y computador</strong> donde has estado subiendo los productos. Los datos viven ahí; desde otro equipo esta página aparecerá vacía.
+    </div>
+
+    <div class="card">
+      <h2>Lo que hay guardado ahora</h2>
+      <p class="sub">Resumen de lo que encontramos en este navegador.</p>
+      <div class="stat-grid" id="stats"></div>
+      <div id="usageBlock"></div>
+    </div>
+
+    <div class="card">
+      <h2>1. Descargar respaldo</h2>
+      <p class="sub">Guarda un archivo <code>.json</code> con todos tus productos, fotos y configuración. Envíaselo a José.</p>
+      <button class="btn btn-primary" id="downloadBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Descargar respaldo completo
+      </button>
+      <p class="hint">Se descarga un archivo tipo <code>cronosfera-respaldo-2026-07-23.json</code>. Guárdalo bien.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. Restaurar desde un respaldo</h2>
+      <p class="sub">Solo si necesitas volver a cargar un archivo de respaldo en este navegador. Reemplaza los datos actuales por los del archivo.</p>
+      <div class="file-row">
+        <label class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0-4 4m4-4 4 4M4 3h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Elegir archivo de respaldo
+          <input type="file" accept="application/json,.json" id="restoreInput" hidden>
+        </label>
+        <span id="restoreName" style="color:var(--muted);font-size:14px"></span>
+      </div>
+      <p class="hint">Al restaurar, se sobrescribe lo que haya en este navegador con el contenido del archivo.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      var PREFIX = 'cronos:';
+      function toast(msg, type) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show ' + (type || '');
+        setTimeout(function () { t.className = 'toast ' + (type || ''); }, 3200);
+      }
+      function collect() {
+        var data = {};
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf(PREFIX) === 0) data[k] = localStorage.getItem(k);
+        }
+        return data;
+      }
+      function bytesOf(data) {
+        var total = 0;
+        Object.keys(data).forEach(function (k) { total += k.length + (data[k] ? data[k].length : 0); });
+        return total;
+      }
+      function fmtBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
+        return (b / 1024 / 1024).toFixed(2) + ' MB';
+      }
+      function parseCount(raw) {
+        try { var v = JSON.parse(raw); return Array.isArray(v) ? v.length : null; } catch (e) { return null; }
+      }
+
+      var data = collect();
+      var products = data[PREFIX + 'products'] ? parseCount(data[PREFIX + 'products']) : 0;
+      var orders = data[PREFIX + 'orders'] ? parseCount(data[PREFIX + 'orders']) : 0;
+      var users = data[PREFIX + 'users'] ? parseCount(data[PREFIX + 'users']) : 0;
+      var used = bytesOf(data);
+      // Tope típico de localStorage por sitio: ~5 MB. Es el límite que llenó el catálogo.
+      var LIMIT = 5 * 1024 * 1024;
+      var pct = Math.min(100, Math.round(used / LIMIT * 100));
+
+      document.getElementById('stats').innerHTML = ''
+        + '<div class="stat"><div class="n' + (products === 0 ? ' danger' : '') + '">' + (products == null ? '—' : products) + '</div><div class="l">Productos guardados</div></div>'
+        + '<div class="stat"><div class="n">' + (orders == null ? '—' : orders) + '</div><div class="l">Pedidos</div></div>'
+        + '<div class="stat"><div class="n">' + (users == null ? '—' : users) + '</div><div class="l">Cuentas</div></div>'
+        + '<div class="stat"><div class="n' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '') + '">' + fmtBytes(used) + '</div><div class="l">Espacio usado</div></div>';
+
+      document.getElementById('usageBlock').innerHTML = ''
+        + '<div class="bar' + (pct >= 90 ? ' full' : '') + '"><span style="width:' + pct + '%"></span></div>'
+        + '<div class="l" style="font-size:13px;color:var(--muted)">' + pct + '% del límite del navegador (~5 MB). '
+        + (pct >= 90 ? '<span class="empty-note">Está lleno: por eso los últimos productos no se guardaron.</span>' : 'Cuando llega al 100%, el navegador deja de guardar nuevos productos.')
+        + '</div>'
+        + (products === 0 ? '<p class="empty-note" style="margin-top:12px">No encontramos productos en este navegador. Si aquí es donde los subiste, avísale a José antes de hacer nada más.</p>' : '');
+
+      // ---- Descargar ----
+      document.getElementById('downloadBtn').addEventListener('click', function () {
+        var payload = {
+          _tipo: 'cronosfera-respaldo',
+          _version: 1,
+          _fecha: new Date().toISOString(),
+          _resumen: { productos: products, pedidos: orders, cuentas: users, bytes: used },
+          datos: data
+        };
+        var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var fecha = new Date().toISOString().slice(0, 10);
+        a.href = url; a.download = 'cronosfera-respaldo-' + fecha + '.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        toast('Respaldo descargado ✓ Guárdalo y envíaselo a José', 'ok');
+      });
+
+      // ---- Restaurar ----
+      document.getElementById('restoreInput').addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        document.getElementById('restoreName').textContent = file.name;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var parsed;
+          try { parsed = JSON.parse(reader.result); } catch (err) { toast('El archivo no es un respaldo válido', 'err'); return; }
+          var d = parsed && parsed.datos ? parsed.datos : null;
+          if (!d || typeof d !== 'object') { toast('El archivo no tiene datos de Cronosfera', 'err'); return; }
+          var n = (d[PREFIX + 'products'] ? parseCount(d[PREFIX + 'products']) : 0) || 0;
+          if (!confirm('Se van a restaurar ' + n + ' productos (y su configuración) en este navegador, reemplazando lo que haya ahora. ¿Continuar?')) return;
+          Object.keys(d).forEach(function (k) {
+            if (k.indexOf(PREFIX) === 0) { try { localStorage.setItem(k, d[k]); } catch (err) { toast('No cupo todo: el navegador se llenó al restaurar', 'err'); } }
+          });
+          toast('Restaurado ✓ Recargando…', 'ok');
+          setTimeout(function () { location.reload(); }, 1400);
+        };
+        reader.readAsText(file);
+      });
+    })();
+  </script>
+</body>
+</html>
