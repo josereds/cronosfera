@@ -364,6 +364,7 @@
   var catalogViewAll = false;
 
   function renderCatalogo(pane) {
+    var gd = Store.getDiscounts().global || { active: false, pct: 30 };
     pane.innerHTML = ''
       + '<div class="catalogo-head">'
       +   '<div class="catalogo-search">'
@@ -375,7 +376,42 @@
       +     '<button class="btn-primary" id="newProduct">+ Nuevo producto</button>'
       +   '</div>'
       + '</div>'
+      // Descuento general de toda la tienda, a la mano (se aplica al instante).
+      + '<div class="global-discount-bar' + (gd.active ? ' on' : '') + '" id="globalDiscountBar">'
+      +   '<div class="gd-info">'
+      +     '<span class="gd-title">Descuento general de la tienda</span>'
+      +     '<span class="gd-sub">Se aplica a todos los productos (relojes y accesorios). Un descuento puesto en una categoría o en un producto tiene prioridad sobre este.</span>'
+      +   '</div>'
+      +   '<div class="gd-control">'
+      +     '<label class="discount-toggle-wrap"><input type="checkbox" id="gdiscActive" hidden' + (gd.active ? ' checked' : '') + '>'
+      +       '<span class="discount-toggle' + (gd.active ? ' active' : '') + '" id="gdiscPill">' + (gd.active ? 'Descuento activo' : 'Activar descuento') + '</span></label>'
+      +     '<label class="discount-pct-field' + (gd.active ? ' enabled' : '') + '" id="gdiscPctWrap"><input type="number" id="gdiscPct" min="0" max="95" step="1" value="' + (gd.pct || 30) + '"><span>%</span></label>'
+      +   '</div>'
+      + '</div>'
       + '<div id="catalogBody"></div>';
+
+    // Barra de descuento general: guarda al instante (interruptor o cambio de %).
+    (function () {
+      var check = pane.querySelector('#gdiscActive');
+      var pill = pane.querySelector('#gdiscPill');
+      var pctWrap = pane.querySelector('#gdiscPctWrap');
+      var pctInput = pane.querySelector('#gdiscPct');
+      var bar = pane.querySelector('#globalDiscountBar');
+      function apply() {
+        Store.setGlobalDiscount(check.checked, pctInput.value);
+      }
+      check.addEventListener('change', function () {
+        pill.classList.toggle('active', check.checked);
+        pill.textContent = check.checked ? 'Descuento activo' : 'Activar descuento';
+        pctWrap.classList.toggle('enabled', check.checked);
+        bar.classList.toggle('on', check.checked);
+        apply();
+        toast(check.checked ? 'Descuento general activado (' + (Number(pctInput.value) || 0) + '%)' : 'Descuento general desactivado', 'success');
+      });
+      pctInput.addEventListener('change', function () {
+        if (check.checked) { apply(); toast('Descuento general: ' + (Number(pctInput.value) || 0) + '%', 'success'); }
+      });
+    })();
 
     var body = pane.querySelector('#catalogBody');
     var search = pane.querySelector('#prodSearch');
@@ -1382,16 +1418,12 @@
   // ============== CONFIGURACIÓN ==============
   function renderConfig(pane) {
     var cfg = Store.getConfig();
-    var discounts = Store.getDiscounts();
     pane.innerHTML = ''
       + '<form id="configForm" class="config-form">'
       +   '<fieldset><legend>General</legend>'
       +     '<label><span>Nombre del sitio</span><input name="siteName" value="' + escapeHtml(cfg.siteName) + '"></label>'
       +     '<label><span>Tagline</span><input name="tagline" value="' + escapeHtml(cfg.tagline) + '"></label>'
-      +   '</fieldset>'
-      +   '<fieldset><legend>Descuento general</legend>'
-      +     '<p class="form-hint">Aplica a todo el catálogo (relojes y accesorios). Si un producto o su categoría ya tienen su propio descuento activo, ese gana sobre este.</p>'
-      +     discountFieldHtml('discount', 'Descuento sobre toda la página', discounts.global)
+      +     '<p class="form-hint">El <strong>descuento general de la tienda</strong> se activa desde la pestaña Catálogo, en la barra de arriba.</p>'
       +   '</fieldset>'
       +   '<fieldset><legend>Mayorista</legend>'
       +     '<label><span>Descuento mayorista (%)</span><input type="number" name="wholesaleDiscountPct" value="' + cfg.wholesaleDiscountPct + '" min="0" max="80" step="1"></label>'
@@ -1427,11 +1459,6 @@
     pane.querySelector('#configForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(this);
-      // El descuento general se guarda dentro de la misma configuración (que
-      // ahora se sincroniza por Supabase), en una sola escritura.
-      var gd = readDiscountField(fd, 'discount');
-      var discounts = Object.assign({}, Store.getDiscounts());
-      discounts.global = { active: gd.active, pct: gd.pct };
       Store.saveConfig({
         siteName: fd.get('siteName'),
         tagline: fd.get('tagline'),
@@ -1453,13 +1480,11 @@
           lead: fd.get('heroLead'),
           ctaPrimary: { label: fd.get('heroCtaPrimaryLabel'), href: fd.get('heroCtaPrimaryHref') },
           ctaSecondary: { label: fd.get('heroCtaSecondaryLabel'), href: fd.get('heroCtaSecondaryHref') }
-        },
-        discounts: discounts
+        }
       }).then(function () {
         toast('Configuración guardada', 'success');
       }).catch(function (err) { toast(err.message, 'danger'); });
     });
-    bindDiscountFields(pane);
   }
 
   // ============== INIT ==============

@@ -572,6 +572,24 @@
     .status-pill.scheduled, .status-pill.pending { background: color-mix(in oklab, var(--info) 14%, transparent); color: oklch(82% 0.10 230); }
     .status-pill.closed, .status-pill.rejected, .status-pill.suspended { background: var(--surface-2); color: var(--muted); }
 
+    /* ===== Barra de descuento general (arriba del catálogo) ===== */
+    .global-discount-bar {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 16px 20px; margin-bottom: 22px;
+      border: 1px solid var(--border); border-radius: var(--r-lg);
+      background: var(--surface);
+      transition: border-color .2s, background .2s;
+    }
+    .global-discount-bar.on {
+      border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
+      background: color-mix(in oklab, var(--danger) 7%, var(--surface));
+    }
+    .global-discount-bar .gd-info { display: flex; flex-direction: column; gap: 3px; min-width: 240px; flex: 1; }
+    .global-discount-bar .gd-title { font-size: 14px; font-weight: 600; color: var(--fg); }
+    .global-discount-bar .gd-sub { font-size: 12px; color: var(--muted); line-height: 1.45; max-width: 560px; }
+    .global-discount-bar .gd-control { display: flex; align-items: center; gap: 12px; }
+
     /* ===== Descuentos (general / categoría / producto) ===== */
     .discount-field { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
     .discount-field > span:first-child { display: block; font-size: 13px; font-weight: 500; margin-bottom: 10px; }
