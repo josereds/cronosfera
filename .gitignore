@@ -36,3 +36,5 @@ yarn-error.log*
 pnpm-debug.log*
 .vercel
 .env*
+# Respaldos de datos: se guardan localmente, NO se versionan ni se sirven en el sitio
+backend/respaldos/
