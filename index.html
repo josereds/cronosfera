@@ -1651,25 +1651,6 @@
       { brand: 'Cronosfera', model: 'Selva Verde 39', price: 1999000, was: 2299000, off: 13, tone: 'green', tag: { kind: 'special', label: 'Edición especial' }, stock: 'Bajo inventario · 2 unidades', stockLow: true, variants: ['#344a3a','#1d2026'] },
       { brand: 'Cronosfera', model: 'Aurora Mujer 33', price: 1149000, was: 0, off: 0, tone: 'fog', tag: { kind: 'new', label: 'Nuevo' }, stock: 'Disponible', variants: ['#dcd6cc','#c9a86a','#5a544a'] }
     ];
-    var products = (window.Store ? Store.getWatchProducts().slice(0, 8) : _legacyProducts).map(function(p){
-      var pd = window.Store ? Store.getPriceDisplay(p) : { price: p.price, wasPrice: p.wasPrice || p.was || 0, off: p.off || 0 };
-      return {
-        id: p.id,
-        brand: p.brand,
-        model: p.model,
-        ref: p.ref,
-        price: pd.price,
-        was: pd.wasPrice || 0,
-        off: pd.off || 0,
-        tone: p.tone,
-        tag: p.tag,
-        stock: p.stock,
-        stockLow: p.stockStatus === 'low' || p.stockLow,
-        stockOut: p.stockStatus === 'out' || p.stockOut,
-        variants: p.variants || [],
-        image: p.image || ''
-      };
-    });
     function cop(v){ return '$' + v.toLocaleString('es-CO'); }
     function buildAskWhatsappUrl(p) {
       var num = window.Store ? (Store.getConfig().payments || {}).whatsappNumber : '';
@@ -1713,9 +1694,27 @@
         +   '<ellipse cx="-30" cy="-46" rx="48" ry="22" fill="#ffffff" opacity="0.05" transform="rotate(-25)"/>'
         + '</svg>';
     }
-    var isWholesale = !!(window.Auth && Auth.isWholesale()); // sesión real desde Store
-    var grid = document.getElementById('productsGrid');
-    products.forEach(function(p){
+    // Se re-pinta cuando Store hidrata desde Supabase: en la primera visita el
+    // catálogo llega de forma asíncrona, así que hay que refrescar (no pintar
+    // una sola vez, que dejaría los destacados vacíos hasta recargar).
+    var railSync = function () {};
+    function renderFeatured() {
+      var grid = document.getElementById('productsGrid');
+      if (!grid) return;
+      var isWholesale = !!(window.Auth && Auth.isWholesale()); // sesión real desde Store
+      var products = (window.Store ? Store.getWatchProducts().slice(0, 8) : _legacyProducts).map(function(p){
+        var pd = window.Store ? Store.getPriceDisplay(p) : { price: p.price, wasPrice: p.wasPrice || p.was || 0, off: p.off || 0 };
+        return {
+          id: p.id, brand: p.brand, model: p.model, ref: p.ref,
+          price: pd.price, was: pd.wasPrice || 0, off: pd.off || 0,
+          tone: p.tone, tag: p.tag, stock: p.stock,
+          stockLow: p.stockStatus === 'low' || p.stockLow,
+          stockOut: p.stockStatus === 'out' || p.stockOut,
+          variants: p.variants || [], image: p.image || ''
+        };
+      });
+      grid.innerHTML = '';
+      products.forEach(function(p){
       var off = p.off ? '<span class="off">-' + p.off + '%</span>' : '';
       var was = p.was ? '<span class="was">' + cop(p.was) + '</span>' : '';
       var tag = p.tag ? '<span class="' + p.tag.kind + '">' + p.tag.label + '</span>' : '';
@@ -1752,7 +1751,9 @@
       var quick = card.querySelector('.product-quick');
       quick.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); window.location.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : ''); });
       grid.appendChild(card);
-    });
+      });
+      railSync();
+    }
 
     // ============== Rail de destacados (scroll horizontal) ==============
     (function () {
@@ -1772,6 +1773,7 @@
         prev.disabled = rail.scrollLeft <= 2;
         next.disabled = rail.scrollLeft >= (rail.scrollWidth - rail.clientWidth - 2);
       }
+      railSync = syncNav; // renderFeatured lo llama para actualizar las flechas al re-pintar
       prev.addEventListener('click', function () { rail.scrollBy({ left: -step(), behavior: 'smooth' }); });
       next.addEventListener('click', function () { rail.scrollBy({ left: step(), behavior: 'smooth' }); });
       rail.addEventListener('scroll', syncNav);
@@ -1783,7 +1785,7 @@
     // Cristian también vende accesorios. Cada tarjeta lleva a su página de
     // categoría real (accesorios.html?cat=), que muestra los productos que
     // haya cargados o un aviso de "muy pronto" si todavía no hay ninguno.
-    (function () {
+    function renderSubcats() {
       var mount = document.getElementById('subcats');
       if (!mount) return;
       var ICONS = {
@@ -1811,7 +1813,16 @@
           + '</span>'
           + '</a>';
       }).join('');
-    })();
+    }
+
+    // Pinta destacados y subcategorías al cargar, y otra vez cuando Store
+    // termina de hidratar desde Supabase (primera visita con caché vacía).
+    renderFeatured();
+    renderSubcats();
+    if (window.Store && Store.subscribe) Store.subscribe(function () {
+      renderFeatured();
+      renderSubcats();
+    });
 
     // ============== Catálogo de marcas ==============
     // Algunos logos blancos traen mucho margen dentro de su propio PNG y se
