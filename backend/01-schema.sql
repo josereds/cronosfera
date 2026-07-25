@@ -69,7 +69,7 @@ $$;
 create table if not exists public.products (
   id                uuid primary key default gen_random_uuid(),
   category          text not null default 'reloj' check (category in ('reloj','accesorio')),
-  accessory_type    text check (accessory_type in ('gorras','correas','billeteras')),
+  accessory_type    text check (accessory_type in ('gorras','correas','billeteras','camisetas-buzos','perfumes-joyas')),
   brand             text not null default '',
   brand_slug        text,
   model             text not null,

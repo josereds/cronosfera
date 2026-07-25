@@ -256,8 +256,49 @@ grant execute on function public.close_auction(uuid) to authenticated;
 -- ============================================================
 --  TIEMPO REAL: que las pujas se vean al instante en todos lados
 -- ============================================================
-alter publication supabase_realtime add table public.auctions;
-alter publication supabase_realtime add table public.bids;
-alter publication supabase_realtime add table public.products;
-alter publication supabase_realtime add table public.orders;
-alter publication supabase_realtime add table public.wholesale_requests;
+-- Se agregan a la publicación de Realtime de forma idempotente: si ya
+-- estaban (por haber corrido este script antes), no se vuelve a intentar,
+-- así re-ejecutar el archivo no da error.
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['auctions','bids','products','orders','wholesale_requests'] loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', t);
+    end if;
+  end loop;
+end $$;
+
+-- ============================================================
+--  ALMACENAMIENTO DE FOTOS (Supabase Storage)
+--  ------------------------------------------------------------
+--  Las fotos de los productos NO se guardan dentro de la base de
+--  datos como texto (eso reventaría el navegador otra vez). Van como
+--  archivos en este "bucket" público; en la tabla products solo se
+--  guarda el enlace corto a cada foto.
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
+
+-- Cualquiera puede VER las fotos (catálogo público)...
+drop policy if exists product_images_public_read on storage.objects;
+create policy product_images_public_read on storage.objects
+  for select using (bucket_id = 'product-images');
+
+-- ...pero solo el admin puede subir, reemplazar o borrar.
+drop policy if exists product_images_admin_insert on storage.objects;
+create policy product_images_admin_insert on storage.objects
+  for insert with check (bucket_id = 'product-images' and public.is_admin());
+
+drop policy if exists product_images_admin_update on storage.objects;
+create policy product_images_admin_update on storage.objects
+  for update using (bucket_id = 'product-images' and public.is_admin());
+
+drop policy if exists product_images_admin_delete on storage.objects;
+create policy product_images_admin_delete on storage.objects
+  for delete using (bucket_id = 'product-images' and public.is_admin());
