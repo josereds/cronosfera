@@ -266,33 +266,6 @@
     }
     .card-foot a { color: var(--accent); font-weight: 500; }
     .card-foot a:hover { text-decoration: underline; }
-
-    /* ====== Demo hint ====== */
-    .demo-hint {
-      margin-top: 18px;
-      padding: 12px 14px;
-      background: color-mix(in oklab, var(--info) 8%, transparent);
-      border: 1px dashed color-mix(in oklab, var(--info) 35%, transparent);
-      border-radius: var(--r);
-      font-size: 12px;
-      color: var(--fg-soft);
-      line-height: 1.55;
-    }
-    .demo-hint code {
-      font-family: var(--font-mono);
-      color: var(--accent);
-      font-size: 11px;
-      background: var(--bg-warm);
-      padding: 1px 6px;
-      border-radius: 4px;
-      margin: 0 2px;
-    }
-    .demo-hint button {
-      color: var(--accent);
-      font-weight: 600;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
   </style>
   <link rel="stylesheet" href="cronos-ui.css">
 </head>
@@ -396,12 +369,6 @@
         <div class="card-foot">
           ¿Olvidaste tu contraseña? <a href="#">Recupérala</a><br>
           <span style="opacity:.7">o vuelve al <a href="index.html">inicio</a></span>
-        </div>
-
-        <div class="demo-hint">
-          <strong>Acceso demo:</strong> admin <code>admin@cronosfera.co</code> / <code>admin</code>
-          ·
-          <button type="button" id="autofillAdmin">autollenar</button>
         </div>
       </div>
     </section>
@@ -513,13 +480,6 @@
         }).then(function () {
           if (submitBtn) submitBtn.disabled = false;
         });
-      });
-
-      document.getElementById('autofillAdmin').addEventListener('click', function () {
-        tabs[0].click();
-        document.getElementById('loginEmail').value = 'admin@cronosfera.co';
-        document.getElementById('loginPassword').value = 'admin';
-        clearMsgs();
       });
     })();
   </script>
