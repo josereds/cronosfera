@@ -621,6 +621,30 @@
     saveBrandsMeta({ custom: custom, order: order, overrides: overrides });
   }
 
+  // Sube una foto a Supabase Storage y devuelve su URL pública. Si ya es una
+  // URL (http…) o una ruta del sitio (productos/…), la deja igual — solo sube
+  // las que llegan como data URL base64 (fotos nuevas elegidas en el panel).
+  // Esto evita que las fotos vuelvan a guardarse como texto pesado en la base
+  // o en el navegador, que fue lo que llenó el localStorage.
+  function ensureImageStored(image) {
+    if (!sb || !image || image.indexOf('data:') !== 0) return Promise.resolve(image || null);
+    var m = image.match(/^data:(.*?);base64,(.*)$/);
+    if (!m) return Promise.resolve(image);
+    var mime = m[1] || 'image/jpeg';
+    var ext = mime.indexOf('png') >= 0 ? 'png' : (mime.indexOf('webp') >= 0 ? 'webp' : 'jpg');
+    var bstr = atob(m[2]);
+    var len = bstr.length;
+    var u8 = new Uint8Array(len);
+    for (var i = 0; i < len; i++) u8[i] = bstr.charCodeAt(i);
+    var blob = new Blob([u8], { type: mime });
+    var id = (global.crypto && global.crypto.randomUUID) ? global.crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+    var path = 'products/' + id + '.' + ext;
+    return sb.storage.from('product-images').upload(path, blob, { contentType: mime, upsert: false }).then(function (res) {
+      if (res.error) throw new Error('No se pudo subir la foto: ' + res.error.message);
+      return sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+    });
+  }
+
   function saveProduct(p) {
     if (p.brand && !p.brandSlug) p.brandSlug = slugifyBrand(p.brand);
     if (!sb) {
@@ -633,13 +657,16 @@
       write(NS.products, list);
       return Promise.resolve(p);
     }
-    var row = mapProductToDb(p);
-    var query = p.id
-      ? sb.from('products').update(row).eq('id', p.id).select().single()
-      : sb.from('products').insert(row).select().single();
-    return query.then(function (res) {
-      if (res.error) throw new Error(mapAuthError(res.error));
-      return hydrateProducts().then(function () { return mapProductFromDb(res.data); });
+    return ensureImageStored(p.image).then(function (imageUrl) {
+      var toSave = Object.assign({}, p, { image: imageUrl });
+      var row = mapProductToDb(toSave);
+      var query = toSave.id
+        ? sb.from('products').update(row).eq('id', toSave.id).select().single()
+        : sb.from('products').insert(row).select().single();
+      return query.then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return hydrateProducts().then(function () { return mapProductFromDb(res.data); });
+      });
     });
   }
 

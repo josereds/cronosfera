@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14161c">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Importar catálogo · Cronosfera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: oklch(14% 0.008 250); --surface: oklch(20% 0.010 250); --surface-2: oklch(24% 0.012 250);
+      --fg: oklch(96% 0.005 80); --fg-soft: oklch(82% 0.005 80); --muted: oklch(60% 0.008 80);
+      --border: oklch(30% 0.008 250); --accent: oklch(78% 0.10 75);
+      --danger: oklch(64% 0.18 25); --success: oklch(70% 0.12 155); --warning: oklch(80% 0.13 80);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Inter', -apple-system, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace; --r: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; padding: 32px 20px 80px; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .logo { font-family: var(--font-display); font-size: 26px; font-weight: 600; }
+    .logo .dot { color: var(--accent); }
+    h1 { font-family: var(--font-display); font-size: 34px; font-weight: 500; margin: 24px 0 8px; line-height: 1.1; }
+    .lead { color: var(--muted); margin-bottom: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .card p.sub { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: var(--r); font-size: 15px; font-weight: 600; cursor: pointer; border: 0; transition: filter .15s; text-decoration: none; }
+    .btn:hover { filter: brightness(1.08); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #1a1c20; }
+    .btn-ghost { background: var(--surface-2); color: var(--fg); border: 1px solid var(--border); }
+    .btn svg { width: 20px; height: 20px; }
+    .hint { font-size: 13px; color: var(--muted); margin-top: 14px; }
+    .callout { border-left: 3px solid var(--warning); background: color-mix(in oklab, var(--warning) 8%, transparent); padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--fg-soft); margin-bottom: 22px; }
+    .callout.err { border-color: var(--danger); background: color-mix(in oklab, var(--danger) 8%, transparent); }
+    .bar { height: 12px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 14px 0 8px; }
+    .bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--success)); border-radius: 999px; width: 0; transition: width .2s; }
+    .progress-label { font-family: var(--font-mono); font-size: 14px; color: var(--fg-soft); }
+    .log { font-family: var(--font-mono); font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 14px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; }
+    .log .ok { color: oklch(78% 0.12 155); }
+    .log .err { color: oklch(78% 0.16 25); }
+    code { font-family: var(--font-mono); font-size: 13px; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 6px; }
+    .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+    .stat .n { font-family: var(--font-mono); font-size: 22px; }
+    .stat .l { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">Cronosfera<span class="dot">.</span></div>
+    <h1>Importar catálogo a la nube</h1>
+    <p class="lead">Sube el archivo de respaldo (<code>.json</code>) para pasar los productos y sus fotos a Supabase. Las fotos van a Storage; en la base solo queda el enlace.</p>
+
+    <div id="gate"></div>
+    <div id="tool" style="display:none">
+      <div class="card">
+        <h2>1. Elige el archivo de respaldo</h2>
+        <p class="sub">El <code>cronosfera-respaldo-….json</code> que descargó Cristian.</p>
+        <label class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9m0 0-4 4m4-4 4 4M4 3h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Elegir archivo
+          <input type="file" accept="application/json,.json" id="fileInput" hidden>
+        </label>
+        <span id="fileName" style="color:var(--muted);font-size:14px;margin-left:12px"></span>
+        <div id="preview" style="margin-top:18px"></div>
+      </div>
+
+      <div class="card" id="runCard" style="display:none">
+        <h2>2. Importar</h2>
+        <p class="sub">Sube cada foto a Storage e inserta el producto. Puedes correrlo más de una vez: los que ya existan (misma referencia) se omiten.</p>
+        <button class="btn btn-primary" id="runBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Importar productos
+        </button>
+        <div id="progressWrap" style="display:none;margin-top:18px">
+          <div class="bar"><span id="bar"></span></div>
+          <div class="progress-label" id="progressLabel"></div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="cronos-store.js"></script>
+  <script>
+    (function () {
+      var PREFIX = 'cronos:';
+      var gate = document.getElementById('gate');
+      var tool = document.getElementById('tool');
+
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }); }
+
+      (Store.ready ? Store.ready() : Promise.resolve()).then(function () {
+        var u = Store.currentUser && Store.currentUser();
+        if (!u || u.role !== 'admin') {
+          gate.innerHTML = '<div class="callout err">Debes <strong>iniciar sesión como administrador</strong> para importar. '
+            + '<a href="login.html?next=importar.html" style="color:var(--accent)">Iniciar sesión →</a></div>';
+          return;
+        }
+        gate.innerHTML = '<div class="callout">Sesión de administrador: <strong>' + esc(u.name || u.email) + '</strong>. Todo lo que subas aquí queda en la nube, disponible para todos.</div>';
+        tool.style.display = '';
+        initTool();
+      });
+
+      function initTool() {
+        var fileInput = document.getElementById('fileInput');
+        var fileName = document.getElementById('fileName');
+        var preview = document.getElementById('preview');
+        var runCard = document.getElementById('runCard');
+        var runBtn = document.getElementById('runBtn');
+        var pending = null; // productos a importar
+
+        fileInput.addEventListener('change', function (e) {
+          var file = e.target.files && e.target.files[0];
+          if (!file) return;
+          fileName.textContent = file.name;
+          var reader = new FileReader();
+          reader.onload = function () {
+            var backup;
+            try { backup = JSON.parse(reader.result); } catch (err) { preview.innerHTML = '<div class="callout err">El archivo no es un JSON válido.</div>'; return; }
+            var raw = backup && backup.datos ? backup.datos[PREFIX + 'products'] : null;
+            var prods;
+            try { prods = raw ? JSON.parse(raw) : null; } catch (err) { prods = null; }
+            if (!Array.isArray(prods)) { preview.innerHTML = '<div class="callout err">El archivo no contiene productos de Cronosfera.</div>'; return; }
+
+            // Omitir los que ya existan en la nube por referencia (para poder re-correr sin duplicar).
+            var existing = {};
+            Store.getProducts().forEach(function (p) { if (p.ref) existing[p.ref.toLowerCase().trim()] = true; });
+            var toImport = prods.filter(function (p) { return !(p.ref && existing[p.ref.toLowerCase().trim()]); });
+            var skipped = prods.length - toImport.length;
+            var withPhoto = toImport.filter(function (p) { return p.image && p.image.indexOf('data:') === 0; }).length;
+            pending = toImport;
+
+            preview.innerHTML = ''
+              + '<div class="stat-grid">'
+              +   '<div class="stat"><div class="n">' + prods.length + '</div><div class="l">En el respaldo</div></div>'
+              +   '<div class="stat"><div class="n" style="color:var(--accent)">' + toImport.length + '</div><div class="l">Por importar</div></div>'
+              +   '<div class="stat"><div class="n">' + withPhoto + '</div><div class="l">Fotos a subir</div></div>'
+              +   '<div class="stat"><div class="n">' + skipped + '</div><div class="l">Ya existen (omitir)</div></div>'
+              + '</div>';
+            runCard.style.display = toImport.length ? '' : 'none';
+            if (!toImport.length) preview.innerHTML += '<p class="hint">Todos los productos del respaldo ya están en la nube. No hay nada que importar.</p>';
+          };
+          reader.readAsText(file);
+        });
+
+        runBtn.addEventListener('click', function () {
+          if (!pending || !pending.length) return;
+          runBtn.disabled = true;
+          fileInput.disabled = true;
+          document.getElementById('progressWrap').style.display = '';
+          var bar = document.getElementById('bar');
+          var label = document.getElementById('progressLabel');
+          var log = document.getElementById('log');
+          var total = pending.length, done = 0, ok = 0, failed = 0;
+
+          function line(html, cls) { log.innerHTML += '<div' + (cls ? ' class="' + cls + '"' : '') + '>' + html + '</div>'; log.scrollTop = log.scrollHeight; }
+
+          function next(i) {
+            if (i >= total) {
+              label.textContent = 'Listo: ' + ok + ' importados, ' + failed + ' con error.';
+              line('— Terminado. ' + ok + ' importados, ' + failed + ' con error. —', failed ? 'err' : 'ok');
+              runBtn.textContent = 'Importar de nuevo (omite los ya subidos)';
+              runBtn.disabled = false;
+              fileInput.disabled = false;
+              return;
+            }
+            var p = pending[i];
+            // Se limpian los identificadores locales: en la nube se genera uno nuevo.
+            var clean = Object.assign({}, p);
+            delete clean.id; delete clean.createdAt;
+            label.textContent = 'Importando ' + (i + 1) + ' de ' + total + '…  ' + ((p.brand || '') + ' ' + (p.model || '')).trim();
+            Store.saveProduct(clean).then(function () {
+              ok++; done++;
+              line('<span class="ok">✓</span> ' + esc(((p.brand || '') + ' · ' + (p.model || '')).trim()));
+            }).catch(function (err) {
+              failed++; done++;
+              line('<span class="err">✗</span> ' + esc(((p.brand || '') + ' · ' + (p.model || '')).trim()) + ' — ' + esc(err.message));
+            }).then(function () {
+              bar.style.width = Math.round(done / total * 100) + '%';
+              next(i + 1);
+            });
+          }
+          line('Iniciando importación de ' + total + ' productos…');
+          next(0);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
