@@ -53,6 +53,42 @@
 
   function confirmDialog(msg) { return window.confirm(msg); }
 
+  // ---------- Descuentos: campo reutilizable (general / categoría / producto) ----------
+  // Un pill que activa/desactiva + un % al lado. Va dentro de un <form> ya
+  // existente y se lee con FormData en el submit, igual que cualquier otro
+  // campo — no tiene guardado propio.
+  function discountFieldHtml(name, label, current) {
+    var active = !!(current && current.active);
+    var pct = (current && current.pct) || 10;
+    return '<div class="discount-field">'
+      + '<span>' + escapeHtml(label) + '</span>'
+      + '<div class="discount-row">'
+      +   '<label class="discount-toggle-wrap">'
+      +     '<input type="checkbox" name="' + name + 'Active" class="discount-checkbox" hidden' + (active ? ' checked' : '') + '>'
+      +     '<span class="discount-toggle' + (active ? ' active' : '') + '">' + (active ? 'Descuento activo' : 'Activar descuento') + '</span>'
+      +   '</label>'
+      +   '<label class="discount-pct-field' + (active ? ' enabled' : '') + '"><input type="number" name="' + name + 'Pct" min="0" max="95" step="1" value="' + pct + '"><span>%</span></label>'
+      + '</div>'
+      + '</div>';
+  }
+
+  function bindDiscountFields(container) {
+    container.querySelectorAll('.discount-checkbox').forEach(function (checkbox) {
+      var pill = checkbox.nextElementSibling;
+      var row = checkbox.closest('.discount-row');
+      var pctField = row ? row.querySelector('.discount-pct-field') : null;
+      checkbox.addEventListener('change', function () {
+        pill.classList.toggle('active', checkbox.checked);
+        pill.textContent = checkbox.checked ? 'Descuento activo' : 'Activar descuento';
+        if (pctField) pctField.classList.toggle('enabled', checkbox.checked);
+      });
+    });
+  }
+
+  function readDiscountField(fd, name) {
+    return { active: !!fd.get(name + 'Active'), pct: Number(fd.get(name + 'Pct')) || 0 };
+  }
+
   // Redimensiona/comprime una foto elegida desde el input file antes de
   // guardarla como data URL en localStorage (no hay servidor todavía: sin
   // esto, fotos de celular de varios MB llenan la cuota del navegador rápido).
@@ -351,11 +387,12 @@
 
     function prodCard(p) {
       var w = Store.wholesalePriceFor(p);
+      var disc = Store.getPriceDisplay(p);
       var cover = p.image
         ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">'
         : '<span class="admin-prod-ph">◷</span>';
       return '<div class="admin-prod-card" data-id="' + p.id + '">'
-        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></div>'
+        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span>' + (disc.off > 0 ? '<span class="discount-badge">-' + disc.off + '%</span>' : '') + '</div>'
         + '<div class="admin-prod-body">'
         +   '<div class="admin-prod-model">' + escapeHtml(p.model) + '</div>'
         +   '<div class="admin-prod-ref mono">' + escapeHtml(p.ref) + '</div>'
@@ -517,6 +554,7 @@
       +     '</div>'
       +     '<p class="form-hint">Si no pones foto, se usa la primera foto de un producto de esta carpeta (o el nombre solo).</p>'
       +   '</label>'
+      +   (!isNew ? discountFieldHtml('discount', 'Descuento para toda la marca "' + b.name + '"', Store.getBrandDiscount(slug)) : '')
       +   (!isNew && b.custom
             ? '<p class="form-hint">' + (b.count > 0 ? 'Esta carpeta tiene ' + b.count + ' producto(s), así que no se puede eliminar.' : 'Esta carpeta está vacía, se puede eliminar.') + '</p>'
             : '')
@@ -559,7 +597,8 @@
 
     modal.querySelector('#brandForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var name = new FormData(this).get('name');
+      var fd = new FormData(this);
+      var name = fd.get('name');
       try {
         if (isNew) {
           Store.addBrand({ name: name, cover: pendingCover || '' });
@@ -567,12 +606,15 @@
         } else {
           Store.renameBrand(slug, name);
           if (pendingCover !== undefined) Store.setBrandCover(slug, pendingCover);
+          var d = readDiscountField(fd, 'discount');
+          Store.setBrandDiscount(slug, d.active, d.pct);
           toast('Carpeta actualizada', 'success');
         }
         close();
         if (typeof onDone === 'function') onDone();
       } catch (err) { toast(err.message, 'danger'); }
     });
+    bindDiscountFields(modal);
   }
 
   // ============== ACCESORIOS (gorras, correas, billeteras) ==============
@@ -598,11 +640,12 @@
 
     function accProdCard(p) {
       var w = Store.wholesalePriceFor(p);
+      var disc = Store.getPriceDisplay(p);
       var cover = p.image
         ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">'
         : '<span class="admin-prod-ph">◷</span>';
       return '<div class="admin-prod-card" data-id="' + p.id + '">'
-        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span></div>'
+        + '<div class="admin-prod-cover">' + cover + '<span class="stock-pill ' + (p.stockStatus || 'in') + '">' + escapeHtml(p.stock || '—') + '</span>' + (disc.off > 0 ? '<span class="discount-badge">-' + disc.off + '%</span>' : '') + '</div>'
         + '<div class="admin-prod-body">'
         +   '<div class="admin-prod-model">' + escapeHtml(p.model) + '</div>'
         +   (p.ref ? '<div class="admin-prod-ref mono">' + escapeHtml(p.ref) + '</div>' : '')
@@ -707,6 +750,7 @@
       +   '</div>'
       + '</div>'
       + '<p class="form-hint">Si no pones foto, se usa la primera foto de un producto de esta categoría (o el nombre solo).</p>'
+      + discountFieldHtml('discount', 'Descuento para toda la categoría "' + escapeHtml(cat.name) + '"', Store.getAccessoryCategoryDiscount(slug))
       + '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button></div>';
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -735,6 +779,20 @@
       close();
       if (typeof onDone === 'function') onDone();
     });
+
+    // Este modal no tiene botón "Guardar": todo se guarda al instante, así
+    // que el descuento también se aplica apenas se toca el interruptor o el %.
+    bindDiscountFields(modal);
+    var discCheckbox = modal.querySelector('.discount-checkbox');
+    var discPctInput = modal.querySelector('.discount-pct-field input');
+    function saveDiscount() {
+      Store.setAccessoryCategoryDiscount(slug, discCheckbox.checked, discPctInput.value);
+    }
+    discCheckbox.addEventListener('change', function () {
+      saveDiscount();
+      toast(discCheckbox.checked ? 'Descuento activado' : 'Descuento desactivado', 'success');
+    });
+    discPctInput.addEventListener('change', saveDiscount);
   }
 
   function openAccessoryModal(id, categorySlug, onDone) {
@@ -773,6 +831,7 @@
       +     '</select></label>'
       +   '</div>'
       +   '<label class="block"><span>Descripción (opcional)</span><textarea name="description" rows="3">' + escapeHtml(p.description || '') + '</textarea></label>'
+      +   discountFieldHtml('discount', 'Descuento solo para este producto', { active: p.discountActive, pct: p.discountPct })
       +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>'
       + '</form>';
     overlay.appendChild(modal);
@@ -783,6 +842,7 @@
     modal.querySelector('.modal-close').addEventListener('click', close);
     modal.querySelector('.cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    bindDiscountFields(modal);
 
     var pendingImage;
     var photoInput = modal.querySelector('#accPhotoInput');
@@ -821,6 +881,9 @@
         stockStatus: fd.get('stockStatus'),
         description: fd.get('description')
       });
+      var pd = readDiscountField(fd, 'discount');
+      next.discountActive = pd.active;
+      next.discountPct = pd.pct;
       if (pendingImage !== undefined) next.image = pendingImage;
       Store.saveProduct(next).then(function () {
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
@@ -888,6 +951,7 @@
       +     '<label><span>Etiqueta (opcional)</span><input name="tagLabel" value="' + escapeHtml(p.tag ? p.tag.label : '') + '" placeholder="ej. Más vendido"></label>'
       +     '<label><span>Variants (colores hex separados por coma)</span><input name="variants" value="' + escapeHtml((p.variants || []).join(',')) + '" placeholder="#1d2026,#c9a86a"></label>'
       +   '</div>'
+      +   discountFieldHtml('discount', 'Descuento solo para este producto', { active: p.discountActive, pct: p.discountPct })
       +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>'
       + '</form>';
     overlay.appendChild(modal);
@@ -898,6 +962,7 @@
     modal.querySelector('.modal-close').addEventListener('click', close);
     modal.querySelector('.cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    bindDiscountFields(modal);
 
     // pendingImage: undefined = sin cambios (conserva la foto actual),
     // null = se quitó, string = foto nueva (data URL ya comprimida).
@@ -944,6 +1009,9 @@
         tag: fd.get('tagLabel') ? { kind: 'special', label: fd.get('tagLabel') } : null,
         variants: String(fd.get('variants') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean)
       };
+      var pd = readDiscountField(fd, 'discount');
+      data.discountActive = pd.active;
+      data.discountPct = pd.pct;
       Store.saveProduct(Object.assign({}, p, data)).then(function () {
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
         close();
@@ -1314,11 +1382,16 @@
   // ============== CONFIGURACIÓN ==============
   function renderConfig(pane) {
     var cfg = Store.getConfig();
+    var discounts = Store.getDiscounts();
     pane.innerHTML = ''
       + '<form id="configForm" class="config-form">'
       +   '<fieldset><legend>General</legend>'
       +     '<label><span>Nombre del sitio</span><input name="siteName" value="' + escapeHtml(cfg.siteName) + '"></label>'
       +     '<label><span>Tagline</span><input name="tagline" value="' + escapeHtml(cfg.tagline) + '"></label>'
+      +   '</fieldset>'
+      +   '<fieldset><legend>Descuento general</legend>'
+      +     '<p class="form-hint">Aplica a todo el catálogo (relojes y accesorios). Si un producto o su categoría ya tienen su propio descuento activo, ese gana sobre este.</p>'
+      +     discountFieldHtml('discount', 'Descuento sobre toda la página', discounts.global)
       +   '</fieldset>'
       +   '<fieldset><legend>Mayorista</legend>'
       +     '<label><span>Descuento mayorista (%)</span><input type="number" name="wholesaleDiscountPct" value="' + cfg.wholesaleDiscountPct + '" min="0" max="80" step="1"></label>'
@@ -1354,6 +1427,11 @@
     pane.querySelector('#configForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var fd = new FormData(this);
+      // El descuento general se guarda dentro de la misma configuración (que
+      // ahora se sincroniza por Supabase), en una sola escritura.
+      var gd = readDiscountField(fd, 'discount');
+      var discounts = Object.assign({}, Store.getDiscounts());
+      discounts.global = { active: gd.active, pct: gd.pct };
       Store.saveConfig({
         siteName: fd.get('siteName'),
         tagline: fd.get('tagline'),
@@ -1375,11 +1453,13 @@
           lead: fd.get('heroLead'),
           ctaPrimary: { label: fd.get('heroCtaPrimaryLabel'), href: fd.get('heroCtaPrimaryHref') },
           ctaSecondary: { label: fd.get('heroCtaSecondaryLabel'), href: fd.get('heroCtaSecondaryHref') }
-        }
+        },
+        discounts: discounts
       }).then(function () {
         toast('Configuración guardada', 'success');
       }).catch(function (err) { toast(err.message, 'danger'); });
     });
+    bindDiscountFields(pane);
   }
 
   // ============== INIT ==============

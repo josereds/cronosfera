@@ -18,6 +18,7 @@
     requests: 'cronos:wholesale-requests',
     config: 'cronos:config',
     brandsMeta: 'cronos:brands-meta',
+    discounts: 'cronos:discounts',
     accessoryMeta: 'cronos:accessory-meta',
     counters: 'cronos:counters',
     meta: 'cronos:meta',
@@ -332,7 +333,9 @@
   var ACCESSORY_CATEGORIES = [
     { slug: 'gorras', name: 'Gorras' },
     { slug: 'correas', name: 'Correas' },
-    { slug: 'billeteras', name: 'Billeteras' }
+    { slug: 'billeteras', name: 'Billeteras' },
+    { slug: 'camisetas-buzos', name: 'Camisetas y buzos' },
+    { slug: 'perfumes-joyas', name: 'Perfumes y joyas' }
   ];
 
   // Opciones cerradas para la ficha técnica (las usa el panel admin y los filtros).
@@ -485,12 +488,13 @@
   // Portada editable desde el panel por categoría de accesorio (independiente
   // de las fotos de producto): si Cristian no sube una, se usa la primera
   // foto de un producto de esa categoría, igual que en las carpetas de marca.
-  function getAccessoryMeta() { return read(NS.accessoryMeta, { covers: {} }); }
+  // Igual que los descuentos: las portadas de categorías viven en la config
+  // sincronizada, para que se vean en todos los navegadores.
+  function getAccessoryMeta() { return getConfig().accessoryMeta || { covers: {} }; }
   function setAccessoryCover(slug, cover) {
-    var meta = getAccessoryMeta();
-    var covers = Object.assign({}, meta.covers);
+    var covers = Object.assign({}, getAccessoryMeta().covers);
     covers[slug] = cover || '';
-    write(NS.accessoryMeta, { covers: covers });
+    saveConfig({ accessoryMeta: { covers: covers } }).catch(function (e) { console.error('[Store] guardando portada', e); });
   }
 
   function getAccessoryCategories() {
@@ -509,14 +513,16 @@
   // portada propia y agregar marcas nuevas sin tocar código. `order` guarda
   // el orden final de carpetas una vez que Daniela lo ajusta manualmente;
   // mientras no lo toque, se ordena alfabético.
+  // La personalización de marcas (renombrar, portadas, orden, marcas nuevas)
+  // vive en la config sincronizada, para que los clientes vean lo mismo que
+  // configura el admin.
   function getBrandsMeta() {
-    return read(NS.brandsMeta, { order: [], overrides: {}, custom: [] });
+    return getConfig().brandsMeta || { order: [], overrides: {}, custom: [] };
   }
 
   function saveBrandsMeta(patch) {
-    var cur = getBrandsMeta();
-    var next = Object.assign({}, cur, patch);
-    write(NS.brandsMeta, next);
+    var next = Object.assign({}, getBrandsMeta(), patch);
+    saveConfig({ brandsMeta: next }).catch(function (e) { console.error('[Store] guardando marcas', e); });
     return next;
   }
 
@@ -684,6 +690,71 @@
     var pct = (cfg.wholesaleDiscountPct || 0) / 100;
     return Math.round(p.price * (1 - pct));
   }
+
+  // ---------- descuentos promocionales (general / categoría / producto) ----------
+  // Tres niveles independientes, cada uno con su propio interruptor y su
+  // propio %. Si más de uno aplica al mismo producto, gana el más
+  // específico: producto > categoría (marca o accesorio) > general. No se
+  // suman entre sí para no confundir con descuentos acumulados.
+  // Los descuentos viven dentro de la configuración (tabla config de Supabase),
+  // no en una clave local aparte: así los ve también el navegador de cada
+  // cliente, no solo el del admin.
+  function getDiscounts() {
+    var d = getConfig().discounts;
+    return (d && d.global) ? d : { global: { active: false, pct: 10 }, brands: {}, accessoryCategories: {} };
+  }
+  function saveDiscounts(next) {
+    saveConfig({ discounts: next }).catch(function (e) { console.error('[Store] guardando descuentos', e); });
+    return next;
+  }
+
+  function setGlobalDiscount(active, pct) {
+    var d = getDiscounts();
+    d.global = { active: !!active, pct: Math.max(0, Math.min(95, Number(pct) || 0)) };
+    return saveDiscounts(d);
+  }
+  function setBrandDiscount(slug, active, pct) {
+    var d = getDiscounts();
+    d.brands = Object.assign({}, d.brands);
+    d.brands[slug] = { active: !!active, pct: Math.max(0, Math.min(95, Number(pct) || 0)) };
+    return saveDiscounts(d);
+  }
+  function setAccessoryCategoryDiscount(slug, active, pct) {
+    var d = getDiscounts();
+    d.accessoryCategories = Object.assign({}, d.accessoryCategories);
+    d.accessoryCategories[slug] = { active: !!active, pct: Math.max(0, Math.min(95, Number(pct) || 0)) };
+    return saveDiscounts(d);
+  }
+  function getBrandDiscount(slug) { return (getDiscounts().brands || {})[slug] || { active: false, pct: 0 }; }
+  function getAccessoryCategoryDiscount(slug) { return (getDiscounts().accessoryCategories || {})[slug] || { active: false, pct: 0 }; }
+
+  // % de descuento vigente para un producto puntual, o 0 si ninguno aplica.
+  function resolveDiscountPct(p) {
+    if (p.discountActive && p.discountPct > 0) return p.discountPct;
+    var d = getDiscounts();
+    if (p.category === 'accesorio') {
+      var acc = (d.accessoryCategories || {})[p.accessoryType];
+      if (acc && acc.active && acc.pct > 0) return acc.pct;
+    } else {
+      var brand = (d.brands || {})[productBrandSlug(p)];
+      if (brand && brand.active && brand.pct > 0) return brand.pct;
+    }
+    if (d.global && d.global.active && d.global.pct > 0) return d.global.pct;
+    return 0;
+  }
+
+  // Precio/etiquetas a mostrar: si hay un descuento promocional vigente,
+  // reemplaza el "antes/ahora" manual del producto (no se suman). El precio
+  // guardado en el producto (p.price) nunca se toca — esto es solo para
+  // pintar la vitrina y cobrar en el carrito.
+  function getPriceDisplay(p) {
+    var pct = resolveDiscountPct(p);
+    if (pct > 0) {
+      return { price: Math.round(p.price * (1 - pct / 100)), wasPrice: p.price, off: pct };
+    }
+    return { price: p.price, wasPrice: p.wasPrice || 0, off: p.off || 0 };
+  }
+  function getEffectivePrice(p) { return getPriceDisplay(p).price; }
 
   // ---------- usuarios / auth ----------
 
@@ -947,7 +1018,10 @@
     return getCart().map(function (line) {
       var p = getProduct(line.productId);
       if (!p) return null;
-      return Object.assign({}, p, { qty: line.qty, lineTotal: p.price * line.qty });
+      // Se cobra el precio efectivo (con descuento promocional si aplica),
+      // no el precio de lista guardado en el producto.
+      var price = getEffectivePrice(p);
+      return Object.assign({}, p, { price: price, qty: line.qty, lineTotal: price * line.qty });
     }).filter(Boolean);
   }
 
@@ -998,10 +1072,14 @@
     if (partial.auctionDefaults) next.auctionDefaults = Object.assign({}, cur.auctionDefaults || {}, partial.auctionDefaults);
     if (partial.hero) next.hero = Object.assign({}, cur.hero || {}, partial.hero);
     if (partial.payments) next.payments = Object.assign({}, cur.payments || {}, partial.payments);
-    if (!sb) { write(NS.config, next); return Promise.resolve(next); }
+    // Escritura optimista: la caché local queda al día de inmediato (y notifica
+    // a la UI vía scheduleEmit) para que descuentos/marcas se vean al instante,
+    // sin esperar el viaje de ida y vuelta a Supabase. Realtime reconcilia luego.
+    write(NS.config, next);
+    if (!sb) return Promise.resolve(next);
     return sb.from('config').update({ data: next }).eq('id', 1).then(function (res) {
       if (res.error) throw new Error(mapAuthError(res.error));
-      return hydrateConfig().then(function () { return next; });
+      return next;
     });
   }
 
@@ -1087,6 +1165,15 @@
     saveProduct: saveProduct,
     deleteProduct: deleteProduct,
     wholesalePriceFor: wholesalePriceFor,
+    // descuentos promocionales
+    getDiscounts: getDiscounts,
+    setGlobalDiscount: setGlobalDiscount,
+    setBrandDiscount: setBrandDiscount,
+    setAccessoryCategoryDiscount: setAccessoryCategoryDiscount,
+    getBrandDiscount: getBrandDiscount,
+    getAccessoryCategoryDiscount: getAccessoryCategoryDiscount,
+    getPriceDisplay: getPriceDisplay,
+    getEffectivePrice: getEffectivePrice,
     // accesorios (gorras, correas, billeteras)
     ACCESSORY_CATEGORIES: ACCESSORY_CATEGORIES,
     getAccessoryCategories: getAccessoryCategories,
