@@ -503,7 +503,8 @@
       var list = Store.getWatchProducts().filter(function (p) {
         return (p.model + ' ' + p.brand + ' ' + p.ref).toLowerCase().indexOf(filter) >= 0;
       }).sort(function (a, b) {
-        return (a.model || '').localeCompare(b.model || '', 'es');
+        return (a.brand || '').localeCompare(b.brand || '', 'es')
+            || (a.model || '').localeCompare(b.model || '', 'es');
       });
       if (list.length === 0) {
         body.innerHTML = '<div class="empty-state"><h3>Sin resultados</h3><p>No hay productos que coincidan con “' + escapeHtml(filter) + '”.</p></div>';
@@ -515,7 +516,8 @@
 
     function drawAll() {
       var list = Store.getWatchProducts().slice().sort(function (a, b) {
-        return (a.model || '').localeCompare(b.model || '', 'es');
+        return (a.brand || '').localeCompare(b.brand || '', 'es')
+            || (a.model || '').localeCompare(b.model || '', 'es');
       });
       body.innerHTML = ''
         + '<div class="folder-bar">'
@@ -899,6 +901,9 @@
 
     modal.querySelector('#accProductForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      var saveBtn = modal.querySelector('button[type="submit"]');
+      if (saveBtn && saveBtn.disabled) return;
+      if (saveBtn) saveBtn.disabled = true;
       var fd = new FormData(this);
       var accCat = Store.getAccessoryCategories().filter(function (c) { return c.slug === (p.accessoryType || categorySlug); })[0];
       var next = Object.assign({}, p, {
@@ -925,7 +930,7 @@
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
         close();
         if (typeof onDone === 'function') onDone();
-      }).catch(function (err) { toast(err.message, 'danger'); });
+      }).catch(function (err) { toast(err.message, 'danger'); if (saveBtn) saveBtn.disabled = false; });
     });
   }
 
@@ -975,6 +980,9 @@
       +     specSelect('crystal', 'Cristal', Store.SPECS.crystal, p.crystal)
       +     specSelect('strap', 'Pulso', Store.SPECS.strap, p.strap)
       +     specSelect('gender', 'Género', Store.SPECS.gender, p.gender)
+      +     '<label><span>Tamaño de la caja</span><input name="caseSize" value="' + escapeHtml(p.caseSize || '') + '" placeholder="ej. 42mm"></label>'
+      +     '<label><span>Material de la caja</span><input name="caseMaterial" value="' + escapeHtml(p.caseMaterial || '') + '" placeholder="ej. Acero"></label>'
+      +     '<label><span>Resistencia al agua</span><input name="waterResistance" value="' + escapeHtml(p.waterResistance || '') + '" placeholder="ej. 100m"></label>'
       +     '<label><span>Precio (COP)</span><input type="number" name="price" value="' + (p.price || 0) + '" required min="0" step="1000"></label>'
       +     '<label><span>Precio antes (0 = sin descuento)</span><input type="number" name="wasPrice" value="' + (p.wasPrice || 0) + '" min="0" step="1000"></label>'
       +     '<label><span>Precio mayorista (COP, vacío = usa el % general)</span><input type="number" name="wholesalePrice" value="' + (p.wholesalePrice || 0) + '" min="0" step="1000"></label>'
@@ -1022,6 +1030,11 @@
 
     modal.querySelector('#productForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      // Evita duplicados por doble clic: mientras se guarda, el botón queda
+      // deshabilitado, así un segundo clic no dispara una segunda inserción.
+      var saveBtn = modal.querySelector('button[type="submit"]');
+      if (saveBtn && saveBtn.disabled) return;
+      if (saveBtn) saveBtn.disabled = true;
       var fd = new FormData(this);
       var selectedBrand = Store.getBrand(fd.get('brandSlug'));
       var data = {
@@ -1036,6 +1049,9 @@
         crystal: fd.get('crystal'),
         strap: fd.get('strap'),
         gender: fd.get('gender'),
+        caseSize: (fd.get('caseSize') || '').trim(),
+        caseMaterial: (fd.get('caseMaterial') || '').trim(),
+        waterResistance: (fd.get('waterResistance') || '').trim(),
         price: Number(fd.get('price')),
         wasPrice: Number(fd.get('wasPrice')),
         wholesalePrice: Number(fd.get('wholesalePrice')) || 0,
@@ -1055,7 +1071,7 @@
         if (data.brand) catalogOpenBrand = data.brand;
         if (typeof onDone === 'function') onDone();
         else renderTab('catalogo', document.getElementById('tab-catalogo'));
-      }).catch(function (err) { toast(err.message, 'danger'); });
+      }).catch(function (err) { toast(err.message, 'danger'); if (saveBtn) saveBtn.disabled = false; });
     });
   }
 

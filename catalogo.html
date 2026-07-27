@@ -832,7 +832,7 @@
             <div class="sort">
               <label for="sort">Ordenar:</label>
               <select id="sort">
-                <option value="ref">Referencia (A–Z)</option>
+                <option value="nombre">Nombre (A–Z)</option>
                 <option value="price-asc">Precio: menor a mayor</option>
                 <option value="price-desc">Precio: mayor a menor</option>
                 <option value="discount">Mayor descuento</option>
@@ -1194,16 +1194,20 @@
           && priceMatches(p) && availabilityMatches(p) && promoMatches(p);
       }));
     }
-    // Orden por defecto: referencias alfabéticas (pedido del cliente).
+    // Orden por defecto: alfabético por marca y luego por modelo, para que
+    // los productos nuevos caigan en su lugar y no se vean "desordenados".
     function sortList(list) {
-      var mode = (document.getElementById('sort') || {}).value || 'ref';
+      var mode = (document.getElementById('sort') || {}).value || 'nombre';
       var sorted = list.slice();
-      var byRef = function(a, b) { return String(a.ref).localeCompare(String(b.ref), 'es'); };
-      if (mode === 'price-asc') sorted.sort(function(a, b) { return a.price - b.price || byRef(a, b); });
-      else if (mode === 'price-desc') sorted.sort(function(a, b) { return b.price - a.price || byRef(a, b); });
-      else if (mode === 'discount') sorted.sort(function(a, b) { return (b.off || 0) - (a.off || 0) || byRef(a, b); });
-      else if (mode === 'newest') sorted.sort(function(a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)) || byRef(a, b); });
-      else sorted.sort(byRef);
+      var byName = function(a, b) {
+        return String(a.brand || '').localeCompare(String(b.brand || ''), 'es')
+            || String(a.model || '').localeCompare(String(b.model || ''), 'es');
+      };
+      if (mode === 'price-asc') sorted.sort(function(a, b) { return a.price - b.price || byName(a, b); });
+      else if (mode === 'price-desc') sorted.sort(function(a, b) { return b.price - a.price || byName(a, b); });
+      else if (mode === 'discount') sorted.sort(function(a, b) { return (b.off || 0) - (a.off || 0) || byName(a, b); });
+      else if (mode === 'newest') sorted.sort(function(a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)) || byName(a, b); });
+      else sorted.sort(byName);
       return sorted;
     }
     function updateCatalogMeta(list) {

@@ -185,7 +185,10 @@
   // suscriptores (Store.subscribe) para que la UI se vuelva a pintar.
   function hydrateProducts() {
     if (!sb) return Promise.resolve();
-    return sb.from('products').select('*').then(function (res) {
+    // Orden base alfabético (marca y luego modelo): así los productos que
+    // Cristian agrega manualmente caen en su lugar, no al final. Las vistas
+    // que necesiten otro orden (precio, descuento) igual pueden re-ordenar.
+    return sb.from('products').select('*').order('brand').order('model').then(function (res) {
       if (res.error) { console.error('[Store] hidratando products', res.error); return; }
       write(NS.products, res.data.map(mapProductFromDb));
     });
