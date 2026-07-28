@@ -640,6 +640,16 @@
         else renderList();
       });
 
+      // Sondeo en vivo: cada 4s re-consulta subastas y pujas desde el servidor.
+      // syncAuctions solo re-renderiza si ALGO cambió (writeIfChanged), así que
+      // no interrumpe al usuario mientras escribe su puja si no hay novedades.
+      if (Store.syncAuctions) {
+        setInterval(function () {
+          if (document.hidden) return; // no gastar red con la pestaña en segundo plano
+          Store.syncAuctions();
+        }, 4000);
+      }
+
       window.addEventListener('popstate', function () {
         var p = new URLSearchParams(window.location.search);
         var newId = p.get('id');

@@ -223,8 +223,13 @@
   function startTicker() {
     if (tickerStarted) return;
     tickerStarted = true;
+    var tick = 0;
     setInterval(function () {
-      global.Store.autoCloseExpired();
+      // El cierre de subastas vencidas es una llamada al servidor: no hace
+      // falta cada segundo. Cada 20s basta (y la cuenta regresiva de abajo,
+      // que es puro cálculo local, sí se actualiza cada segundo).
+      tick++;
+      if (tick % 20 === 0) global.Store.autoCloseExpired();
       var nodes = document.querySelectorAll('.auc-countdown[data-ends]');
       Array.prototype.forEach.call(nodes, function (n) {
         var ends = n.getAttribute('data-ends');

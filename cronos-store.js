@@ -65,6 +65,20 @@
     scheduleEmit();
   }
 
+  // Igual que write() pero solo escribe/notifica si el dato realmente cambió.
+  // Clave para el sondeo de subastas: re-consultar cada pocos segundos NO debe
+  // provocar un re-render (que borraría, por ejemplo, la puja a medio escribir)
+  // cuando no hubo cambios; solo re-renderiza cuando llega una puja nueva.
+  function writeIfChanged(key, value) {
+    var next = JSON.stringify(value);
+    var cur;
+    try { cur = localStorage.getItem(key); } catch (e) { cur = null; }
+    if (cur === next) return false;
+    try { localStorage.setItem(key, next); } catch (e) { console.error('[Store] fallo escribiendo', key, e); }
+    scheduleEmit();
+    return true;
+  }
+
   function scheduleEmit() {
     if (emitScheduled) return;
     emitScheduled = true;
@@ -197,16 +211,19 @@
     if (!sb) return Promise.resolve();
     return sb.from('auctions').select('*').then(function (res) {
       if (res.error) { console.error('[Store] hidratando auctions', res.error); return; }
-      write(NS.auctions, res.data.map(mapAuctionFromDb));
+      writeIfChanged(NS.auctions, res.data.map(mapAuctionFromDb));
     });
   }
   function hydrateBids() {
     if (!sb) return Promise.resolve();
     return sb.from('bids').select('*').then(function (res) {
       if (res.error) { console.error('[Store] hidratando bids', res.error); return; }
-      write(NS.bids, res.data.map(mapBidFromDb));
+      writeIfChanged(NS.bids, res.data.map(mapBidFromDb));
     });
   }
+  // Re-consulta subastas + pujas (para el sondeo en vivo de la página de
+  // subastas). Solo dispara re-render si algo cambió (writeIfChanged).
+  function syncAuctions() { return Promise.all([hydrateAuctions(), hydrateBids()]); }
   function hydrateConfig() {
     if (!sb) return Promise.resolve();
     return sb.from('config').select('data').eq('id', 1).single().then(function (res) {
@@ -1217,6 +1234,7 @@
     placeBid: placeBid,
     closeAuction: closeAuction,
     autoCloseExpired: autoCloseExpired,
+    syncAuctions: syncAuctions,
     // bids
     getBids: getBids,
     getBidsForAuction: getBidsForAuction,
