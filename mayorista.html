@@ -1520,7 +1520,11 @@
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch (err) {
-      showInlineError(err.message || 'No pudimos procesar la solicitud.');
+      if (/confirma|confirmaci[óo]n/i.test(err.message || '')) {
+        showInlineError('Cuenta creada. Te enviamos un correo de confirmación: ábrelo, confírmala y tu solicitud mayorista quedará en revisión.');
+      } else {
+        showInlineError(err.message || 'No pudimos procesar la solicitud.');
+      }
     }
   });
 

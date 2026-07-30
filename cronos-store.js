@@ -794,6 +794,11 @@
   function register(data) {
     if (!sb) return Promise.reject(new Error('Backend no disponible'));
     if (!data.email || !data.password) return Promise.reject(new Error('Faltan email o contraseña'));
+    // Todos los datos del negocio viajan en la metadata del signUp: el trigger
+    // handle_new_user() crea el perfil y —si es mayorista— la solicitud, en el
+    // servidor. Así la solicitud existe aunque el correo aún no esté confirmado
+    // (antes se creaba desde el cliente tras iniciar sesión, y con "confirmar
+    // correo" activado esa sesión no llegaba, así que la solicitud se perdía).
     return sb.auth.signUp({
       email: String(data.email).trim().toLowerCase(),
       password: data.password,
@@ -803,7 +808,9 @@
         company: data.company || null,
         tax_id: data.taxId || null,
         phone: data.phone || null,
-        city: data.city || null
+        city: data.city || null,
+        channel: data.channel || null,
+        message: data.message || null
       } }
     }).then(function (res) {
       if (res.error) throw new Error(mapAuthError(res.error));
@@ -815,19 +822,7 @@
       return refreshProfile();
     }).then(function (profile) {
       if (!profile) throw new Error('No se pudo cargar tu perfil');
-      if (data.role === 'wholesale') {
-        return sb.from('wholesale_requests').insert({
-          user_id: profile.id,
-          reference: 'CR-MA-' + new Date().getFullYear() + '-' + Date.now().toString(36).toUpperCase(),
-          business_data: {
-            company: data.company, taxId: data.taxId, phone: data.phone,
-            city: data.city, channel: data.channel, message: data.message
-          }
-        }).then(function (r) {
-          if (r.error) console.error('[Store] wholesale_requests insert', r.error);
-          return profile;
-        });
-      }
+      if (data.role === 'wholesale') return hydrateWholesale().then(function () { return profile; });
       return profile;
     });
   }

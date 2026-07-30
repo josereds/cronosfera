@@ -476,7 +476,15 @@
             }, 1200);
           }
         }).catch(function (ex) {
-          showErr(ex.message);
+          // "Te enviamos un correo de confirmación" no es un error: es el flujo
+          // normal cuando la cuenta se creó y solo falta confirmar el correo.
+          if (/confirma|confirmaci[óo]n/i.test(ex.message)) {
+            showOk('¡Cuenta creada! Te enviamos un correo de confirmación. Ábrelo, confirma tu cuenta y vuelve a iniciar sesión.');
+            registerForm.reset();
+            wholesaleFields.style.display = 'none';
+          } else {
+            showErr(ex.message);
+          }
         }).then(function () {
           if (submitBtn) submitBtn.disabled = false;
         });
