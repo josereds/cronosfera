@@ -963,6 +963,18 @@
       margin-top: 6px;
     }
 
+    /* ---------- RESEÑAS DE GOOGLE ---------- */
+    .reviews-head { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .reviews-badge { display: inline-flex; align-items: center; gap: 12px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; box-shadow: var(--shadow-sm); }
+    .reviews-badge .g-logo { width: 26px; height: 26px; flex-shrink: 0; }
+    .reviews-badge .reviews-stars { color: #fbbc05; font-size: 17px; letter-spacing: 2px; line-height: 1; }
+    .reviews-badge .reviews-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .reviews-head h2 { font-family: var(--font-display); font-size: clamp(30px, 3.4vw, 44px); font-weight: 500; line-height: 1.05; }
+    .reviews-grid { margin-bottom: 40px; }
+    .testimonial .g-mark { width: 20px; height: 20px; margin-left: auto; opacity: .9; }
+    .reviews-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    @media (max-width: 640px) { .reviews-cta .btn { width: 100%; justify-content: center; } }
+
     /* ---------- NEWSLETTER ---------- */
     .newsletter {
       background: var(--bg-warm);
@@ -1421,6 +1433,27 @@
       </div>
     </section>
 
+    <!-- ============================== RESEÑAS DE GOOGLE ============================== -->
+    <section class="bay" id="resenas" style="padding-top:0">
+      <div class="container-wide">
+        <div class="reviews-head reveal">
+          <div class="reviews-badge">
+            <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            <div>
+              <div class="reviews-stars" aria-label="5 estrellas">★★★★★</div>
+              <div class="reviews-sub">Reseñas verificadas en Google</div>
+            </div>
+          </div>
+          <h2>Lo que dicen nuestros clientes.</h2>
+        </div>
+        <div class="testimonials-grid reviews-grid reveal" id="reviewsGrid"></div>
+        <div class="reviews-cta reveal">
+          <a href="https://share.google/gsvgpZTWwueWTcFep" target="_blank" rel="noopener" class="btn btn-primary">Ver reseñas en Google</a>
+          <a href="https://share.google/gsvgpZTWwueWTcFep" target="_blank" rel="noopener" class="btn btn-outline">Escribir una reseña</a>
+        </div>
+      </div>
+    </section>
+
     <!-- ============================== TRUST ============================== -->
     <section class="bay" id="trust" style="padding-top:0">
       <div class="container-wide">
@@ -1810,6 +1843,32 @@
       renderFeatured();
       renderSubcats();
     });
+
+    // ============== Reseñas de Google ==============
+    // Reseñas reales de clientes (copiadas del perfil de Google del negocio).
+    // Mientras esté vacío, la sección solo muestra el botón hacia Google.
+    var GOOGLE_REVIEWS = [
+      // { name: 'Nombre Apellido', stars: 5, text: 'Texto de la reseña…', date: 'hace 2 meses' }
+    ];
+    (function () {
+      var grid = document.getElementById('reviewsGrid');
+      if (!grid) return;
+      if (!GOOGLE_REVIEWS.length) { grid.style.display = 'none'; return; }
+      function initials(n) { var p = String(n).trim().split(/\s+/); return ((p[0] || '')[0] || '') + ((p[1] || '')[0] || ''); }
+      function stars(k) { var s = ''; for (var i = 0; i < 5; i++) s += i < k ? '★' : '☆'; return s; }
+      var gMark = '<svg class="g-mark" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+      grid.innerHTML = GOOGLE_REVIEWS.slice(0, 6).map(function (r) {
+        return '<div class="testimonial">'
+          + '<div class="stars" style="color:#fbbc05;font-size:15px;letter-spacing:2px">' + stars(r.stars || 5) + '</div>'
+          + '<blockquote>' + (r.text || '') + '</blockquote>'
+          + '<div class="meta">'
+          +   '<div class="avatar">' + initials(r.name) + '</div>'
+          +   '<div class="who"><div class="name">' + (r.name || '') + '</div><div class="city">' + (r.date || 'Cliente en Google') + '</div></div>'
+          +   gMark
+          + '</div>'
+          + '</div>';
+      }).join('');
+    })();
 
     // ============== Catálogo de marcas ==============
     // Algunos logos blancos traen mucho margen dentro de su propio PNG y se

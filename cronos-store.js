@@ -890,6 +890,41 @@
       });
   }
 
+  // El admin crea una cuenta mayorista directamente (ya activa y aprobada),
+  // para clientes que él mismo da de alta sin que llenen el formulario ni
+  // esperen aprobación. Usa un cliente Supabase temporal para el signUp, así
+  // no reemplaza la sesión del admin.
+  function createWholesaleUser(data) {
+    if (!sb || !global.supabase || !global.supabase.createClient) return Promise.reject(new Error('Backend no disponible'));
+    if (!data.email || !data.password) return Promise.reject(new Error('Faltan correo o contraseña'));
+    if (String(data.password).length < 6) return Promise.reject(new Error('La contraseña debe tener al menos 6 caracteres'));
+    var tmp = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return tmp.auth.signUp({
+      email: String(data.email).trim().toLowerCase(),
+      password: data.password,
+      options: { data: {
+        name: data.name || data.email.split('@')[0],
+        role: 'wholesale',
+        company: data.company || null, tax_id: data.taxId || null,
+        phone: data.phone || null, city: data.city || null,
+        channel: 'Alta directa por el administrador', message: data.message || null
+      } }
+    }).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      var uid = res.data.user && res.data.user.id;
+      if (!uid) throw new Error('No se pudo crear la cuenta');
+      // El trigger handle_new_user ya creó el perfil (wholesale/pending) y la
+      // solicitud; el admin la deja activa y aprobada de una vez.
+      return sb.from('profiles').update({ status: 'active', role: 'wholesale' }).eq('id', uid).then(function (r2) {
+        if (r2.error) throw new Error(mapAuthError(r2.error));
+        return sb.from('wholesale_requests').update({ status: 'approved', reviewed_at: nowIso() }).eq('user_id', uid);
+      }).then(function () {
+        try { tmp.auth.signOut(); } catch (e) {}
+        return Promise.all([hydrateUsers(), hydrateWholesale()]);
+      });
+    });
+  }
+
   function rejectWholesale(id, reason) {
     if (!sb) return Promise.reject(new Error('Backend no disponible'));
     var r = find(getWholesaleRequests(), function (x) { return x.id === id; });
@@ -1213,6 +1248,7 @@
     // solicitudes mayoristas
     getWholesaleRequests: getWholesaleRequests,
     approveWholesale: approveWholesale,
+    createWholesaleUser: createWholesaleUser,
     rejectWholesale: rejectWholesale,
     // subastas
     getAuctions: getAuctions,

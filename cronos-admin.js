@@ -1351,7 +1351,10 @@
     });
 
     pane.innerHTML = ''
-      + '<div class="catalogo-head"><p class="page-desc">Revisa y aprueba las solicitudes de cuenta mayorista. Al aprobar, el usuario pasa a ver precios especiales en el catálogo.</p></div>'
+      + '<div class="catalogo-head">'
+      +   '<p class="page-desc" style="margin:0">Revisa y aprueba las solicitudes de cuenta mayorista. Al aprobar, el usuario pasa a ver precios especiales en el catálogo.</p>'
+      +   '<div class="catalogo-head-actions"><button class="btn-primary" id="newWholesale">+ Crear cuenta mayorista</button></div>'
+      + '</div>'
       + (reqs.length === 0
         ? '<div class="empty-state"><h3>Sin solicitudes aún</h3><p>Cuando alguien llene el formulario en <a href="mayorista.html">mayorista.html</a>, aparecerá acá.</p></div>'
         : '<div class="req-grid">' + reqs.map(function (r) {
@@ -1398,6 +1401,58 @@
           toast('Solicitud rechazada', 'info');
           renderTab('mayoristas', pane);
         }).catch(function (err) { toast(err.message, 'danger'); });
+      });
+    });
+    var newBtn = pane.querySelector('#newWholesale');
+    if (newBtn) newBtn.addEventListener('click', function () { openCreateWholesaleModal(pane); });
+  }
+
+  // Modal para que el admin cree una cuenta mayorista ya activa y aprobada.
+  function openCreateWholesaleModal(pane) {
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal product-modal' });
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>Crear cuenta mayorista</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<form id="wsCreateForm">'
+      +   '<p class="form-hint">La cuenta queda <strong>activa y aprobada de inmediato</strong>. Comparte el correo y la contraseña con el cliente para que inicie sesión y vea los precios mayoristas.</p>'
+      +   '<div class="form-grid">'
+      +     '<label><span>Nombre del contacto</span><input name="name" required placeholder="Ej. Juan Pérez"></label>'
+      +     '<label><span>Correo</span><input name="email" type="email" required placeholder="cliente@correo.com"></label>'
+      +     '<label><span>Contraseña (mín. 6)</span><input name="password" required minlength="6" placeholder="La que el cliente usará"></label>'
+      +     '<label><span>Empresa</span><input name="company" placeholder="Nombre del negocio"></label>'
+      +     '<label><span>NIT / Cédula</span><input name="taxId" placeholder="Opcional"></label>'
+      +     '<label><span>Ciudad</span><input name="city" placeholder="Opcional"></label>'
+      +     '<label><span>Teléfono</span><input name="phone" placeholder="Opcional"></label>'
+      +   '</div>'
+      +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Crear cuenta mayorista</button></div>'
+      + '</form>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    modal.querySelector('#wsCreateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var saveBtn = modal.querySelector('button[type="submit"]');
+      if (saveBtn && saveBtn.disabled) return;
+      if (saveBtn) saveBtn.disabled = true;
+      var fd = new FormData(this);
+      var email = (fd.get('email') || '').trim();
+      var password = fd.get('password') || '';
+      Store.createWholesaleUser({
+        name: fd.get('name'), email: email, password: password,
+        company: fd.get('company'), taxId: fd.get('taxId'), city: fd.get('city'), phone: fd.get('phone')
+      }).then(function () {
+        toast('Cuenta mayorista creada y activada', 'success');
+        close();
+        alert('Cuenta mayorista creada.\n\nEntrégale al cliente estos datos para iniciar sesión:\n\nCorreo: ' + email + '\nContraseña: ' + password + '\n\nYa puede entrar y verá los precios mayoristas.');
+        renderTab('mayoristas', pane);
+      }).catch(function (err) {
+        toast(err.message, 'danger');
+        if (saveBtn) saveBtn.disabled = false;
       });
     });
   }
