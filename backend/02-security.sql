@@ -68,6 +68,10 @@ create policy wr_owner_insert on public.wholesale_requests
 -- Solo el admin aprueba o rechaza.
 create policy wr_admin_all on public.wholesale_requests
   for update using (public.is_admin()) with check (public.is_admin());
+-- Solo el admin puede borrar solicitudes (quitar spam o pruebas de la lista).
+drop policy if exists wr_admin_delete on public.wholesale_requests;
+create policy wr_admin_delete on public.wholesale_requests
+  for delete using (public.is_admin());
 
 -- ---------- SUBASTAS: visibles para todos, las crea el admin ----------
 drop policy if exists auctions_public_read on public.auctions;

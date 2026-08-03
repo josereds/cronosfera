@@ -1363,7 +1363,10 @@
             return '<div class="req-card ' + r.status + '">'
               + '<div class="req-card-head">'
               +   '<div><strong>' + escapeHtml(u ? u.name : '—') + '</strong><span class="row-meta">' + escapeHtml(u ? u.email : '') + '</span></div>'
-              +   '<span class="status-pill ' + r.status + '">' + r.status + '</span>'
+              +   '<div style="display:flex;align-items:center;gap:8px">'
+              +     '<span class="status-pill ' + r.status + '">' + r.status + '</span>'
+              +     '<button class="icon-action delete-req" data-id="' + r.id + '" title="Quitar solicitud de la lista">×</button>'
+              +   '</div>'
               + '</div>'
               + '<div class="req-card-meta">'
               +   '<div><span>Empresa</span><strong>' + escapeHtml(bd.company || '—') + '</strong></div>'
@@ -1399,6 +1402,15 @@
         var reason = prompt('Motivo del rechazo (opcional):') || '';
         Store.rejectWholesale(id, reason).then(function () {
           toast('Solicitud rechazada', 'info');
+          renderTab('mayoristas', pane);
+        }).catch(function (err) { toast(err.message, 'danger'); });
+      });
+    });
+    pane.querySelectorAll('.delete-req').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirmDialog('¿Quitar esta solicitud de la lista? (no borra la cuenta de acceso, solo la solicitud del panel)')) return;
+        Store.deleteWholesaleRequest(b.getAttribute('data-id')).then(function () {
+          toast('Solicitud eliminada', 'success');
           renderTab('mayoristas', pane);
         }).catch(function (err) { toast(err.message, 'danger'); });
       });

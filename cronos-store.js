@@ -898,7 +898,14 @@
     if (!sb || !global.supabase || !global.supabase.createClient) return Promise.reject(new Error('Backend no disponible'));
     if (!data.email || !data.password) return Promise.reject(new Error('Faltan correo o contraseña'));
     if (String(data.password).length < 6) return Promise.reject(new Error('La contraseña debe tener al menos 6 caracteres'));
-    var tmp = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Cliente temporal SIN persistir sesión: si compartiera el almacenamiento
+    // con el cliente del admin, el signUp del nuevo usuario le robaría la sesión
+    // al admin y el UPDATE correría como el mayorista (sin permiso), dejando la
+    // cuenta en "pendiente". Con persistSession:false su sesión queda solo en
+    // memoria y no toca la del admin.
+    var tmp = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, storageKey: 'cronos-admincreate-tmp' }
+    });
     return tmp.auth.signUp({
       email: String(data.email).trim().toLowerCase(),
       password: data.password,
@@ -913,12 +920,21 @@
       if (res.error) throw new Error(mapAuthError(res.error));
       var uid = res.data.user && res.data.user.id;
       if (!uid) throw new Error('No se pudo crear la cuenta');
-      // El trigger handle_new_user ya creó el perfil (wholesale/pending) y la
-      // solicitud; el admin la deja activa y aprobada de una vez.
-      return sb.from('profiles').update({ status: 'active', role: 'wholesale' }).eq('id', uid).then(function (r2) {
-        if (r2.error) throw new Error(mapAuthError(r2.error));
-        return sb.from('wholesale_requests').update({ status: 'approved', reviewed_at: nowIso() }).eq('user_id', uid);
-      }).then(function () {
+      // El trigger handle_new_user crea el perfil (wholesale/pending) y la
+      // solicitud, pero puede tardar un instante en verse desde aquí. Se
+      // reintenta el UPDATE hasta que el perfil exista, para que no quede en
+      // "pendiente" por una condición de carrera con el trigger.
+      function activate(attempt) {
+        return sb.from('profiles').update({ status: 'active', role: 'wholesale' }).eq('id', uid).select().then(function (r2) {
+          if (r2.error) throw new Error(mapAuthError(r2.error));
+          if ((!r2.data || !r2.data.length) && (attempt || 0) < 6) {
+            return new Promise(function (r) { setTimeout(r, 500); }).then(function () { return activate((attempt || 0) + 1); });
+          }
+          if (!r2.data || !r2.data.length) throw new Error('La cuenta se creó pero no se pudo activar; apruébala manualmente en la lista.');
+          return sb.from('wholesale_requests').update({ status: 'approved', reviewed_at: nowIso() }).eq('user_id', uid);
+        });
+      }
+      return activate(0).then(function () {
         try { tmp.auth.signOut(); } catch (e) {}
         return Promise.all([hydrateUsers(), hydrateWholesale()]);
       });
@@ -940,6 +956,16 @@
         if (res.error) throw new Error(mapAuthError(res.error));
         return hydrateWholesale();
       });
+  }
+
+  // Borra una solicitud mayorista de la lista (para quitar spam o pruebas).
+  // No elimina la cuenta de acceso; solo saca la solicitud del panel.
+  function deleteWholesaleRequest(id) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.from('wholesale_requests').delete().eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateWholesale();
+    });
   }
 
   // ---------- subastas ----------
