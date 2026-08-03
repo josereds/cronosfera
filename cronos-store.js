@@ -448,15 +448,11 @@
     // funcionan. Se completan desde Admin → Configuración → Pagos.
     payments: {
       whatsappNumber: '573107764080',
-      // Llave de PRUEBAS de Wompi activa mientras se verifica el flujo de pago
-      // end-to-end. Cristian ya envió la de producción (pub_prod_...); se
-      // cambia a esa solo cuando confirme que quiere empezar a cobrar de verdad.
-      wompiPublicKey: 'pub_test_4vSzA3WLfIFWpXhyt0dxJXNVAhNue4F1',
-      // "Secreto de integridad" del dashboard de Wompi (Desarrolladores → Llaves
-      // API), distinto de la llave pública/privada. Sin esto, Wompi rechaza el
-      // pago con "Firma de integridad requerida no enviada" si la cuenta lo exige.
-      // Este es el de PRUEBAS (test_integrity_...), pareja de la llave pub_test_ de arriba.
-      wompiIntegritySecret: 'test_integrity_VaVN7f1KujfqHp7u6Blp7Q0mVYNr2Z1N'
+      // Llaves de PRODUCCIÓN de Wompi: cobra dinero real con tarjeta.
+      wompiPublicKey: 'pub_prod_MUUaswCAx10ZE1JgOsnOiZsbWGFrZqdj',
+      // "Secreto de integridad" de PRODUCCIÓN (Wompi → Desarrolladores → Llaves API),
+      // pareja de la llave pub_prod_ de arriba. Sin esto Wompi rechaza el pago.
+      wompiIntegritySecret: 'prod_integrity_8zQE7uNPqLNmjmHZ2U5abzfvTEVTiwu9'
     }
   };
 

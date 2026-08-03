@@ -861,6 +861,17 @@
       display: grid; place-items: center;
     }
     .story-visual .ph-macro svg { width: 78%; opacity: 0.9; }
+    /* Logo de Cronosfera cubriendo la imagen de la sección "Nuestra historia" */
+    .story-visual-logo {
+      background: radial-gradient(ellipse at 50% 45%, oklch(24% 0.008 250), oklch(12% 0.005 250));
+      display: grid; place-items: center;
+    }
+    .story-visual-logo .story-logo {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      object-position: center;
+      padding: 6%;
+    }
     .story-visual .caption {
       position: absolute; bottom: 24px; left: 24px; right: 24px;
       color: rgba(255,255,255,0.7);
@@ -1368,7 +1379,7 @@
             <span class="eyebrow">Selección de la semana</span>
             <h2 class="display title">Productos destacados.</h2>
           </div>
-          <p class="meta">Precios de demostración en pesos colombianos. Con sesión mayorista activa, verás tarifas especiales. <a href="catalogo.html">Ver todo →</a></p>
+          <p class="meta">Precios en pesos colombianos. Con sesión mayorista activa, verás tarifas especiales. <a href="catalogo.html">Ver todo →</a></p>
         </div>
 
         <div class="rail-wrap reveal">
@@ -1453,32 +1464,8 @@
     <section class="bay" id="story" style="padding-top:0">
       <div class="container-wide">
         <div class="story reveal">
-          <div class="story-visual">
-            <div class="ph-macro">
-              <svg viewBox="-160 -160 320 320">
-                <defs>
-                  <radialGradient id="macroDial" cx="50%" cy="42%" r="65%">
-                    <stop offset="0%" stop-color="#3a3d44"></stop>
-                    <stop offset="55%" stop-color="#1d2026"></stop>
-                    <stop offset="100%" stop-color="#0c0e12"></stop>
-                  </radialGradient>
-                </defs>
-                <circle r="150" fill="#5a5853"></circle>
-                <circle r="138" fill="#3d3b37"></circle>
-                <circle r="126" fill="url(#macroDial)"></circle>
-                <g stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round">
-                  <line x1="0" y1="-118" x2="0" y2="-108"></line><line x1="118" y1="0" x2="108" y2="0"></line><line x1="0" y1="118" x2="0" y2="108"></line><line x1="-118" y1="0" x2="-108" y2="0"></line>
-                  <line x1="84" y1="-84" x2="78" y2="-78"></line><line x1="84" y1="84" x2="78" y2="78"></line><line x1="-84" y1="84" x2="-78" y2="78"></line><line x1="-84" y1="-84" x2="-78" y2="-78"></line>
-                </g>
-                <text y="-80" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-size="14" letter-spacing="5" fill="#c9a86a">CRONOSFERA</text>
-                <line x1="0" y1="0" x2="0" y2="-78" stroke="#e9e6df" stroke-width="3.4" stroke-linecap="round"></line>
-                <line x1="0" y1="0" x2="60" y2="14" stroke="#e9e6df" stroke-width="3.4" stroke-linecap="round"></line>
-                <line x1="0" y1="0" x2="0" y2="100" stroke="#c9a86a" stroke-width="1.4" stroke-linecap="round"></line>
-                <circle r="6" fill="#1d2026" stroke="#c9a86a" stroke-width="0.6"></circle>
-                <ellipse cx="-40" cy="-70" rx="80" ry="40" fill="#ffffff" opacity="0.05" transform="rotate(-25)"></ellipse>
-              </svg>
-            </div>
-            <div class="caption">Detalle · construcción interna</div>
+          <div class="story-visual story-visual-logo">
+            <img src="logo-cronosfera.svg" alt="Cronosfera" class="story-logo">
           </div>
           <div class="story-text">
             <span class="eyebrow">Nuestra historia</span>
@@ -1573,7 +1560,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <div>© 2026 Cronosfera · Marketplace colombiano de relojería. Precios y referencias en este demo son ilustrativos.</div>
+        <div>© 2026 Cronosfera · Marketplace colombiano de relojería.</div>
         <div class="payments">
           <span class="pay-pill">VISA</span>
           <span class="pay-pill">MASTERCARD</span>

@@ -565,7 +565,9 @@
     .pagination .current {
       background: var(--fg); color: var(--surface); border-color: var(--fg);
     }
-    .pagination .gap { color: var(--muted-2); border: 0; background: none; }
+    .pagination .current:hover { color: var(--surface); }
+    .pagination button[disabled] { opacity: .4; pointer-events: none; }
+    .pagination .gap { color: var(--muted-2); border: 0; background: none; min-width: 20px; }
 
     /* ---------- EMPTY ---------- */
     .empty {
@@ -848,6 +850,7 @@
 
         <div class="products" id="products"></div>
 
+        <nav class="pagination" id="pagination" aria-label="Paginación"></nav>
 
       </div>
     </div>
@@ -881,7 +884,7 @@
         </ul></div>
       </div>
       <div class="footer-bottom">
-        <div>© 2026 Cronosfera · Demostración</div>
+        <div>© 2026 Cronosfera</div>
         <div>Colombia · COP</div>
       </div>
     </div>
@@ -991,9 +994,18 @@
     }
     var isWholesale = !!(window.Auth && Auth.isWholesale());
     var grid = document.getElementById('products');
-    function renderProductList(list){
+    // ---- Paginación: máximo 80 productos por página ----
+    var PER_PAGE = 80;
+    var _page = 1;
+    var _fullList = [];
+    function renderProductList(list, keepPage){
+      _fullList = list;
+      if (!keepPage) _page = 1;
+      var totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+      if (_page > totalPages) _page = totalPages;
+      var pageItems = list.slice((_page - 1) * PER_PAGE, (_page - 1) * PER_PAGE + PER_PAGE);
       grid.innerHTML = '';
-      list.forEach(function(p){
+      pageItems.forEach(function(p){
       var off = p.off ? '<span class="off">-' + p.off + '%</span>' : '';
       var was = p.was ? '<span class="was">' + cop(p.was) + '</span>' : '';
       var tag = p.tag ? '<span class="' + p.tag.kind + '">' + p.tag.label + '</span>' : '';
@@ -1055,7 +1067,41 @@
       if (!list.length) {
         grid.innerHTML = '<div class="catalog-empty"><h3>No hay relojes con esos filtros</h3><p>Ajusta los filtros activos o limpia la busqueda para volver a ver el catalogo.</p><button class="btn" type="button" onclick="clearAll()">Limpiar filtros</button></div>';
       }
+      renderPagination(list.length, totalPages);
       updateCatalogMeta(list);
+    }
+
+    function goToPage(n) {
+      _page = n;
+      renderProductList(_fullList, true);
+      // subir al inicio de la grilla para que la nueva página se vea desde arriba
+      var top = document.getElementById('products');
+      if (top) window.scrollTo({ top: top.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
+    }
+
+    function renderPagination(total, totalPages) {
+      var nav = document.getElementById('pagination');
+      if (!nav) return;
+      if (totalPages <= 1) { nav.innerHTML = ''; return; }
+      // Ventana de páginas alrededor de la actual, con "…" en los saltos.
+      var pages = [];
+      for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= _page - 1 && i <= _page + 1)) pages.push(i);
+        else if (pages[pages.length - 1] !== '…') pages.push('…');
+      }
+      var html = '<button type="button" class="pg-prev"' + (_page === 1 ? ' disabled' : '') + ' aria-label="Anterior">←</button>';
+      html += pages.map(function (p) {
+        if (p === '…') return '<span class="gap">…</span>';
+        return '<button type="button" class="pg-num' + (p === _page ? ' current' : '') + '" data-page="' + p + '">' + p + '</button>';
+      }).join('');
+      html += '<button type="button" class="pg-next"' + (_page === totalPages ? ' disabled' : '') + ' aria-label="Siguiente">→</button>';
+      nav.innerHTML = html;
+      nav.querySelectorAll('.pg-num').forEach(function (b) {
+        b.addEventListener('click', function () { goToPage(Number(b.getAttribute('data-page'))); });
+      });
+      var prev = nav.querySelector('.pg-prev'), next = nav.querySelector('.pg-next');
+      if (prev) prev.addEventListener('click', function () { if (_page > 1) goToPage(_page - 1); });
+      if (next) next.addEventListener('click', function () { if (_page < totalPages) goToPage(_page + 1); });
     }
 
     function normalizeText(value) {
@@ -1212,7 +1258,11 @@
     }
     function updateCatalogMeta(list) {
       var info = document.querySelector('.result-info');
-      if (info) info.innerHTML = '<b>' + list.length + '</b> resultado' + (list.length === 1 ? '' : 's') + ' · filtros activos';
+      if (info) {
+        var totalP = Math.max(1, Math.ceil(list.length / PER_PAGE));
+        var pageTxt = totalP > 1 ? ' · página ' + _page + ' de ' + totalP : '';
+        info.innerHTML = '<b>' + list.length + '</b> reloj' + (list.length === 1 ? '' : 'es') + pageTxt;
+      }
       var chips = document.querySelector('.chips');
       if (!chips) return;
       chips.innerHTML = '';
