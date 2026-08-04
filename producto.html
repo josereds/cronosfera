@@ -1403,7 +1403,7 @@
         + '<div class="info-m">'
         +   '<div class="br">' + p.brand + '</div>'
         +   '<div class="md">' + p.model + '</div>'
-        +   '<div class="pr">' + cop(Store.getPriceDisplay(p).price) + '</div>'
+        +   '<div class="pr">' + cop((window.Auth && Auth.isWholesale()) ? Store.wholesalePriceFor(p) : Store.getPriceDisplay(p).price) + '</div>'
         + '</div>';
       rg.appendChild(a);
     });
@@ -1583,18 +1583,22 @@
         }).join('');
       }
 
-      // Precio principal (ya resuelto con cualquier descuento promocional vigente)
+      // Precio principal (ya resuelto con cualquier descuento promocional vigente).
+      // Para un mayorista se reemplaza por el precio mayorista y se ocultan el
+      // precio de tienda tachado y el porcentaje de descuento.
       var pd = Store.getPriceDisplay(p);
+      var isWholesaleView = !!(window.Auth && Auth.isWholesale());
+      var shownPrice = isWholesaleView ? Store.wholesalePriceFor(p) : pd.price;
 
       var priceNow = document.querySelector('.title-price-row .now, .product-price .now');
-      if (priceNow) priceNow.textContent = '$ ' + pd.price.toLocaleString('es-CO');
+      if (priceNow) priceNow.textContent = '$ ' + shownPrice.toLocaleString('es-CO');
 
       var priceWas = document.querySelector('.title-price-row .was, .product-price .was');
-      if (priceWas && pd.wasPrice) priceWas.textContent = '$ ' + pd.wasPrice.toLocaleString('es-CO');
+      if (priceWas && !isWholesaleView && pd.wasPrice) priceWas.textContent = '$ ' + pd.wasPrice.toLocaleString('es-CO');
       else if (priceWas) priceWas.style.display = 'none';
 
       var priceOff = document.querySelector('.title-price-row .off, .product-price .off');
-      if (priceOff && pd.off) priceOff.textContent = '-' + pd.off + '%';
+      if (priceOff && !isWholesaleView && pd.off) priceOff.textContent = '-' + pd.off + '%';
       else if (priceOff) priceOff.style.display = 'none';
 
       // Enlace "Preguntar por WhatsApp" con los datos reales del producto.
@@ -1625,12 +1629,12 @@
         var isW = window.Auth && Auth.isWholesale();
         var wp = Store.wholesalePriceFor(p);
         var cfg = Store.getConfig();
-        var save = p.price - wp;
         if (isW) {
+          // Solo el precio mayorista: no se muestra el ahorro porque revelaría
+          // el precio de tienda por resta.
           wsBody.innerHTML = ''
             + '<div class="ws-label">Precio mayorista · mín. ' + cfg.wholesaleMinQty + ' un.</div>'
-            + '<div class="ws-price">$ ' + wp.toLocaleString('es-CO') + '</div>'
-            + '<div class="ws-save">Ahorro: <span class="v">$ ' + save.toLocaleString('es-CO') + ' (' + cfg.wholesaleDiscountPct + '%)</span></div>';
+            + '<div class="ws-price">$ ' + wp.toLocaleString('es-CO') + '</div>';
         }
       }
 

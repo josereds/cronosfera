@@ -410,9 +410,12 @@
         var stockOut = p.stockStatus === 'out';
         var stockLow = p.stockStatus === 'low';
         var media = p.image ? '<img src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(p.model) + '" loading="lazy">' : '<div class="ph-img">' + phIcon() + '</div>';
-        var was = pd.wasPrice ? '<span class="was">' + cop(pd.wasPrice) + '</span>' : '';
-        var wholesale = (isWholesale && !stockOut)
-          ? '<div class="product-wholesale"><span>Mayorista</span><span class="price">' + cop(w) + '</span></div>'
+        // Un mayorista solo ve el precio mayorista: ni precio de tienda ni tachado.
+        var isW = isWholesale && !stockOut;
+        var mainPrice = isW ? w : pd.price;
+        var was = (!isW && pd.wasPrice) ? '<span class="was">' + cop(pd.wasPrice) + '</span>' : '';
+        var wholesale = isW
+          ? '<div class="product-wholesale"><span>Precio mayorista</span></div>'
           : '';
         var card = document.createElement('div');
         card.className = 'product-card';
@@ -423,7 +426,7 @@
           + '<div class="product-info">'
           +   '<div class="product-brand">' + escapeHtml(cat.name) + '</div>'
           +   '<div class="product-model">' + escapeHtml(p.model) + '</div>'
-          +   '<div class="product-price"><span class="now">' + cop(pd.price) + '</span>' + was + '</div>'
+          +   '<div class="product-price"><span class="now">' + cop(mainPrice) + '</span>' + was + '</div>'
           +   '<div class="product-stock' + (stockOut ? ' out' : stockLow ? ' low' : '') + '">' + escapeHtml(p.stock || '') + '</div>'
           +   wholesale
           +   '<div class="product-cta"><button class="btn">' + (stockOut ? 'Agotado' : 'Agregar al carrito') + '</button></div>'

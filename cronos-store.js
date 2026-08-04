@@ -1086,13 +1086,19 @@
 
   function getCart() { return read(NS.cart, []); }
 
+  function isWholesaleUser() {
+    var u = currentUser();
+    return !!(u && u.role === 'wholesale' && u.status === 'active');
+  }
+
   function getCartItems() {
+    var wholesale = isWholesaleUser();
     return getCart().map(function (line) {
       var p = getProduct(line.productId);
       if (!p) return null;
-      // Se cobra el precio efectivo (con descuento promocional si aplica),
-      // no el precio de lista guardado en el producto.
-      var price = getEffectivePrice(p);
+      // A un mayorista se le cobra el precio mayorista; a los demás, el precio
+      // efectivo (con descuento promocional si aplica), nunca el de lista crudo.
+      var price = wholesale ? wholesalePriceFor(p) : getEffectivePrice(p);
       return Object.assign({}, p, { price: price, qty: line.qty, lineTotal: price * line.qty });
     }).filter(Boolean);
   }

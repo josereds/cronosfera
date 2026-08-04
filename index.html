@@ -1729,6 +1729,9 @@
         return {
           id: p.id, brand: p.brand, model: p.model, ref: p.ref,
           price: pd.price, was: pd.wasPrice || 0, off: pd.off || 0,
+          // Precio mayorista real (respeta el por-producto), calculado con el
+          // producto completo antes de mapear.
+          wholesale: window.Store ? Store.wholesalePriceFor(p) : Math.round(p.price * 0.78),
           tone: p.tone, tag: p.tag, stock: p.stock,
           stockLow: p.stockStatus === 'low' || p.stockLow,
           stockOut: p.stockStatus === 'out' || p.stockOut,
@@ -1737,19 +1740,19 @@
       });
       grid.innerHTML = '';
       products.forEach(function(p){
-      var off = p.off ? '<span class="off">-' + p.off + '%</span>' : '';
-      var was = p.was ? '<span class="was">' + cop(p.was) + '</span>' : '';
+      // Un mayorista solo ve el precio mayorista: ni precio de tienda ni descuento.
+      var isW = isWholesale;
+      var mainPrice = isW ? p.wholesale : p.price;
+      var off = (!isW && p.off) ? '<span class="off">-' + p.off + '%</span>' : '';
+      var was = (!isW && p.was) ? '<span class="was">' + cop(p.was) + '</span>' : '';
       var tag = p.tag ? '<span class="' + p.tag.kind + '">' + p.tag.label + '</span>' : '';
       var media = p.image ? '<img src="' + p.image + '" alt="' + p.brand + ' ' + p.model + '" loading="lazy">' : watchSVG(p.tone, p.brand);
       var variantsRow = (p.variants && p.variants.length > 1)
         ? '<div class="product-variants">' + p.variants.map(function(c){ return '<span class="dot" style="background:' + c + '"></span>'; }).join('') + '<span style="margin-left:6px">' + p.variants.length + ' acabados</span></div>'
         : '';
-      var wholesale = '';
-      if (isWholesale) {
-        var wp = window.Store ? Store.wholesalePriceFor(p) : Math.round(p.price * 0.78);
-        var save = p.price - wp;
-        wholesale = '<div class="product-wholesale"><span>Mayorista · mín. 6 un.</span><span class="price">' + cop(wp) + ' <span style="opacity:.6;font-weight:400">· ahorras ' + cop(save) + '</span></span></div>';
-      }
+      var wholesale = isW
+        ? '<div class="product-wholesale"><span>Precio mayorista · mín. 6 un.</span></div>'
+        : '';
       var card = document.createElement('a');
       card.href = 'producto.html' + (p.id ? '?id=' + encodeURIComponent(p.id) : '');
       card.className = 'product-card';
@@ -1764,7 +1767,7 @@
         +   '<div class="product-brand">' + p.brand + '</div>'
         +   '<div class="product-model">' + p.model + '</div>'
         +   variantsRow
-        +   '<div class="product-price"><span class="now">' + cop(p.price) + '</span>' + was + off + '</div>'
+        +   '<div class="product-price"><span class="now">' + cop(mainPrice) + '</span>' + was + off + '</div>'
         +   '<div class="product-stock' + (p.stockLow ? ' low' : '') + '">' + p.stock + '</div>'
         +   wholesale
         + '</div>';
