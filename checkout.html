@@ -511,7 +511,21 @@
         document.getElementById('summaryTotal').textContent = cop(total);
       }
 
+      // Los clientes mayoristas no pagan por la pasarela: su compra se cierra
+      // por WhatsApp (así lo pidió Cristian). Para ellos se oculta la opción de
+      // Wompi y se deja solo WhatsApp. Se declara como función (no variable) para
+      // que se evalúe siempre en el momento de usarse, ya que la sesión puede no
+      // estar lista cuando se ejecuta el primer render.
+      function isWholesaleCheckout() { return !!(window.Auth && Auth.isWholesale()); }
+
       function setupPaymentAvailability() {
+        if (isWholesaleCheckout()) {
+          var wo = document.getElementById('wompiOption');
+          if (wo) wo.style.display = 'none';
+          var wsHead = document.querySelector('#whatsappOption .desc');
+          if (wsHead) wsHead.textContent = 'Como cliente mayorista, tu pedido se cierra por WhatsApp: te enviamos el resumen con tus precios mayoristas para confirmar el pago y el envío directamente con la tienda.';
+          return;
+        }
         if (!payments.wompiPublicKey) {
           document.getElementById('wompiPendingTag').style.display = '';
           document.getElementById('wompiOfflineNote').style.display = '';
@@ -564,7 +578,7 @@
           }).then(function (order) {
             draftOrder = order;
             document.getElementById('paymentCard').classList.remove('locked');
-            mountWompiWidget(draftOrder, total);
+            if (!isWholesaleCheckout()) mountWompiWidget(draftOrder, total);
             bindWhatsappButton(draftOrder, total, customer);
             document.getElementById('paymentCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
             if (continueBtn) continueBtn.textContent = 'Datos guardados ✓';

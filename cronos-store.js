@@ -362,7 +362,7 @@
   var SPECS = {
     mechanism: ['Cuarzo', 'Automático', 'Mecánico', 'Digital', 'Anadigi', 'Cuarzo de recarga solar'],
     crystal: ['Mineral', 'Zafiro', 'Hardlex', 'Plexiglás'],
-    strap: ['Cuero', 'Acero', 'Silicona', 'Lona', 'Resina', 'Caucho'],
+    strap: ['Cuero', 'Acero', 'Titanio', 'Silicona', 'Lona', 'Resina', 'Caucho'],
     gender: ['Femenino', 'Masculino', 'Unisex']
   };
 
