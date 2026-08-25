@@ -202,9 +202,25 @@
     // Orden base alfabético (marca y luego modelo): así los productos que
     // Cristian agrega manualmente caen en su lugar, no al final. Las vistas
     // que necesiten otro orden (precio, descuento) igual pueden re-ordenar.
-    return sb.from('products').select('*').order('brand').order('model').then(function (res) {
-      if (res.error) { console.error('[Store] hidratando products', res.error); return; }
-      write(NS.products, res.data.map(mapProductFromDb));
+    //
+    // Supabase/PostgREST devuelve máximo 1000 filas por consulta. Con más de
+    // 1000 productos, pedir todo de una vez recortaba silenciosamente la cola
+    // del alfabeto (Swatch, Tissot…) y esas marcas aparecían vacías. Por eso se
+    // trae en páginas de 1000 hasta agotar el catálogo, sin importar cuánto
+    // crezca.
+    var PAGE = 1000;
+    var all = [];
+    function fetchPage(from) {
+      return sb.from('products').select('*').order('brand').order('model')
+        .range(from, from + PAGE - 1).then(function (res) {
+          if (res.error) { console.error('[Store] hidratando products', res.error); return null; }
+          all = all.concat(res.data);
+          if (res.data.length === PAGE) return fetchPage(from + PAGE);
+          return all;
+        });
+    }
+    return fetchPage(0).then(function (rows) {
+      if (rows) write(NS.products, rows.map(mapProductFromDb));
     });
   }
   function hydrateAuctions() {
