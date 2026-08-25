@@ -1236,7 +1236,7 @@
       +     '<label><span>Extensión (seg.)</span><input type="number" name="extensionSeconds" value="' + cfg.auctionDefaults.extensionSeconds + '" min="0" step="10"></label>'
       +   '</div>'
       +   '<label class="block"><span>Inicia en (deja vacío para ahora)</span><input type="datetime-local" name="startsAt"></label>'
-      +   '<p class="form-hint">Si configuras duración = 0 y fecha inicio en futuro, la subasta queda "programada" hasta esa fecha.</p>'
+      +   '<p class="form-hint">La <strong>duración</strong> son las horas que la subasta está activa desde que arranca. Para programarla a futuro, pon <strong>fecha y hora de inicio</strong> y la duración que quieras.<br>Ej.: inicio <strong>31/08 8:00 a. m.</strong> + duración <strong>48</strong> = queda programada, arranca sola el 31 y cierra el 2 de septiembre a las 8:00 a. m.<br>Ojo: la fecha necesita también la <strong>hora</strong>; si la dejas vacía, empieza de inmediato.</p>'
       +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Crear subasta</button></div>'
       + '</form>';
     overlay.appendChild(modal);
