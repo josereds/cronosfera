@@ -197,42 +197,55 @@
   // getAuctions()...) desde localStorage; estas funciones lo mantienen al
   // día trayendo la verdad compartida de Supabase y avisando a los
   // suscriptores (Store.subscribe) para que la UI se vuelva a pintar.
-  function hydrateProducts() {
-    if (!sb) return Promise.resolve();
-    // Orden base alfabético (marca y luego modelo): así los productos que
-    // Cristian agrega manualmente caen en su lugar, no al final. Las vistas
-    // que necesiten otro orden (precio, descuento) igual pueden re-ordenar.
-    //
-    // Supabase/PostgREST devuelve máximo 1000 filas por consulta. Con más de
-    // 1000 productos, pedir todo de una vez recortaba silenciosamente la cola
-    // del alfabeto (Swatch, Tissot…) y esas marcas aparecían vacías. Por eso se
-    // trae en páginas de 1000 hasta agotar el catálogo, sin importar cuánto
-    // crezca.
+  // Trae TODAS las filas de una consulta a Supabase paginando de 1000 en 1000.
+  // PostgREST corta en 1000 filas por petición; sin esto, cualquier tabla que
+  // supere las 1000 filas (productos, pedidos, pujas…) perdería la cola en
+  // silencio. `build()` debe devolver el query base recién construido en cada
+  // llamada (sb.from(...).select(...) con su .order()); no se puede reutilizar
+  // un query ya ejecutado. El .order() del caller debe terminar en una columna
+  // única (id) para que la paginación por rango sea determinista y no duplique
+  // ni salte filas entre páginas. Devuelve { data } o { error }.
+  function fetchAllRows(build) {
     var PAGE = 1000;
     var all = [];
-    function fetchPage(from) {
-      return sb.from('products').select('*').order('brand').order('model')
-        .range(from, from + PAGE - 1).then(function (res) {
-          if (res.error) { console.error('[Store] hidratando products', res.error); return null; }
-          all = all.concat(res.data);
-          if (res.data.length === PAGE) return fetchPage(from + PAGE);
-          return all;
-        });
+    function page(from) {
+      return build().range(from, from + PAGE - 1).then(function (res) {
+        if (res.error) return { error: res.error };
+        all = all.concat(res.data || []);
+        if ((res.data || []).length === PAGE) return page(from + PAGE);
+        return { data: all };
+      });
     }
-    return fetchPage(0).then(function (rows) {
-      if (rows) write(NS.products, rows.map(mapProductFromDb));
+    return page(0);
+  }
+
+  function hydrateProducts() {
+    if (!sb) return Promise.resolve();
+    // Orden base alfabético (marca y luego modelo, con id de desempate para que
+    // la paginación sea estable): así los productos que Cristian agrega caen en
+    // su lugar, no al final. Las vistas que necesiten otro orden (precio,
+    // descuento) igual pueden re-ordenar.
+    return fetchAllRows(function () {
+      return sb.from('products').select('*').order('brand').order('model').order('id');
+    }).then(function (res) {
+      if (res.error) { console.error('[Store] hidratando products', res.error); return; }
+      write(NS.products, res.data.map(mapProductFromDb));
     });
   }
   function hydrateAuctions() {
     if (!sb) return Promise.resolve();
-    return sb.from('auctions').select('*').then(function (res) {
+    return fetchAllRows(function () {
+      return sb.from('auctions').select('*').order('id');
+    }).then(function (res) {
       if (res.error) { console.error('[Store] hidratando auctions', res.error); return; }
       writeIfChanged(NS.auctions, res.data.map(mapAuctionFromDb));
     });
   }
   function hydrateBids() {
     if (!sb) return Promise.resolve();
-    return sb.from('bids').select('*').then(function (res) {
+    return fetchAllRows(function () {
+      return sb.from('bids').select('*').order('id');
+    }).then(function (res) {
       if (res.error) { console.error('[Store] hidratando bids', res.error); return; }
       writeIfChanged(NS.bids, res.data.map(mapBidFromDb));
     });
@@ -252,14 +265,20 @@
   // a propósito, simplemente no aplica a un visitante anónimo.
   function hydrateWholesale() {
     if (!sb) return Promise.resolve();
-    return sb.from('wholesale_requests').select('*').then(function (res) {
+    return fetchAllRows(function () {
+      return sb.from('wholesale_requests').select('*').order('id');
+    }).then(function (res) {
       if (res.error) return;
       write(NS.requests, res.data.map(mapWholesaleFromDb));
     });
   }
   function hydrateOrders() {
     if (!sb) return Promise.resolve();
-    return sb.from('orders').select('*').then(function (res) {
+    // Más recientes primero (con id de desempate para paginar estable): el panel
+    // de pedidos muestra la lista tal cual, sin re-ordenar.
+    return fetchAllRows(function () {
+      return sb.from('orders').select('*').order('created_at', { ascending: false }).order('id');
+    }).then(function (res) {
       if (res.error) return;
       write(NS.orders, res.data.map(mapOrderFromDb));
     });
@@ -268,7 +287,9 @@
   // ver todas las filas); para cualquier otro, RLS solo devuelve la propia.
   function hydrateUsers() {
     if (!sb) return Promise.resolve();
-    return sb.from('profiles').select('*').then(function (res) {
+    return fetchAllRows(function () {
+      return sb.from('profiles').select('*').order('id');
+    }).then(function (res) {
       if (res.error) return;
       write(NS.users, res.data.map(mapProfileFromDb));
     });
