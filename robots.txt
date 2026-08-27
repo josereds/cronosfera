@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Herramientas internas / páginas que no deben indexarse
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /importar
+Disallow: /importar.html
+Disallow: /respaldo
+Disallow: /respaldo.html
+Disallow: /checkout
+Disallow: /checkout.html
+Disallow: /og-image
+Disallow: /og-image.html
+
+Sitemap: https://cronosfera-beta.vercel.app/sitemap.xml
