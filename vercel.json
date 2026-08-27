@@ -2,9 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/google80113e9a87cf3a2f.html", "destination": "/google80113e9a87cf3a2f" }
-  ],
   "headers": [
     {
       "source": "/(.*)\\.mp4",
