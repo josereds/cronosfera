@@ -344,6 +344,16 @@
               </select>
             </div>
           </div>
+          <div class="field">
+            <label for="regPhone">Teléfono / WhatsApp</label>
+            <input type="tel" id="regPhone" name="phone" inputmode="tel" autocomplete="tel" required placeholder="Ej. 3001234567">
+          </div>
+          <div id="retailFields">
+            <div class="field">
+              <label for="regCedula">Cédula</label>
+              <input type="text" id="regCedula" name="cedula" inputmode="numeric" autocomplete="off" required placeholder="Número de cédula">
+            </div>
+          </div>
           <div id="wholesaleFields" style="display:none">
             <div class="field-row">
               <div class="field">
@@ -414,8 +424,14 @@
         });
       });
 
+      var retailFields = document.getElementById('retailFields');
+      var regCedula = document.getElementById('regCedula');
       regRole.addEventListener('change', function () {
-        wholesaleFields.style.display = regRole.value === 'wholesale' ? '' : 'none';
+        var isWholesale = regRole.value === 'wholesale';
+        wholesaleFields.style.display = isWholesale ? '' : 'none';
+        retailFields.style.display = isWholesale ? 'none' : '';
+        // La cédula solo es obligatoria para clientes; el mayorista da NIT.
+        regCedula.required = !isWholesale;
       });
 
       if (new URLSearchParams(window.location.search).get('mode') === 'register') {
@@ -444,18 +460,25 @@
       registerForm.addEventListener('submit', function (e) {
         e.preventDefault();
         clearMsgs();
+        var role = document.getElementById('regRole').value;
+        var cedula = document.getElementById('regCedula').value.trim();
         var data = {
           name: document.getElementById('regName').value,
           email: document.getElementById('regEmail').value,
           password: document.getElementById('regPassword').value,
-          role: document.getElementById('regRole').value,
+          role: role,
+          phone: document.getElementById('regPhone').value.trim(),
           company: document.getElementById('regCompany').value,
-          taxId: document.getElementById('regTaxId').value,
+          // La cédula del cliente se guarda como documento (tax_id); el mayorista
+          // usa ese mismo campo para el NIT.
+          taxId: role === 'wholesale' ? document.getElementById('regTaxId').value : cedula,
           city: document.getElementById('regCity').value
         };
         if (!data.email || !data.password) { showErr('Completa correo y contraseña'); return; }
         if (data.password.length < 6) { showErr('La contraseña debe tener al menos 6 caracteres'); return; }
-        if (data.role === 'wholesale' && (!data.company || !data.taxId)) {
+        if (!data.phone) { showErr('Ingresa tu teléfono / WhatsApp'); return; }
+        if (role !== 'wholesale' && !cedula) { showErr('Ingresa tu número de cédula'); return; }
+        if (role === 'wholesale' && (!data.company || !data.taxId)) {
           showErr('Para cuenta mayorista necesitamos empresa y NIT');
           return;
         }

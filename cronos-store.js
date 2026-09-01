@@ -903,6 +903,27 @@
     });
   }
 
+  // Actualiza los datos de contacto del PROPIO usuario (cédula + teléfono). Se
+  // usa para "comprometer" a quien puja: no se puede pujar sin estos datos. La
+  // política profiles_self_update deja que cada quien edite su fila, y el
+  // trigger protect_profile_privileges impide cambiar rol/estado pero permite
+  // estos campos. La cédula se guarda en tax_id (número de documento) para no
+  // requerir una columna nueva.
+  function updateContactInfo(data) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var u = currentUser();
+    if (!u) return Promise.reject(new Error('Necesitas una cuenta'));
+    var cedula = String((data && data.cedula) || '').replace(/\s+/g, ' ').trim();
+    var phone = String((data && data.phone) || '').replace(/\s+/g, ' ').trim();
+    if (!cedula || !phone) return Promise.reject(new Error('Ingresa tu cédula y tu teléfono'));
+    return sb.from('profiles').update({ tax_id: cedula, phone: phone }).eq('id', u.id).select().single().then(function (r) {
+      if (r.error) throw new Error(mapAuthError(r.error));
+      var profile = mapProfileFromDb(r.data);
+      applyProfile(profile);
+      return profile;
+    });
+  }
+
   // ---------- solicitudes mayoristas ----------
 
   function getWholesaleRequests() { return read(NS.requests, []); }
@@ -1314,6 +1335,7 @@
     currentUser: currentUser,
     setUserRole: setUserRole,
     setUserStatus: setUserStatus,
+    updateContactInfo: updateContactInfo,
     // solicitudes mayoristas
     getWholesaleRequests: getWholesaleRequests,
     approveWholesale: approveWholesale,

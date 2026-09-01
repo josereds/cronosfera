@@ -129,6 +129,21 @@
     if (status === 'live') {
       if (!user) {
         bidFormHtml = '<div class="bid-guest"><p>Para pujar necesitas una cuenta.</p><a href="login.html?next=subastas.html%3Fid%3D' + encodeURIComponent(auction.id) + '" class="btn-primary">Iniciar sesión</a></div>';
+      } else if (!user.taxId || !user.phone) {
+        // Antes de dejar pujar exigimos cédula y teléfono, para comprometer a
+        // quien participa. Solo se piden una vez: quedan guardados en el perfil.
+        bidFormHtml = ''
+          + '<form class="bid-form contact-gate" data-auction="' + auction.id + '">'
+          +   '<p class="bid-form-hint" style="margin:0 0 14px">Para pujar necesitamos tus datos de contacto. Solo se piden una vez.</p>'
+          +   '<label style="display:block;margin-bottom:12px"><span class="bid-form-lbl">Número de cédula</span>'
+          +     '<input type="text" name="cedula" inputmode="numeric" autocomplete="off" placeholder="Ej. 1012345678" value="' + escapeHtml(user.taxId || '') + '" required>'
+          +   '</label>'
+          +   '<label style="display:block;margin-bottom:14px"><span class="bid-form-lbl">Teléfono / WhatsApp</span>'
+          +     '<input type="tel" name="phone" inputmode="tel" autocomplete="tel" placeholder="Ej. 3001234567" value="' + escapeHtml(user.phone || '') + '" required>'
+          +   '</label>'
+          +   '<button type="submit" class="btn-primary">Guardar y continuar</button>'
+          +   '<div class="bid-msg"></div>'
+          + '</form>';
       } else {
         bidFormHtml = ''
           + '<form class="bid-form" data-auction="' + auction.id + '">'
@@ -192,10 +207,40 @@
       + '</section>';
 
     bindBidForm(container, auction);
+    bindContactGate(container, auction);
+  }
+
+  // Formulario que exige cédula + teléfono antes de habilitar la puja. Al
+  // guardar, actualiza el perfil y re-renderiza: entonces aparece el form real
+  // de puja (el usuario ya tiene taxId y phone).
+  function bindContactGate(container, auction) {
+    var form = container.querySelector('.contact-gate');
+    if (!form) return;
+    var msg = form.querySelector('.bid-msg');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var cedula = String(fd.get('cedula') || '').trim();
+      var phone = String(fd.get('phone') || '').trim();
+      if (!cedula || !phone) {
+        msg.innerHTML = '<div class="bid-err">Ingresa tu cédula y tu teléfono para poder pujar.</div>';
+        return;
+      }
+      var submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando…'; }
+      global.Store.updateContactInfo({ cedula: cedula, phone: phone }).then(function () {
+        renderAuctionDetail(auction, container);
+        var nextMsg = container.querySelector('.bid-msg');
+        if (nextMsg) nextMsg.innerHTML = '<div class="bid-ok">✓ Datos guardados. Ya puedes pujar.</div>';
+      }).catch(function (ex) {
+        msg.innerHTML = '<div class="bid-err">' + escapeHtml(ex.message) + '</div>';
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar y continuar'; }
+      });
+    });
   }
 
   function bindBidForm(container, auction) {
-    var form = container.querySelector('.bid-form');
+    var form = container.querySelector('.bid-form:not(.contact-gate)');
     if (!form) return;
     var msg = form.querySelector('.bid-msg');
     form.addEventListener('submit', function (e) {
