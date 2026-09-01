@@ -1120,6 +1120,15 @@
         var leaderMeta = bids > 0
           ? '<div class="row-meta">Va ganando: ' + escapeHtml(leader ? leader.name : 'Postor') + '</div>'
           : '<div class="row-meta">Sin pujas aún</div>';
+        // Al cerrar con ganador, se muestran de una vez sus datos de contacto
+        // (cédula + teléfono) para que Cristian pueda ubicarlo rápido.
+        if (status === 'closed' && a.winnerId) {
+          var w = Store.getUser(a.winnerId);
+          leaderMeta = '<div class="row-meta" style="color:var(--accent);font-weight:500">🏆 ' + escapeHtml(w ? w.name : (a.winnerName || 'Ganador'))
+            + (w ? ' · CC ' + escapeHtml(w.taxId || '—') + ' · Tel ' + escapeHtml(w.phone || '—') : '') + '</div>';
+        } else if (status === 'closed') {
+          leaderMeta = '<div class="row-meta">Sin ganador (no alcanzó la reserva)</div>';
+        }
         return '<tr data-id="' + a.id + '">'
           + aucThumb(p)
           + '<td><strong>' + escapeHtml(p ? p.brand + ' · ' + p.model : '— producto eliminado') + '</strong><div class="row-meta">' + escapeHtml(p ? p.ref : '') + '</div></td>'
@@ -1184,15 +1193,41 @@
       : chrono.map(function (b, i) {
           var u = Store.getUser(b.userId);
           var isLeader = b.userId === a.currentBidderId && b.amount === a.currentBid;
+          var contact = u
+            ? escapeHtml(u.email || '') + '<br>CC ' + escapeHtml(u.taxId || '—') + ' · Tel ' + escapeHtml(u.phone || '—')
+            : escapeHtml(b.userId);
           return '<tr>'
             + '<td class="mono">' + Store.formatCOP(b.amount) + (isLeader ? ' <span class="status-pill approved" style="margin-left:6px">líder</span>' : '') + '</td>'
-            + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">' + escapeHtml(u ? u.email : b.userId) + '</div></td>'
+            + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">' + contact + '</div></td>'
             + '<td class="mono small">' + new Date(b.at).toLocaleString('es-CO') + '</td>'
             + '</tr>';
         }).join('');
 
+    // Tarjeta destacada con los datos del ganador cuando la subasta ya cerró.
+    var winner = (status === 'closed' && a.winnerId) ? Store.getUser(a.winnerId) : null;
+    var winnerBanner = '';
+    if (winner) {
+      var waDigits = String(winner.phone || '').replace(/\D/g, '');
+      var waHref = waDigits ? 'https://wa.me/' + (waDigits.length <= 10 ? '57' : '') + waDigits : '';
+      winnerBanner = ''
+        + '<div style="background:color-mix(in oklab, var(--accent) 12%, transparent);border:1px solid color-mix(in oklab, var(--accent) 40%, transparent);border-radius:12px;padding:14px 16px;margin-bottom:16px">'
+        +   '<div style="font-weight:600;margin-bottom:10px">🏆 Ganador · datos de contacto</div>'
+        +   '<div class="req-card-meta" style="border:0;padding:0">'
+        +     '<div><span>Nombre</span><strong>' + escapeHtml(winner.name || a.winnerName || '—') + '</strong></div>'
+        +     '<div><span>Cédula</span><strong class="mono">' + escapeHtml(winner.taxId || '—') + '</strong></div>'
+        +     '<div><span>Teléfono</span><strong class="mono">' + escapeHtml(winner.phone || '—') + '</strong></div>'
+        +     '<div><span>Correo</span><strong>' + escapeHtml(winner.email || '—') + '</strong></div>'
+        +     '<div><span>Puja ganadora</span><strong class="mono accent">' + Store.formatCOP(a.currentBid) + '</strong></div>'
+        +   '</div>'
+        +   (waHref ? '<a href="' + waHref + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 14px;background:var(--accent);color:#1a1c20;border-radius:8px;font-weight:600;text-decoration:none;font-size:13px">Escribir al ganador por WhatsApp</a>' : '')
+        + '</div>';
+    } else if (status === 'closed') {
+      winnerBanner = '<div class="form-hint" style="margin-bottom:16px">La subasta cerró sin ganador (no se alcanzó el precio de reserva).</div>';
+    }
+
     modal.innerHTML = ''
       + '<div class="modal-head"><h3>Pujas · ' + escapeHtml(p ? p.brand + ' · ' + p.model : 'Subasta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + winnerBanner
       + '<div class="req-card-meta" style="border:0;padding:0 0 16px">'
       +   '<div><span>Estado</span><strong><span class="status-pill ' + status + '">' + status + '</span></strong></div>'
       +   '<div><span>Puja actual</span><strong class="mono accent">' + Store.formatCOP(a.currentBid) + '</strong></div>'
