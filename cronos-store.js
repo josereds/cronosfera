@@ -147,7 +147,12 @@
       minIncrementPct: r.min_increment_pct, antiSnipeSeconds: r.anti_snipe_seconds,
       extensionSeconds: r.extension_seconds, startsAt: r.starts_at, endsAt: r.ends_at,
       status: r.status, closedAt: r.closed_at, winnerId: r.winner_id, winnerName: r.winner_name,
-      reserveMet: r.reserve_met, createdAt: r.created_at
+      reserveMet: r.reserve_met, createdAt: r.created_at,
+      // Ítem externo (reloj que no está en el catálogo). Undefined si las
+      // columnas aún no existen: la lectura es segura, solo la escritura
+      // requiere la migración 06-subastas-item-externo.sql.
+      itemTitle: r.item_title, itemRef: r.item_ref, itemImage: r.item_image,
+      itemDescription: r.item_description
     };
   }
   function mapBidFromDb(r) {
@@ -1047,22 +1052,55 @@
     var durationMs = (data.durationHours != null ? data.durationHours : ad.durationHours) * 3600 * 1000;
     var startsAt = data.startsAt || nowIso();
     var endsAt = new Date(new Date(startsAt).getTime() + durationMs).toISOString();
-    var row = {
-      product_id: data.productId,
-      start_price: data.startPrice,
-      current_bid: data.startPrice,
-      reserve_price: data.reservePrice || data.startPrice,
-      min_increment_pct: data.minIncrementPct || ad.minIncrementPct || 5,
-      anti_snipe_seconds: data.antiSnipeSeconds != null ? data.antiSnipeSeconds : ad.antiSnipeSeconds,
-      extension_seconds: data.extensionSeconds != null ? data.extensionSeconds : ad.extensionSeconds,
-      starts_at: startsAt,
-      ends_at: endsAt,
-      status: 'scheduled'
-    };
-    return sb.from('auctions').insert(row).select().single().then(function (res) {
-      if (res.error) throw new Error(mapAuthError(res.error));
-      return hydrateAuctions().then(function () { return mapAuctionFromDb(res.data); });
+    var isCustom = !data.productId;
+    // La foto del ítem externo puede venir como data URL: se sube a Storage
+    // igual que las fotos de producto y se guarda solo el enlace.
+    return (isCustom ? ensureImageStored(data.itemImage) : Promise.resolve(null)).then(function (storedImage) {
+      var row = {
+        product_id: data.productId || null,
+        start_price: data.startPrice,
+        current_bid: data.startPrice,
+        reserve_price: data.reservePrice || data.startPrice,
+        min_increment_pct: data.minIncrementPct || ad.minIncrementPct || 5,
+        anti_snipe_seconds: data.antiSnipeSeconds != null ? data.antiSnipeSeconds : ad.antiSnipeSeconds,
+        extension_seconds: data.extensionSeconds != null ? data.extensionSeconds : ad.extensionSeconds,
+        starts_at: startsAt,
+        ends_at: endsAt,
+        status: 'scheduled'
+      };
+      // Solo se envían las columnas item_* cuando es un ítem externo, para que
+      // las subastas de catálogo sigan funcionando aunque la migración de esas
+      // columnas todavía no se haya corrido.
+      if (isCustom) {
+        row.item_title = (data.itemTitle || '').trim() || 'Reloj de segunda';
+        row.item_ref = (data.itemRef || '').trim() || null;
+        row.item_image = storedImage || null;
+        row.item_description = (data.itemDescription || '').trim() || null;
+      }
+      return sb.from('auctions').insert(row).select().single().then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return hydrateAuctions().then(function () { return mapAuctionFromDb(res.data); });
+      });
     });
+  }
+
+  // Devuelve un "producto" para pintar la subasta: el del catálogo si está
+  // ligada a uno, o uno sintético a partir de los datos del ítem externo. Así
+  // las vistas siguen usando p.brand/p.model/p.ref/p.image sin ramificar.
+  function auctionProduct(a) {
+    if (!a) return null;
+    if (a.productId) {
+      var p = getProduct(a.productId);
+      if (p) return p;
+    }
+    if (a.itemTitle || a.itemImage || a.itemRef) {
+      return {
+        id: null, brand: a.itemTitle || 'Reloj de segunda', model: '',
+        ref: a.itemRef || '', image: a.itemImage || '', tone: 'ink',
+        description: a.itemDescription || '', _custom: true
+      };
+    }
+    return null;
   }
 
   // Ediciones puntuales desde el panel (fechas, precios, parámetros); llega
@@ -1345,6 +1383,7 @@
     getAuctions: getAuctions,
     getAuction: getAuction,
     getAuctionStatus: getAuctionStatus,
+    auctionProduct: auctionProduct,
     createAuction: createAuction,
     updateAuction: updateAuction,
     deleteAuction: deleteAuction,

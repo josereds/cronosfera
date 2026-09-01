@@ -54,8 +54,16 @@
   }
 
   function findProduct(auction) {
-    if (!auction || !auction.productId) return null;
-    return global.Store.getProduct(auction.productId);
+    // Resuelve el producto del catálogo o uno sintético si es un reloj externo
+    // (de segunda) que no está montado en la tienda.
+    return global.Store.auctionProduct(auction);
+  }
+
+  // Título del ítem: "Marca · Modelo" para catálogo, o el título tal cual para
+  // un reloj externo (que no tiene modelo aparte).
+  function itemTitle(p) {
+    if (!p) return 'Subasta Cronosfera';
+    return p.model ? (p.brand + ' · ' + p.model) : p.brand;
   }
 
   // Foto real del producto si existe; si no, el reloj SVG genérico como respaldo.
@@ -75,7 +83,7 @@
     var remaining = new Date(auction.endsAt).getTime() - Date.now();
     var href = 'subastas.html?id=' + encodeURIComponent(auction.id);
 
-    var productTitle = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
+    var productTitle = itemTitle(p);
     var ref = p ? p.ref : '';
 
     var bids = global.Store.getBidsForAuction(auction.id);
@@ -122,7 +130,7 @@
     var user = global.Store.currentUser();
     var minNext = global.Store.minNextBid(auction);
 
-    var title = p ? (p.brand + ' · ' + p.model) : 'Subasta Cronosfera';
+    var title = itemTitle(p);
     var ref = p ? p.ref : '';
 
     var bidFormHtml;
@@ -175,7 +183,11 @@
       +   '<div class="auc-detail-info">'
       +     '<div class="auc-detail-meta"><span class="mono">' + escapeHtml(ref) + '</span>' + statusBadge(status) + '</div>'
       +     '<h1 class="auc-detail-title">' + escapeHtml(title) + '</h1>'
-      +     (p ? '<p class="auc-detail-lead">Reloj del catálogo Cronosfera. Pieza verificada, con garantía de originalidad y envío asegurado a toda Colombia.</p>' : '')
+      +     (p
+              ? '<p class="auc-detail-lead">' + (p._custom
+                  ? (p.description ? escapeHtml(p.description) : 'Pieza en subasta. Envío asegurado a toda Colombia.')
+                  : 'Reloj del catálogo Cronosfera. Pieza verificada, con garantía de originalidad y envío asegurado a toda Colombia.') + '</p>'
+              : '')
       +     '<div class="auc-price-row big">'
       +       '<div class="auc-price-block">'
       +         '<span class="auc-price-lbl">' + (status === 'live' ? 'Puja actual' : 'Puja inicial') + '</span>'

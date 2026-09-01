@@ -1112,7 +1112,7 @@
         return;
       }
       tbody.innerHTML = sorted.map(function (a) {
-        var p = Store.getProduct(a.productId);
+        var p = Store.auctionProduct(a);
         var status = Store.getAuctionStatus(a);
         var bids = Store.getBidsForAuction(a.id).length;
         var ends = new Date(a.endsAt);
@@ -1131,7 +1131,7 @@
         }
         return '<tr data-id="' + a.id + '">'
           + aucThumb(p)
-          + '<td><strong>' + escapeHtml(p ? p.brand + ' · ' + p.model : '— producto eliminado') + '</strong><div class="row-meta">' + escapeHtml(p ? p.ref : '') + '</div></td>'
+          + '<td><strong>' + escapeHtml(p ? (p.model ? p.brand + ' · ' + p.model : p.brand) : '— producto eliminado') + '</strong><div class="row-meta">' + escapeHtml(p ? (p.ref || (p._custom ? 'Reloj externo' : '')) : '') + '</div></td>'
           + '<td class="mono accent">' + Store.formatCOP(a.currentBid) + leaderMeta + '</td>'
           + '<td class="mono">' + bids + '</td>'
           + '<td><span class="status-pill ' + status + '">' + status + '</span></td>'
@@ -1179,7 +1179,7 @@
   function openAuctionBidsModal(auctionId) {
     var a = Store.getAuction(auctionId);
     if (!a) return;
-    var p = Store.getProduct(a.productId);
+    var p = Store.auctionProduct(a);
     var status = Store.getAuctionStatus(a);
     var bids = Store.getBidsForAuction(auctionId); // ya ordenadas por monto desc
     // Historial cronológico (más reciente primero) para "quién pujó y cuándo".
@@ -1193,15 +1193,42 @@
       : chrono.map(function (b, i) {
           var u = Store.getUser(b.userId);
           var isLeader = b.userId === a.currentBidderId && b.amount === a.currentBid;
-          var contact = u
-            ? escapeHtml(u.email || '') + '<br>CC ' + escapeHtml(u.taxId || '—') + ' · Tel ' + escapeHtml(u.phone || '—')
-            : escapeHtml(b.userId);
           return '<tr>'
             + '<td class="mono">' + Store.formatCOP(b.amount) + (isLeader ? ' <span class="status-pill approved" style="margin-left:6px">líder</span>' : '') + '</td>'
-            + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">' + contact + '</div></td>'
+            + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">' + escapeHtml(u ? (u.email || '') : b.userId) + '</div></td>'
             + '<td class="mono small">' + new Date(b.at).toLocaleString('es-CO') + '</td>'
             + '</tr>';
         }).join('');
+
+    // Ranking de postores DISTINTOS por su mejor oferta (bids ya viene ordenado
+    // por monto desc, así que la primera aparición de cada persona es su puja
+    // más alta). Sirve para contactar al 2º, 3º… si el ganador se cae.
+    var seenBidder = {};
+    var ranking = [];
+    bids.forEach(function (b) {
+      if (seenBidder[b.userId]) return;
+      seenBidder[b.userId] = true;
+      ranking.push(b);
+    });
+    var rankingHtml = ranking.map(function (b, i) {
+      var u = Store.getUser(b.userId);
+      var rankLabel = i === 0 ? (status === 'closed' ? 'Ganador' : 'Líder') : (i + 1) + 'º';
+      var rankClass = i === 0 ? 'approved' : 'scheduled';
+      var waDigits = u && u.phone ? String(u.phone).replace(/\D/g, '') : '';
+      var waHref = waDigits ? 'https://wa.me/' + (waDigits.length <= 10 ? '57' : '') + waDigits : '';
+      return '<tr>'
+        + '<td><span class="status-pill ' + rankClass + '">' + rankLabel + '</span></td>'
+        + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">CC ' + escapeHtml(u ? (u.taxId || '—') : '—') + ' · ' + escapeHtml(u ? (u.email || '') : '') + '</div></td>'
+        + '<td class="mono">' + escapeHtml(u ? (u.phone || '—') : '—') + '</td>'
+        + '<td class="mono accent">' + Store.formatCOP(b.amount) + '</td>'
+        + '<td>' + (waHref ? '<a href="' + waHref + '" target="_blank" rel="noopener" class="mini-link">WhatsApp</a>' : '<span class="row-meta">sin teléfono</span>') + '</td>'
+        + '</tr>';
+    }).join('');
+    var rankingSection = ranking.length === 0 ? '' : ''
+      + '<h4 style="margin:4px 0 10px;font-size:14px">Postores · en orden de oferta (para contactar)</h4>'
+      + '<div class="admin-table-wrap" style="margin-bottom:20px"><table class="admin-table"><thead><tr><th>Puesto</th><th>Postor</th><th>Teléfono</th><th>Mejor oferta</th><th></th></tr></thead>'
+      +   '<tbody>' + rankingHtml + '</tbody></table></div>'
+      + '<p class="form-hint" style="margin:-10px 0 18px">Si el ganador desiste, puedes ofrecerle la pieza al siguiente en la lista y contactarlo directo por WhatsApp.</p>';
 
     // Tarjeta destacada con los datos del ganador cuando la subasta ya cerró.
     var winner = (status === 'closed' && a.winnerId) ? Store.getUser(a.winnerId) : null;
@@ -1226,7 +1253,7 @@
     }
 
     modal.innerHTML = ''
-      + '<div class="modal-head"><h3>Pujas · ' + escapeHtml(p ? p.brand + ' · ' + p.model : 'Subasta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<div class="modal-head"><h3>Pujas · ' + escapeHtml(p ? (p.model ? p.brand + ' · ' + p.model : p.brand) : 'Subasta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
       + winnerBanner
       + '<div class="req-card-meta" style="border:0;padding:0 0 16px">'
       +   '<div><span>Estado</span><strong><span class="status-pill ' + status + '">' + status + '</span></strong></div>'
@@ -1234,9 +1261,11 @@
       +   '<div><span>Total de pujas</span><strong>' + bids.length + '</strong></div>'
       +   '<div><span>Termina</span><strong class="mono small">' + new Date(a.endsAt).toLocaleString('es-CO') + '</strong></div>'
       + '</div>'
+      + rankingSection
+      + '<h4 style="margin:4px 0 10px;font-size:14px">Historial de pujas</h4>'
       + '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Puja</th><th>Postor</th><th>Cuándo</th></tr></thead>'
       +   '<tbody>' + rowsHtml + '</tbody></table></div>'
-      + '<p class="form-hint" style="margin-top:14px">El postor debe tener cuenta para pujar, así que cada puja queda asociada a un nombre y correo verificables.</p>'
+      + '<p class="form-hint" style="margin-top:14px">Cada puja queda asociada a una cuenta con nombre, cédula y teléfono verificables.</p>'
       + '<div class="modal-actions"><button type="button" class="btn-primary close-modal">Cerrar</button></div>';
 
     overlay.appendChild(modal);
@@ -1256,12 +1285,29 @@
     modal.innerHTML = ''
       + '<div class="modal-head"><h3>Nueva subasta</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
       + '<form id="auctionForm">'
-      +   '<label class="block"><span>Producto</span>'
-      +     '<select name="productId" required>'
-      +       '<option value="">Selecciona un producto…</option>'
-      +       products.map(function (p) { return '<option value="' + p.id + '">' + escapeHtml(p.brand + ' · ' + p.model + ' (' + p.ref + ')') + ' — ' + Store.formatCOP(p.price) + '</option>'; }).join('')
-      +     '</select>'
+      +   '<label class="block"><span>¿Qué vas a subastar?</span>'
+      +     '<div style="display:flex;gap:18px;margin-top:6px">'
+      +       '<label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer"><input type="radio" name="itemSource" value="catalog" checked> Reloj del catálogo</label>'
+      +       '<label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer"><input type="radio" name="itemSource" value="external"> Reloj externo (de segunda)</label>'
+      +     '</div>'
       +   '</label>'
+      +   '<div id="catalogBlock">'
+      +     '<label class="block"><span>Producto del catálogo</span>'
+      +       '<select name="productId">'
+      +         '<option value="">Selecciona un producto…</option>'
+      +         products.map(function (p) { return '<option value="' + p.id + '">' + escapeHtml(p.brand + ' · ' + p.model + ' (' + p.ref + ')') + ' — ' + Store.formatCOP(p.price) + '</option>'; }).join('')
+      +       '</select>'
+      +     '</label>'
+      +   '</div>'
+      +   '<div id="externalBlock" style="display:none">'
+      +     '<label class="block"><span>Reloj a subastar (marca y modelo)</span><input type="text" name="itemTitle" placeholder="Ej. Rolex Datejust 36 (usado)"></label>'
+      +     '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">'
+      +       '<label><span>Referencia / serie (opcional)</span><input type="text" name="itemRef" placeholder="Ref. o serie"></label>'
+      +       '<label><span>Foto del reloj</span><input type="file" name="itemImageFile" accept="image/*"></label>'
+      +     '</div>'
+      +     '<label class="block"><span>Descripción (opcional)</span><textarea name="itemDescription" rows="2" placeholder="Estado, detalles, accesorios que incluye…"></textarea></label>'
+      +     '<p class="form-hint">Este reloj no queda en el catálogo: es solo para esta subasta.</p>'
+      +   '</div>'
       +   '<div class="form-grid three">'
       +     '<label><span>Precio inicial (COP)</span><input type="number" name="startPrice" required min="1000" step="1000"></label>'
       +     '<label><span>Reserva (COP)</span><input type="number" name="reservePrice" min="0" step="1000"></label>'
@@ -1283,30 +1329,69 @@
     modal.querySelector('.cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
+    // Alterna entre reloj del catálogo y reloj externo.
+    var catalogBlock = modal.querySelector('#catalogBlock');
+    var externalBlock = modal.querySelector('#externalBlock');
+    function isExternal() { return modal.querySelector('[name=itemSource]:checked').value === 'external'; }
+    Array.prototype.forEach.call(modal.querySelectorAll('[name=itemSource]'), function (r) {
+      r.addEventListener('change', function () {
+        var ext = isExternal();
+        catalogBlock.style.display = ext ? 'none' : '';
+        externalBlock.style.display = ext ? '' : 'none';
+      });
+    });
+
     // prefill precio inicial cuando se elige producto
     modal.querySelector('[name=productId]').addEventListener('change', function (e) {
       var p = Store.getProduct(e.target.value);
       if (p && !modal.querySelector('[name=startPrice]').value) modal.querySelector('[name=startPrice]').value = Math.round(p.price * 0.7 / 1000) * 1000;
     });
 
+    function readFileAsDataURL(file) {
+      return new Promise(function (resolve, reject) {
+        if (!file) return resolve(null);
+        var reader = new FileReader();
+        reader.onload = function () { resolve(reader.result); };
+        reader.onerror = function () { reject(new Error('No se pudo leer la foto')); };
+        reader.readAsDataURL(file);
+      });
+    }
+
     modal.querySelector('#auctionForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var fd = new FormData(this);
+      var form = this;
+      var fd = new FormData(form);
+      var external = isExternal();
+      // Validaciones según el origen del reloj.
+      if (!external && !fd.get('productId')) { toast('Elige un producto del catálogo', 'danger'); return; }
+      if (external && !String(fd.get('itemTitle') || '').trim()) { toast('Escribe la marca y el modelo del reloj', 'danger'); return; }
       var startsAt = fd.get('startsAt');
-      Store.createAuction({
-        productId: fd.get('productId'),
-        startPrice: Number(fd.get('startPrice')),
-        reservePrice: Number(fd.get('reservePrice')) || Number(fd.get('startPrice')),
-        durationHours: Number(fd.get('durationHours')),
-        minIncrementPct: Number(fd.get('minIncrementPct')),
-        antiSnipeSeconds: Number(fd.get('antiSnipeSeconds')),
-        extensionSeconds: Number(fd.get('extensionSeconds')),
-        startsAt: startsAt ? new Date(startsAt).toISOString() : undefined
+      var submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Creando…'; }
+
+      readFileAsDataURL(external ? fd.get('itemImageFile') : null).then(function (imageDataUrl) {
+        return Store.createAuction({
+          productId: external ? undefined : fd.get('productId'),
+          itemTitle: external ? fd.get('itemTitle') : undefined,
+          itemRef: external ? fd.get('itemRef') : undefined,
+          itemImage: external ? imageDataUrl : undefined,
+          itemDescription: external ? fd.get('itemDescription') : undefined,
+          startPrice: Number(fd.get('startPrice')),
+          reservePrice: Number(fd.get('reservePrice')) || Number(fd.get('startPrice')),
+          durationHours: Number(fd.get('durationHours')),
+          minIncrementPct: Number(fd.get('minIncrementPct')),
+          antiSnipeSeconds: Number(fd.get('antiSnipeSeconds')),
+          extensionSeconds: Number(fd.get('extensionSeconds')),
+          startsAt: startsAt ? new Date(startsAt).toISOString() : undefined
+        });
       }).then(function () {
         toast('Subasta creada', 'success');
         close();
         renderTab('subastas', document.getElementById('tab-subastas'));
-      }).catch(function (err) { toast(err.message, 'danger'); });
+      }).catch(function (err) {
+        toast(err.message, 'danger');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Crear subasta'; }
+      });
     });
   }
 
