@@ -1311,6 +1311,7 @@
       +   '<div class="form-grid three">'
       +     '<label><span>Precio inicial (COP)</span><input type="number" name="startPrice" required min="1000" step="1000"></label>'
       +     '<label><span>Reserva (COP)</span><input type="number" name="reservePrice" min="0" step="1000"></label>'
+      +     '<p class="form-hint" style="grid-column:1/-1;margin:0">El <strong>precio inicial</strong> es solo una sugerencia (' + (cfg.auctionDefaults.startPricePct != null ? cfg.auctionDefaults.startPricePct : 50) + '% del precio de tienda). Puedes escribir uno <strong>más bajo</strong> para que la subasta arranque más atractiva. La <strong>reserva</strong> es el precio mínimo real: si nadie la alcanza, la subasta cierra sin ganador (así proteges tu piso aunque el arranque sea bajo).</p>'
       +     '<label><span>Duración (horas)</span><input type="number" name="durationHours" value="' + cfg.auctionDefaults.durationHours + '" required min="0.1" step="0.1"></label>'
       +     '<label><span>Incremento mín. (%)</span><input type="number" name="minIncrementPct" value="' + cfg.auctionDefaults.minIncrementPct + '" min="1" step="1"></label>'
       +     '<label><span>Anti-snipe (seg.)</span><input type="number" name="antiSnipeSeconds" value="' + cfg.auctionDefaults.antiSnipeSeconds + '" min="0" step="10"></label>'
@@ -1341,10 +1342,13 @@
       });
     });
 
-    // prefill precio inicial cuando se elige producto
+    // Precio inicial SUGERIDO = un % del precio comercial (configurable en
+    // Ajustes). Es solo una sugerencia editable: Cristian puede escribir un
+    // precio más bajo para que la subasta arranque más llamativa.
+    var startPct = (cfg.auctionDefaults && cfg.auctionDefaults.startPricePct != null ? cfg.auctionDefaults.startPricePct : 50) / 100;
     modal.querySelector('[name=productId]').addEventListener('change', function (e) {
       var p = Store.getProduct(e.target.value);
-      if (p && !modal.querySelector('[name=startPrice]').value) modal.querySelector('[name=startPrice]').value = Math.round(p.price * 0.7 / 1000) * 1000;
+      if (p && !modal.querySelector('[name=startPrice]').value) modal.querySelector('[name=startPrice]').value = Math.round(p.price * startPct / 1000) * 1000;
     });
 
     function readFileAsDataURL(file) {
@@ -1640,11 +1644,13 @@
       +   '</fieldset>'
       +   '<fieldset><legend>Subastas (valores por defecto)</legend>'
       +     '<div class="form-grid">'
+      +       '<label><span>Precio inicial sugerido (% del precio de tienda)</span><input type="number" name="startPricePct" value="' + (cfg.auctionDefaults.startPricePct != null ? cfg.auctionDefaults.startPricePct : 50) + '" min="1" max="100" step="1"></label>'
       +       '<label><span>Duración (horas)</span><input type="number" name="durationHours" value="' + cfg.auctionDefaults.durationHours + '" min="0.1" step="0.1"></label>'
       +       '<label><span>Incremento mín. (%)</span><input type="number" name="minIncrementPct" value="' + cfg.auctionDefaults.minIncrementPct + '" min="1" step="1"></label>'
       +       '<label><span>Anti-snipe (seg.)</span><input type="number" name="antiSnipeSeconds" value="' + cfg.auctionDefaults.antiSnipeSeconds + '" min="0" step="10"></label>'
       +       '<label><span>Extensión (seg.)</span><input type="number" name="extensionSeconds" value="' + cfg.auctionDefaults.extensionSeconds + '" min="0" step="10"></label>'
       +     '</div>'
+      +     '<p class="form-hint">El <strong>precio inicial sugerido</strong> es con cuánto arranca el autocompletado al crear una subasta (más bajo = arranque más llamativo). Es solo una sugerencia: al crear cada subasta puedes escribir el precio que quieras.</p>'
       +   '</fieldset>'
       +   '<fieldset><legend>Hero (landing)</legend>'
       +     '<label class="block"><span>Título (admite HTML)</span><textarea name="heroTitle" rows="2">' + escapeHtml(cfg.hero.title) + '</textarea></label>'
@@ -1673,6 +1679,7 @@
           wompiIntegritySecret: (fd.get('wompiIntegritySecret') || '').trim()
         },
         auctionDefaults: {
+          startPricePct: Number(fd.get('startPricePct')) || 50,
           durationHours: Number(fd.get('durationHours')),
           minIncrementPct: Number(fd.get('minIncrementPct')),
           antiSnipeSeconds: Number(fd.get('antiSnipeSeconds')),

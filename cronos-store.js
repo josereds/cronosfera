@@ -476,7 +476,11 @@
       durationHours: 24,
       minIncrementPct: 5,
       antiSnipeSeconds: 60,
-      extensionSeconds: 120
+      extensionSeconds: 120,
+      // % del precio comercial con el que se sugiere el precio inicial al crear
+      // una subasta. Más bajo = arranque más llamativo. Cristian lo ajusta
+      // desde el panel; igual puede escribir cualquier precio a mano.
+      startPricePct: 50
     },
     hero: {
       eyebrow: 'Marketplace de relojería · Colombia',
