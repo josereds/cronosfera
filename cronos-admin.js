@@ -1138,6 +1138,7 @@
           + '<td class="mono small">' + ends.toLocaleString('es-CO') + '</td>'
           + '<td class="actions">'
           +    '<button class="icon-action bids" title="Ver pujas">☰</button>'
+          +    (status !== 'closed' ? '<button class="icon-action edit-auction" title="Editar precio">✎</button>' : '')
           +    (status === 'live' ? '<button class="icon-action close" title="Cerrar ahora">■</button>' : '')
           +    '<button class="icon-action delete" title="Eliminar">×</button>'
           + '</td>'
@@ -1153,6 +1154,10 @@
       var id = tr.getAttribute('data-id');
       var a = Store.getAuction(id);
       if (!a) return;
+      if (e.target.matches('.edit-auction')) {
+        openAuctionEditModal(id, pane);
+        return;
+      }
       if (e.target.matches('.bids') || (!e.target.closest('.actions') && !e.target.closest('.thumb-cell'))) {
         openAuctionBidsModal(id);
         return;
@@ -1174,6 +1179,74 @@
         }
       }
     });
+  }
+
+  // Editar el precio inicial y la reserva de una subasta. Solo se habilita si
+  // está PROGRAMADA y sin pujas (chequeo de UI); la validación real ocurre en
+  // el servidor al guardar (Store.updateAuctionPricing), por si arranca o entra
+  // una puja con el formulario abierto.
+  function openAuctionEditModal(auctionId, pane) {
+    var a = Store.getAuction(auctionId);
+    if (!a) return;
+    var p = Store.auctionProduct(a);
+    var status = Store.getAuctionStatus(a);
+    var bidCount = Store.getBidsForAuction(auctionId).length;
+    var editable = status === 'scheduled' && bidCount === 0;
+
+    var lockReason = '';
+    if (!editable) {
+      if (status === 'closed') lockReason = 'Esta subasta ya cerró.';
+      else if (bidCount > 0) lockReason = 'Esta subasta ya tiene pujas (' + bidCount + ').';
+      else if (status === 'live') lockReason = 'Esta subasta ya está en curso (en vivo).';
+      else lockReason = 'Esta subasta no se puede editar.';
+    }
+
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal' });
+    var dis = editable ? '' : ' disabled';
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>Editar subasta · ' + escapeHtml(p ? (p.model ? p.brand + ' · ' + p.model : p.brand) : 'Subasta') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + (editable
+          ? '<p class="form-hint" style="margin-top:0">Puedes cambiar el <strong>precio inicial</strong> y la <strong>reserva</strong> porque la subasta está programada y aún no tiene pujas.</p>'
+          : '<div class="form-hint" style="margin-top:0;padding:12px 14px;border-radius:10px;background:color-mix(in oklab, var(--danger) 12%, transparent);border:1px solid color-mix(in oklab, var(--danger) 35%, transparent)">🔒 <strong>' + escapeHtml(lockReason) + '</strong><br>El precio inicial y la reserva solo se pueden cambiar <strong>antes de que la subasta arranque</strong> y <strong>mientras no tenga pujas</strong>.</div>')
+      + '<form id="auctionEditForm">'
+      +   '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">'
+      +     '<label><span>Precio inicial (COP)</span><input type="number" name="startPrice" value="' + (a.startPrice != null ? a.startPrice : '') + '" min="1000" step="1000"' + dis + '></label>'
+      +     '<label><span>Reserva (COP)</span><input type="number" name="reservePrice" value="' + (a.reservePrice != null ? a.reservePrice : '') + '" min="0" step="1000"' + dis + '></label>'
+      +   '</div>'
+      +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cerrar</button>' + (editable ? '<button type="submit" class="btn-primary">Guardar cambios</button>' : '') + '</div>'
+      + '</form>';
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    if (editable) {
+      modal.querySelector('#auctionEditForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var fd = new FormData(this);
+        var sp = Number(fd.get('startPrice'));
+        var rpRaw = fd.get('reservePrice');
+        var rp = (rpRaw === '' || rpRaw == null) ? sp : Number(rpRaw);
+        if (!sp || sp < 1000) { toast('El precio inicial debe ser al menos 1.000', 'danger'); return; }
+        var btn = modal.querySelector('button[type=submit]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+        // La validación real (estado + pujas, con bloqueo de fila) la hace el
+        // servidor: si la subasta arrancó o recibió una puja recién, rechaza.
+        Store.updateAuctionPricing(auctionId, sp, rp).then(function () {
+          toast('Precio actualizado', 'success');
+          close();
+          renderTab('subastas', pane || document.getElementById('tab-subastas'));
+        }).catch(function (err) {
+          toast(err.message, 'danger');
+          if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+        });
+      });
+    }
   }
 
   function openAuctionBidsModal(auctionId) {

@@ -1126,6 +1126,22 @@
     });
   }
 
+  // Editar precio inicial y reserva de una subasta PROGRAMADA sin pujas. La
+  // validación real (estado + conteo de pujas, con bloqueo de fila) vive en la
+  // función de servidor update_scheduled_auction_pricing: aquí solo se invoca,
+  // así el chequeo ocurre al momento de guardar y no se puede saltar desde la UI.
+  function updateAuctionPricing(id, startPrice, reservePrice) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.rpc('update_scheduled_auction_pricing', {
+      p_auction_id: id,
+      p_start_price: Math.round(Number(startPrice)),
+      p_reserve_price: Math.round(Number(reservePrice))
+    }).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydrateAuctions().then(function () { return res.data; });
+    });
+  }
+
   function deleteAuction(id) {
     if (!sb) return Promise.reject(new Error('Backend no disponible'));
     return sb.from('auctions').delete().eq('id', id).then(function (res) {
@@ -1390,6 +1406,7 @@
     auctionProduct: auctionProduct,
     createAuction: createAuction,
     updateAuction: updateAuction,
+    updateAuctionPricing: updateAuctionPricing,
     deleteAuction: deleteAuction,
     minNextBid: minNextBid,
     placeBid: placeBid,
