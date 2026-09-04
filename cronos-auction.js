@@ -46,6 +46,70 @@
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
   }
 
+  // ---------- Aviso "te superaron la puja" ----------
+  // Mientras la persona tenga la página abierta (aunque esté en otra pestaña), el
+  // sondeo detecta que dejó de ser líder y le avisa: banner en pantalla y, si dio
+  // permiso, notificación del navegador. Si cierra el navegador no llega nada —
+  // para ese caso está el aviso manual por WhatsApp desde el panel.
+  var lastLeader = {}; // auctionId -> id del líder en el sondeo anterior
+
+  function requestNotifyPermission() {
+    if (!global.Notification) return;
+    if (global.Notification.permission === 'default') {
+      try { global.Notification.requestPermission(); } catch (e) {}
+    }
+  }
+
+  function checkOutbid(auction, user) {
+    if (!auction || !user) return;
+    var prev = lastLeader[auction.id];
+    var leaderNow = auction.currentBidderId || null;
+    lastLeader[auction.id] = leaderNow;
+    // En el primer render no hay con qué comparar: solo se registra.
+    if (prev === undefined) return;
+    // Avisa únicamente si antes el líder era esta persona y ahora es otra.
+    if (prev === user.id && leaderNow && leaderNow !== user.id) showOutbidAlert(auction);
+  }
+
+  function showOutbidAlert(auction) {
+    var name = itemTitle(findProduct(auction));
+    var amount = global.Store.formatCOP(auction.currentBid);
+
+    // Notificación del navegador: llega aunque la pestaña esté en segundo plano.
+    if (global.Notification && global.Notification.permission === 'granted') {
+      try {
+        var n = new global.Notification('Te superaron la puja · Cronosfera', {
+          body: name + ' — la puja va en ' + amount,
+          tag: 'outbid-' + auction.id
+        });
+        n.onclick = function () { global.focus(); n.close(); };
+      } catch (e) { /* algunos navegadores bloquean el constructor */ }
+    }
+
+    // Banner dentro de la página. Se monta en <body> y no dentro del contenedor
+    // del detalle, porque ese se reescribe completo en cada sondeo.
+    var old = document.getElementById('outbidAlert');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var box = document.createElement('div');
+    box.id = 'outbidAlert';
+    box.setAttribute('role', 'alert');
+    box.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:9999;'
+      + 'max-width:min(92vw,460px);display:flex;gap:12px;align-items:flex-start;padding:14px 16px;'
+      + 'border-radius:12px;background:#20232a;color:#f2efe9;border:1px solid #c0483f;'
+      + 'box-shadow:0 12px 32px rgba(0,0,0,.45);font-size:14px';
+    box.innerHTML = ''
+      + '<div style="font-size:20px;line-height:1">⚠️</div>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-weight:600;margin-bottom:2px">Te superaron la puja</div>'
+      +   '<div style="opacity:.85">' + escapeHtml(name) + ' — la puja va en <strong>' + amount + '</strong></div>'
+      + '</div>'
+      + '<button type="button" aria-label="Cerrar" style="background:none;border:0;color:inherit;font-size:20px;line-height:1;cursor:pointer;opacity:.7">×</button>';
+    box.querySelector('button').addEventListener('click', function () {
+      if (box.parentNode) box.parentNode.removeChild(box);
+    });
+    document.body.appendChild(box);
+  }
+
   function statusBadge(status) {
     if (status === 'live') return '<span class="auc-badge live"><span class="pulse"></span>En vivo</span>';
     if (status === 'scheduled') return '<span class="auc-badge scheduled">Programada</span>';
@@ -129,6 +193,9 @@
     var bids = global.Store.getBidsForAuction(auction.id);
     var user = global.Store.currentUser();
     var minNext = global.Store.minNextBid(auction);
+
+    // Corre en cada sondeo: si esta persona dejó de ser líder, se le avisa.
+    checkOutbid(auction, user);
 
     var title = itemTitle(p);
     var ref = p ? p.ref : '';
@@ -263,10 +330,14 @@
       var submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
       global.Store.placeBid(auction.id, amount).then(function (updated) {
+        // Se pide el permiso justo aquí: es el momento en que a la persona le
+        // empieza a importar que le avisen si la superan.
+        requestNotifyPermission();
         // Re-render para actualizar historial y minNext
         renderAuctionDetail(updated, container);
         var nextMsg = container.querySelector('.bid-msg');
-        if (nextMsg) nextMsg.innerHTML = '<div class="bid-ok">✓ Puja registrada: ' + global.Store.formatCOP(amount) + '</div>';
+        if (nextMsg) nextMsg.innerHTML = '<div class="bid-ok">✓ Puja registrada: ' + global.Store.formatCOP(amount)
+          + '<br><span style="opacity:.8;font-weight:400">Te avisamos aquí mismo si alguien te supera. Deja esta pestaña abierta para recibir el aviso.</span></div>';
       }).catch(function (ex) {
         msg.innerHTML = '<div class="bid-err">' + escapeHtml(ex.message) + '</div>';
         if (submitBtn) submitBtn.disabled = false;

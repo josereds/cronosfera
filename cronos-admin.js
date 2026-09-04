@@ -1283,18 +1283,38 @@
       seenBidder[b.userId] = true;
       ranking.push(b);
     });
+    // Datos para armar el mensaje de "te superaron" que se manda por WhatsApp.
+    var itemName = p ? (p.model ? p.brand + ' · ' + p.model : p.brand) : 'la subasta';
+    var auctionUrl = window.location.origin + '/subastas.html?id=' + encodeURIComponent(a.id);
+
     var rankingHtml = ranking.map(function (b, i) {
       var u = Store.getUser(b.userId);
       var rankLabel = i === 0 ? (status === 'closed' ? 'Ganador' : 'Líder') : (i + 1) + 'º';
       var rankClass = i === 0 ? 'approved' : 'scheduled';
       var waDigits = u && u.phone ? String(u.phone).replace(/\D/g, '') : '';
-      var waHref = waDigits ? 'https://wa.me/' + (waDigits.length <= 10 ? '57' : '') + waDigits : '';
+      var waHref = '';
+      var waLabel = 'WhatsApp';
+      if (waDigits) {
+        var waBase = 'https://wa.me/' + (waDigits.length <= 10 ? '57' : '') + waDigits;
+        if (i === 0) {
+          waHref = waBase;
+        } else {
+          // A quien ya fue superado se le manda el aviso con el mensaje listo:
+          // Cristian solo abre y le da enviar.
+          var firstName = (u && u.name) ? String(u.name).trim().split(/\s+/)[0] : '';
+          var msg = 'Hola ' + firstName + ', te escribimos de Cronosfera 👋\n\n'
+            + 'Tu puja por ' + itemName + ' fue superada. La puja actual va en ' + Store.formatCOP(a.currentBid) + '.\n\n'
+            + 'Si quieres seguir participando, entra aquí:\n' + auctionUrl;
+          waHref = waBase + '?text=' + encodeURIComponent(msg);
+          waLabel = 'Avisar que lo superaron';
+        }
+      }
       return '<tr>'
         + '<td><span class="status-pill ' + rankClass + '">' + rankLabel + '</span></td>'
         + '<td><strong>' + escapeHtml(u ? u.name : 'Postor') + '</strong><div class="row-meta">CC ' + escapeHtml(u ? (u.taxId || '—') : '—') + ' · ' + escapeHtml(u ? (u.email || '') : '') + '</div></td>'
         + '<td class="mono">' + escapeHtml(u ? (u.phone || '—') : '—') + '</td>'
         + '<td class="mono accent">' + Store.formatCOP(b.amount) + '</td>'
-        + '<td>' + (waHref ? '<a href="' + waHref + '" target="_blank" rel="noopener" class="mini-link">WhatsApp</a>' : '<span class="row-meta">sin teléfono</span>') + '</td>'
+        + '<td>' + (waHref ? '<a href="' + waHref + '" target="_blank" rel="noopener" class="mini-link">' + waLabel + '</a>' : '<span class="row-meta">sin teléfono</span>') + '</td>'
         + '</tr>';
     }).join('');
     var rankingSection = ranking.length === 0 ? '' : ''
