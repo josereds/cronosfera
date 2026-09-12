@@ -25,20 +25,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:           oklch(97% 0.008 80);
-      --bg-warm:      oklch(95% 0.012 80);
-      --surface:      oklch(100% 0 0);
-      --surface-2:    oklch(98% 0.006 80);
-      --fg:           oklch(22% 0.005 250);
-      --fg-soft:      oklch(34% 0.005 250);
-      --muted:        oklch(52% 0.006 250);
-      --muted-2:      oklch(64% 0.006 250);
-      --border:       oklch(88% 0.006 250);
-      --border-soft:  oklch(93% 0.006 250);
-      --accent:       oklch(52% 0.08 60);
-      --accent-deep:  oklch(42% 0.08 60);
-      --accent-soft:  oklch(90% 0.05 65);
-      --success:      oklch(48% 0.10 155);
+      --bg: #f8f5ef;
+      --bg-warm: #f3eee6;
+      --surface: #ffffff;
+      --surface-2: #fbf8f4;
+      --fg: #191b1d;
+      --fg-soft: #36383a;
+      --muted: #66696c;
+      --muted-2: #898c90;
+      --border: #d5d8db;
+      --border-soft: #e5e8ec;
+      --accent: #8b5d37;
+      --accent-deep: #6c411a;
+      --accent-soft: #f6d8bc;
+      --success: #236e44;
       --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
       --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
@@ -46,6 +46,28 @@
       --shadow:    0 4px 16px rgba(20, 22, 28, 0.05);
       --shadow-lg: 0 18px 50px rgba(20, 22, 28, 0.10);
       --r: 8px; --r-lg: 14px;
+    }
+
+    /* Los valores de arriba son respaldo en hex para navegadores previos a 2023.
+       Donde oklch() si se soporta, se usan los colores originales (identicos a antes).
+       Sin esto, en un equipo viejo TODOS los colores quedaban invalidos. */
+    @supports (color: oklch(0% 0 0)) {
+      :root {
+      --bg: oklch(97% 0.008 80);
+      --bg-warm: oklch(95% 0.012 80);
+      --surface: oklch(100% 0 0);
+      --surface-2: oklch(98% 0.006 80);
+      --fg: oklch(22% 0.005 250);
+      --fg-soft: oklch(34% 0.005 250);
+      --muted: oklch(52% 0.006 250);
+      --muted-2: oklch(64% 0.006 250);
+      --border: oklch(88% 0.006 250);
+      --border-soft: oklch(93% 0.006 250);
+      --accent: oklch(52% 0.08 60);
+      --accent-deep: oklch(42% 0.08 60);
+      --accent-soft: oklch(90% 0.05 65);
+      --success: oklch(48% 0.10 155);
+      }
     }
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
@@ -671,6 +693,7 @@
     }
   </style>
   <link rel="stylesheet" href="cronos-ui.css">
+  <script src="cronos-safety.js"></script>
 </head>
 <body>
 

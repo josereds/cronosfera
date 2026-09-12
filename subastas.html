@@ -17,22 +17,22 @@
   <style>
     /* ====== Dark luxe tokens ====== */
     :root {
-      --bg:           oklch(14% 0.008 250);
-      --bg-warm:      oklch(17% 0.010 250);
-      --surface:      oklch(20% 0.010 250);
-      --surface-2:    oklch(24% 0.012 250);
-      --fg:           oklch(96% 0.005 80);
-      --fg-soft:      oklch(82% 0.005 80);
-      --muted:        oklch(60% 0.008 80);
-      --muted-2:      oklch(48% 0.008 80);
-      --border:       oklch(30% 0.008 250);
-      --border-soft:  oklch(24% 0.006 250);
-      --accent:       oklch(78% 0.10 75);
-      --accent-deep:  oklch(68% 0.12 70);
-      --accent-soft:  oklch(28% 0.06 70);
-      --danger:       oklch(64% 0.18 25);
-      --success:      oklch(70% 0.12 155);
-      --info:         oklch(70% 0.10 230);
+      --bg: #07090c;
+      --bg-warm: #0c1014;
+      --surface: #13161a;
+      --surface-2: #1b2025;
+      --fg: #f3f1ee;
+      --fg-soft: #c6c4c0;
+      --muted: #83807b;
+      --muted-2: #605d59;
+      --border: #2b2e32;
+      --border-soft: #1d2022;
+      --accent: #ddae6c;
+      --accent-deep: #c78a3b;
+      --accent-soft: #3b2301;
+      --danger: #e55551;
+      --success: #59b47d;
+      --info: #54aad1;
       --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
       --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
@@ -42,6 +42,30 @@
       --r-sm: 4px;
       --r:    8px;
       --r-lg: 14px;
+    }
+
+    /* Los valores de arriba son respaldo en hex para navegadores previos a 2023.
+       Donde oklch() si se soporta, se usan los colores originales (identicos a antes).
+       Sin esto, en un equipo viejo TODOS los colores quedaban invalidos. */
+    @supports (color: oklch(0% 0 0)) {
+      :root {
+      --bg: oklch(14% 0.008 250);
+      --bg-warm: oklch(17% 0.010 250);
+      --surface: oklch(20% 0.010 250);
+      --surface-2: oklch(24% 0.012 250);
+      --fg: oklch(96% 0.005 80);
+      --fg-soft: oklch(82% 0.005 80);
+      --muted: oklch(60% 0.008 80);
+      --muted-2: oklch(48% 0.008 80);
+      --border: oklch(30% 0.008 250);
+      --border-soft: oklch(24% 0.006 250);
+      --accent: oklch(78% 0.10 75);
+      --accent-deep: oklch(68% 0.12 70);
+      --accent-soft: oklch(28% 0.06 70);
+      --danger: oklch(64% 0.18 25);
+      --success: oklch(70% 0.12 155);
+      --info: oklch(70% 0.10 230);
+      }
     }
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
@@ -452,8 +476,10 @@
     .site-footer .links a:hover { color: var(--accent); }
 
     /* ====== reveal animation ====== */
-    [data-aos] { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s ease; }
-    [data-aos].in { opacity: 1; transform: none; }
+    /* Visible por defecto, misma razon que .reveal en index.html: la animacion solo corre si cronos-safety.js marco <html class=js>. */
+    [data-aos] { opacity: 1; transform: none; }
+    html.js [data-aos] { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s ease; }
+    html.js [data-aos].in { opacity: 1; transform: none; }
 
     @media (max-width: 720px) {
       .header-inner { gap: 16px; height: 64px; }
@@ -461,8 +487,30 @@
       .auc-hero { padding: 48px 0 32px; }
       .container { padding: 0 20px; }
     }
+
+    /* Esqueletos de carga: mientras los datos viajan, el visitante ve que algo
+       esta pasando. Antes, con la cache vacia, se pintaba de una el mensaje
+       "Aun no hay subastas", que era mentira durante la carga. */
+    .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    .sk-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+    .sk-media { height: 200px; background: var(--surface-2); }
+    .sk-body { padding: 18px; }
+    .sk-line { height: 12px; border-radius: 6px; background: var(--surface-2); margin-bottom: 10px; }
+    .sk-line.w80 { width: 80%; } .sk-line.w60 { width: 60%; } .sk-line.w40 { width: 40%; }
+    .sk-shimmer { position: relative; overflow: hidden; }
+    .sk-shimmer::after {
+      content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+      animation: skShimmer 1.4s infinite;
+    }
+    @keyframes skShimmer { 100% { transform: translateX(100%); } }
+    .load-error { text-align: center; padding: 64px 24px; }
+    .load-error h3 { font-family: var(--font-display); font-size: 24px; font-weight: 500; margin-bottom: 10px; }
+    .load-error p { color: var(--muted); margin-bottom: 22px; }
+    .load-error .detail { font-size: 12px; opacity: .5; margin-top: 16px; word-break: break-word; }
   </style>
   <link rel="stylesheet" href="cronos-ui.css">
+  <script src="cronos-safety.js"></script>
 </head>
 <body>
 
@@ -630,9 +678,53 @@
         Auction.renderDetail(a, document.getElementById('detailMount'));
       }
 
+      // ---- Estados de carga ----
+      function skeletonHtml() {
+        var card = '<div class="sk-card sk-shimmer"><div class="sk-media"></div>'
+          + '<div class="sk-body"><div class="sk-line w40"></div><div class="sk-line w80"></div>'
+          + '<div class="sk-line w60"></div></div></div>';
+        return '<section class="auc-section"><div class="container">'
+          + '<div class="sk-grid">' + card + card + card + '</div></div></section>';
+      }
+
+      function showLoadError(msg, detail) {
+        content.innerHTML = '<section class="auc-section"><div class="container">'
+          + '<div class="load-error">'
+          +   '<h3>' + msg + '</h3>'
+          +   '<p>Revisa tu conexion e intenta de nuevo.</p>'
+          +   '<button class="btn-primary" id="retryLoad">Reintentar</button>'
+          +   (detail ? '<div class="detail">' + String(detail) + '</div>' : '')
+          + '</div></div></section>';
+        var b = document.getElementById('retryLoad');
+        if (b) b.onclick = function () { window.location.reload(); };
+      }
+
       // routing
-      if (detailId) renderDetailPage();
-      else renderList();
+      var painted = false;
+      function paint() { painted = true; if (detailId) renderDetailPage(); else renderList(); }
+
+      if (Store.getAuctions().length > 0) {
+        paint();                      // ya hay cache de una visita anterior
+      } else {
+        content.innerHTML = skeletonHtml();   // primera visita: esqueleto
+      }
+
+      // Si el servidor no responde en 12s, no dejamos al usuario mirando el esqueleto.
+      var loadTimer = setTimeout(function () {
+        if (!painted) showLoadError('La conexion esta tardando demasiado.');
+      }, 12000);
+
+      (Store.ready ? Store.ready() : Promise.resolve()).then(function () {
+        clearTimeout(loadTimer);
+        var st = Store.syncStatus ? Store.syncStatus() : { ok: true };
+        // Solo es error si ademas no hay NADA que mostrar; si hay cache, preferimos
+        // pintar datos viejos antes que un error.
+        if (st.ok === false && Store.getAuctions().length === 0) {
+          showLoadError('No pudimos cargar las subastas.', st.error);
+        } else {
+          paint();
+        }
+      });
 
       // re-render en cambios de Store (ej: puja recibida)
       Store.subscribe(function () {

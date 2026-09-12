@@ -13,22 +13,22 @@
   <style>
     /* ====== Dark luxe tokens (estándar Cronosfera) ====== */
     :root {
-      --bg:           oklch(14% 0.008 250);
-      --bg-warm:      oklch(17% 0.010 250);
-      --surface:      oklch(20% 0.010 250);
-      --surface-2:    oklch(24% 0.012 250);
-      --fg:           oklch(96% 0.005 80);
-      --fg-soft:      oklch(82% 0.005 80);
-      --muted:        oklch(60% 0.008 80);
-      --muted-2:      oklch(48% 0.008 80);
-      --border:       oklch(30% 0.008 250);
-      --border-soft:  oklch(24% 0.006 250);
-      --accent:       oklch(78% 0.10 75);
-      --accent-deep:  oklch(68% 0.12 70);
-      --accent-soft:  oklch(28% 0.06 70);
-      --danger:       oklch(64% 0.18 25);
-      --success:      oklch(70% 0.12 155);
-      --info:         oklch(70% 0.10 230);
+      --bg: #07090c;
+      --bg-warm: #0c1014;
+      --surface: #13161a;
+      --surface-2: #1b2025;
+      --fg: #f3f1ee;
+      --fg-soft: #c6c4c0;
+      --muted: #83807b;
+      --muted-2: #605d59;
+      --border: #2b2e32;
+      --border-soft: #1d2022;
+      --accent: #ddae6c;
+      --accent-deep: #c78a3b;
+      --accent-soft: #3b2301;
+      --danger: #e55551;
+      --success: #59b47d;
+      --info: #54aad1;
       --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
       --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
@@ -38,6 +38,30 @@
       --r-sm: 4px;
       --r:    8px;
       --r-lg: 14px;
+    }
+
+    /* Los valores de arriba son respaldo en hex para navegadores previos a 2023.
+       Donde oklch() si se soporta, se usan los colores originales (identicos a antes).
+       Sin esto, en un equipo viejo TODOS los colores quedaban invalidos. */
+    @supports (color: oklch(0% 0 0)) {
+      :root {
+      --bg: oklch(14% 0.008 250);
+      --bg-warm: oklch(17% 0.010 250);
+      --surface: oklch(20% 0.010 250);
+      --surface-2: oklch(24% 0.012 250);
+      --fg: oklch(96% 0.005 80);
+      --fg-soft: oklch(82% 0.005 80);
+      --muted: oklch(60% 0.008 80);
+      --muted-2: oklch(48% 0.008 80);
+      --border: oklch(30% 0.008 250);
+      --border-soft: oklch(24% 0.006 250);
+      --accent: oklch(78% 0.10 75);
+      --accent-deep: oklch(68% 0.12 70);
+      --accent-soft: oklch(28% 0.06 70);
+      --danger: oklch(64% 0.18 25);
+      --success: oklch(70% 0.12 155);
+      --info: oklch(70% 0.10 230);
+      }
     }
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
@@ -268,6 +292,7 @@
     .card-foot a:hover { text-decoration: underline; }
   </style>
   <link rel="stylesheet" href="cronos-ui.css">
+  <script src="cronos-safety.js"></script>
 </head>
 <body>
   <main class="login-shell">

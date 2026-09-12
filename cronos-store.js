@@ -242,7 +242,8 @@
     return fetchAllRows(function () {
       return sb.from('auctions').select('*').order('id');
     }).then(function (res) {
-      if (res.error) { console.error('[Store] hidratando auctions', res.error); return; }
+      if (res.error) { markSync(false, res.error); console.error('[Store] hidratando auctions', res.error); return; }
+      markSync(true, null);
       writeIfChanged(NS.auctions, res.data.map(mapAuctionFromDb));
     });
   }
@@ -1327,6 +1328,14 @@
     };
   }
 
+  // Estado de la ultima sincronizacion con el servidor. Permite distinguir
+  // "no hay datos" de "no pudimos cargarlos", que antes se veian igual: vacio.
+  var lastSync = { ok: null, error: null, at: 0 };
+  function markSync(ok, err) {
+    lastSync = { ok: !!ok, error: err ? String(err.message || err) : null, at: Date.now() };
+  }
+  function syncStatus() { return lastSync; }
+
   // ---------- bootstrap ----------
 
   // Store.ready() resuelve cuando ya se confirmó contra Supabase si hay
@@ -1340,10 +1349,20 @@
     // anterior, o vacío la primera vez); hydrateAll()/refreshProfile() traen
     // la verdad compartida y, junto con scheduleEmit(), hacen que todo lo que
     // esté suscrito a Store.subscribe() se vuelva a pintar solo.
-    readyPromise = Promise.all([refreshProfile(), hydrateAll()]);
+    // .catch() obligatorio: si la red falla, Promise.all se rechaza y TODA pagina
+    // que haga Store.ready().then(...) se queda sin ejecutar su callback (ademas de
+    // disparar un unhandledrejection). ready() debe resolver SIEMPRE; el resultado
+    // real se consulta con Store.syncStatus().
+    readyPromise = Promise.all([refreshProfile(), hydrateAll()])
+      .then(function () { if (lastSync.ok === null) markSync(true, null); })
+      ['catch'](function (err) {
+        markSync(false, err);
+        console.error('[Store] fallo al cargar datos', err);
+      });
     initRealtime();
   } else {
     ensureLocalFallbackSeed();
+    markSync(false, new Error('No se pudo conectar con el servidor de datos'));
     readyPromise = Promise.resolve();
   }
   function ready() { return readyPromise; }
@@ -1436,6 +1455,7 @@
     // utilidades
     subscribe: subscribe,
     ready: ready,
+    syncStatus: syncStatus,
     formatCOP: function (v) { return '$' + Number(v || 0).toLocaleString('es-CO'); },
     now: nowIso
   };
