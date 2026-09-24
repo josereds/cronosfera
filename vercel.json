@@ -4,6 +4,12 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "cronosfera-beta.vercel.app" }],
+      "destination": "https://cronosfera.co/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "cronosfera-beta.vercel.app" }],
       "destination": "https://cronosfera.co/:path*",
