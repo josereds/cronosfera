@@ -13,4 +13,4 @@ Disallow: /checkout.html
 Disallow: /og-image
 Disallow: /og-image.html
 
-Sitemap: https://cronosfera-beta.vercel.app/sitemap.xml
+Sitemap: https://cronosfera.co/sitemap.xml
