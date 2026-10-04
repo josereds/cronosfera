@@ -1,0 +1,185 @@
+/* ============================================================
+   Cronosfera · Banner de promociones
+   ------------------------------------------------------------
+   Se carga en el home y en el panel (vista previa), por eso trae
+   sus propios tokens con los MISMOS valores del home: el panel
+   tiene paleta clara y no debe teñir la vista previa.
+   ============================================================ */
+.promos,
+.promo-preview {
+  --pr-surface: #13161a;
+  --pr-border: #2b2e32;
+  --pr-fg: #f3f1ee;
+  --pr-muted: #a8a49e;
+  --pr-accent: #ddae6c;
+  --pr-accent-deep: #c78a3b;
+  --pr-ink: #07090c;
+  --pr-dot: rgba(243, 241, 238, 0.28);
+  --pr-radius: 14px;
+  --pr-radius-btn: 8px;
+  --pr-h: 200px;
+  --pr-font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --pr-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+/* Mismos colores que el home cuando el navegador soporta oklch(). */
+@supports (color: oklch(0% 0 0)) {
+  .promos,
+  .promo-preview {
+    --pr-surface: oklch(20% 0.010 250);
+    --pr-border: oklch(30% 0.008 250);
+    --pr-fg: oklch(96% 0.005 80);
+    --pr-accent: oklch(78% 0.10 75);
+    --pr-accent-deep: oklch(68% 0.12 70);
+    --pr-ink: oklch(14% 0.008 250);
+  }
+}
+
+.promos[hidden] { display: none !important; }
+.promos { padding: 28px 0 4px; }
+
+.promo-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-radius: var(--pr-radius);
+}
+.promo-track::-webkit-scrollbar { display: none; }
+
+.promo-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  height: var(--pr-h);           /* alto fijo: sin saltos al cargar la imagen */
+  background: var(--pr-surface);
+  border: 1px solid var(--pr-border);
+  border-radius: var(--pr-radius);
+  overflow: hidden;
+  font-family: var(--pr-font-body);
+}
+.promo-media { position: relative; background: #0c0e11; }
+.promo-media img,
+.promo-noimg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.promo-body {
+  min-width: 0;
+  padding: 24px 32px;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 8px;
+  color: var(--pr-fg);
+}
+.promo-body .eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--pr-accent);
+}
+.promo-body .eyebrow::before {
+  content: ""; width: 18px; height: 1px; background: var(--pr-accent); display: inline-block;
+}
+.promo-title {
+  margin: 0;
+  font-family: var(--pr-font-display);
+  font-weight: 500;
+  font-size: 30px; line-height: 1.08;
+  letter-spacing: -0.005em;
+  max-width: 640px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.promo-text {
+  margin: 0;
+  color: var(--pr-muted);
+  font-size: 14px; line-height: 1.5;
+  max-width: 560px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+/* Misma tipografia y radio que los botones del hero; el dorado es el unico acento. */
+.promo-cta {
+  align-self: flex-start;
+  margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px;
+  font-family: var(--pr-font-body);
+  font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+  border-radius: var(--pr-radius-btn);
+  border: 1px solid transparent;
+  background: var(--pr-accent);
+  color: var(--pr-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.promo-cta:hover { background: var(--pr-accent-deep); transform: translateY(-1px); }
+.promo-cta:focus-visible { outline: 2px solid var(--pr-accent); outline-offset: 2px; }
+
+/* Indicadores: el punto es pequeno, pero el area tactil es de 24px. */
+.promo-dots {
+  display: flex; justify-content: center; align-items: center;
+  gap: 2px;
+  height: 24px; margin-top: 8px;
+}
+.promo-dot {
+  width: 24px; height: 24px; padding: 0;
+  border: 0; background: none; cursor: pointer;
+  display: grid; place-items: center;
+}
+.promo-dot::before {
+  content: ""; width: 6px; height: 6px; border-radius: 3px;
+  background: var(--pr-dot);
+  transition: width 0.25s ease, background 0.25s ease;
+}
+.promo-dot[aria-current="true"]::before { width: 18px; background: var(--pr-accent); }
+.promos.is-single .promo-dots { display: none; }
+
+/* ---------- Espacio entre el hero y "Compra por marca" ----------
+   Con promociones, el banner ocupa la franja oscura que habia entre el hero
+   y la seccion de marcas: se recortan esos dos paddings para que la pagina
+   crezca poco. Sin promociones nada de esto aplica y el hueco queda igual. */
+body.has-promos .hero-content { padding-bottom: 48px; }
+body.has-promos #marcas { padding-top: 56px; }
+
+@media (max-width: 1100px) {
+  .promo-slide { grid-template-columns: 300px minmax(0, 1fr); }
+  body.has-promos .hero-content { padding-bottom: 40px; }
+}
+
+@media (max-width: 700px) {
+  .promos,
+  .promo-preview { --pr-h: 176px; }
+  .promo-slide { grid-template-columns: 38% minmax(0, 1fr); }
+  .promo-body { padding: 14px 16px; gap: 5px; }
+  .promo-body .eyebrow { font-size: 10px; letter-spacing: 0.18em; }
+  .promo-body .eyebrow::before { width: 12px; }
+  .promo-title { font-size: 21px; }
+  .promo-text { font-size: 12.5px; line-height: 1.45; }
+  .promo-cta { padding: 9px 13px; font-size: 12px; margin-top: 2px; }
+  .promo-dots { margin-top: 6px; }
+  body.has-promos .hero-content { padding-bottom: 22px; }
+  .promos { padding-top: 18px; }
+  body.has-promos #marcas { padding-top: 28px; }
+}
+
+/* Vista previa "Móvil" del panel: mismos valores que el bloque de 700px, pero
+   aplicados por clase, porque el panel se usa en pantalla grande. */
+.promo-preview.is-mobile { --pr-h: 176px; width: 360px; max-width: 100%; }
+.promo-preview.is-mobile .promo-slide { grid-template-columns: 38% minmax(0, 1fr); }
+.promo-preview.is-mobile .promo-body { padding: 14px 16px; gap: 5px; }
+.promo-preview.is-mobile .promo-body .eyebrow { font-size: 10px; letter-spacing: 0.18em; }
+.promo-preview.is-mobile .promo-body .eyebrow::before { width: 12px; }
+.promo-preview.is-mobile .promo-title { font-size: 21px; }
+.promo-preview.is-mobile .promo-text { font-size: 12.5px; line-height: 1.45; }
+.promo-preview.is-mobile .promo-cta { padding: 9px 13px; font-size: 12px; margin-top: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-cta, .promo-dot::before { transition: none; }
+}
