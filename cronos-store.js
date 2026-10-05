@@ -23,7 +23,8 @@
     counters: 'cronos:counters',
     meta: 'cronos:meta',
     cart: 'cronos:cart',
-    orders: 'cronos:orders'
+    orders: 'cronos:orders',
+    promotions: 'cronos:promotions'
   };
 
   // ---------- Supabase (backend compartido) ----------
@@ -259,6 +260,29 @@
   // Re-consulta subastas + pujas (para el sondeo en vivo de la página de
   // subastas). Solo dispara re-render si algo cambió (writeIfChanged).
   function syncAuctions() { return Promise.all([hydrateAuctions(), hydrateBids()]); }
+  // ---------- promociones del home ----------
+  function mapPromotionFromDb(r) {
+    return {
+      id: r.id, title: r.title || '', body: r.body || '', imageUrl: r.image_url || '',
+      linkUrl: r.link_url || '', linkKind: r.link_kind || '', linkRef: r.link_ref || '',
+      ctaLabel: r.cta_label || '', active: !!r.active,
+      startsAt: r.starts_at || null, endsAt: r.ends_at || null,
+      sortOrder: r.sort_order || 0, createdAt: r.created_at, updatedAt: r.updated_at
+    };
+  }
+  // Para el publico, RLS ya devuelve solo las vigentes; para el admin, todas.
+  // Si la tabla aun no existe (migracion sin correr) se ignora en silencio:
+  // el home simplemente no muestra la seccion.
+  function hydratePromotions() {
+    if (!sb) return Promise.resolve();
+    return fetchAllRows(function () {
+      return sb.from('promotions').select('*').order('sort_order').order('created_at').order('id');
+    }).then(function (res) {
+      if (res.error) { console.warn('[Store] promociones no disponibles', res.error.message); return; }
+      writeIfChanged(NS.promotions, res.data.map(mapPromotionFromDb));
+    });
+  }
+
   function hydrateConfig() {
     if (!sb) return Promise.resolve();
     return sb.from('config').select('data').eq('id', 1).single().then(function (res) {
@@ -304,7 +328,7 @@
   function hydrateAll() {
     return Promise.all([
       hydrateProducts(), hydrateAuctions(), hydrateBids(), hydrateConfig(),
-      hydrateWholesale(), hydrateOrders(), hydrateUsers()
+      hydrateWholesale(), hydrateOrders(), hydrateUsers(), hydratePromotions()
     ]);
   }
 
@@ -695,7 +719,7 @@
   // las que llegan como data URL base64 (fotos nuevas elegidas en el panel).
   // Esto evita que las fotos vuelvan a guardarse como texto pesado en la base
   // o en el navegador, que fue lo que llenó el localStorage.
-  function ensureImageStored(image) {
+  function ensureImageStored(image, folder) {
     if (!sb || !image || image.indexOf('data:') !== 0) return Promise.resolve(image || null);
     var m = image.match(/^data:(.*?);base64,(.*)$/);
     if (!m) return Promise.resolve(image);
@@ -707,7 +731,7 @@
     for (var i = 0; i < len; i++) u8[i] = bstr.charCodeAt(i);
     var blob = new Blob([u8], { type: mime });
     var id = (global.crypto && global.crypto.randomUUID) ? global.crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
-    var path = 'products/' + id + '.' + ext;
+    var path = (folder || 'products') + '/' + id + '.' + ext;
     return sb.storage.from('product-images').upload(path, blob, { contentType: mime, upsert: false }).then(function (res) {
       if (res.error) throw new Error('No se pudo subir la foto: ' + res.error.message);
       return sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
@@ -1143,6 +1167,84 @@
     });
   }
 
+  // ---------- promociones: lectura y gestion ----------
+  function getPromotions() { return read(NS.promotions, []); }
+
+  // Vigente = activa y dentro de su rango. El servidor ya filtra para el
+  // publico; esto vuelve a filtrar en el navegador para que una promo que
+  // vence mientras la pagina esta abierta (o la cache de una visita anterior)
+  // no se muestre.
+  function isPromotionLive(pr, nowMs) {
+    var now = nowMs || Date.now();
+    if (!pr || !pr.active) return false;
+    if (pr.startsAt && new Date(pr.startsAt).getTime() > now) return false;
+    if (pr.endsAt && new Date(pr.endsAt).getTime() <= now) return false;
+    return true;
+  }
+  function getActivePromotions() {
+    return getPromotions().filter(function (pr) { return isPromotionLive(pr); });
+  }
+
+  function savePromotion(data) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return ensureImageStored(data.imageUrl, 'promos').then(function (imageUrl) {
+      var row = {
+        title: String(data.title || '').trim(),
+        body: String(data.body || '').trim() || null,
+        image_url: imageUrl || null,
+        link_url: data.linkUrl || null,
+        link_kind: data.linkKind || null,
+        link_ref: data.linkRef || null,
+        cta_label: String(data.ctaLabel || '').trim() || null,
+        active: !!data.active,
+        starts_at: data.startsAt || null,
+        ends_at: data.endsAt || null,
+        updated_at: nowIso()
+      };
+      if (!row.title) throw new Error('La promocion necesita un titulo');
+      var q;
+      if (data.id) {
+        q = sb.from('promotions').update(row).eq('id', data.id).select().single();
+      } else {
+        // Las nuevas van al final de la lista.
+        var max = getPromotions().reduce(function (m, pr) { return Math.max(m, pr.sortOrder || 0); }, 0);
+        row.sort_order = max + 1;
+        q = sb.from('promotions').insert(row).select().single();
+      }
+      return q.then(function (res) {
+        if (res.error) throw new Error(mapAuthError(res.error));
+        return hydratePromotions().then(function () { return mapPromotionFromDb(res.data); });
+      });
+    });
+  }
+
+  function deletePromotion(id) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    return sb.from('promotions').delete().eq('id', id).then(function (res) {
+      if (res.error) throw new Error(mapAuthError(res.error));
+      return hydratePromotions();
+    });
+  }
+
+  // Reordena moviendo una promo un puesto arriba (-1) o abajo (+1). Se
+  // reescribe sort_order de toda la lista con valores consecutivos para que
+  // no queden empates de datos viejos.
+  function movePromotion(id, dir) {
+    if (!sb) return Promise.reject(new Error('Backend no disponible'));
+    var list = getPromotions().slice();
+    var i = list.findIndex(function (pr) { return pr.id === id; });
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return Promise.resolve();
+    var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    return Promise.all(list.map(function (pr, k) {
+      return sb.from('promotions').update({ sort_order: k + 1 }).eq('id', pr.id);
+    })).then(function (results) {
+      var bad = results.filter(function (r) { return r.error; })[0];
+      if (bad) throw new Error(mapAuthError(bad.error));
+      return hydratePromotions();
+    });
+  }
+
   function deleteAuction(id) {
     if (!sb) return Promise.reject(new Error('Backend no disponible'));
     return sb.from('auctions').delete().eq('id', id).then(function (res) {
@@ -1427,6 +1529,14 @@
     updateAuction: updateAuction,
     updateAuctionPricing: updateAuctionPricing,
     deleteAuction: deleteAuction,
+    // promociones del home
+    getPromotions: getPromotions,
+    getActivePromotions: getActivePromotions,
+    isPromotionLive: isPromotionLive,
+    savePromotion: savePromotion,
+    deletePromotion: deletePromotion,
+    movePromotion: movePromotion,
+    hydratePromotions: hydratePromotions,
     minNextBid: minNextBid,
     placeBid: placeBid,
     closeAuction: closeAuction,

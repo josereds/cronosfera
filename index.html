@@ -1326,6 +1326,7 @@
     .auc-empty .btn { display: inline-flex; align-items: center; gap: 6px; }
   </style>
   <link rel="stylesheet" href="cronos-ui.css">
+  <link rel="stylesheet" href="cronos-promos.css">
   <script src="cronos-safety.js"></script>
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -1404,6 +1405,16 @@
         </div>
       </div>
 
+    </section>
+
+    <!-- ============================ PROMOCIONES ============================ -->
+    <!-- La gestiona Cristian desde el panel (pestana Promociones). Oculta si no
+         hay ninguna vigente; la pinta cronos-promos.js. -->
+    <section class="promos" id="promos" aria-label="Promociones" hidden>
+      <div class="container-wide">
+        <div class="promo-track"></div>
+        <div class="promo-dots"></div>
+      </div>
     </section>
 
     <!-- ============================== MARCAS ============================== -->
@@ -1676,6 +1687,7 @@
   <script src="cronos-auth.js"></script>
   <script src="cronos-ui.js"></script>
 <script src="cronos-cart.js"></script>
+  <script src="cronos-promos.js"></script>
   <script>
     // ============== Header scroll ==============
     var header = document.getElementById('siteHeader');
