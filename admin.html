@@ -766,18 +766,32 @@
     .modal textarea { font-family: var(--font-body); resize: vertical; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-soft); }
     .form-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
-    /* ---- Promociones: formulario con vista previa ---- */
-    .modal.promo-modal { max-width: 960px; }
-    .promo-modal .promo-link-ref { margin-top: 4px; }
-    .promo-modal .form-grid { margin-top: 14px; }
-    /* El checkbox no debe heredar el estilo de los campos (ancho 100% y etiqueta en mayusculas). */
-    .modal .promo-active { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; cursor: pointer; }
-    .modal .promo-active input { width: 18px; height: 18px; margin: 0; flex: 0 0 auto; accent-color: var(--accent); }
-    .modal .promo-active span { display: inline; margin: 0; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--fg); }
-    .promo-previews { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start;
-      margin-top: 18px; padding: 18px; border-radius: var(--r-lg); background: #0b0c0e; }
-    .promo-preview-label { display: block; margin-bottom: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #9a968f; }
-    .promo-preview a { pointer-events: none; }  /* en la vista previa el boton no navega */
+    /* ---- Promociones: productos en oferta del home ---- */
+    .promo-warn { margin: 0 0 18px; padding: 12px 14px; border-radius: var(--r); font-size: 13px; line-height: 1.5;
+      background: color-mix(in oklab, var(--danger) 10%, transparent); border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent); }
+    .promo-add { margin-bottom: 18px; }
+    .promo-add label span { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .promo-add input[type=search] { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); font-size: 14px; }
+    .promo-add input[type=search]:focus { outline: none; border-color: var(--accent); }
+    .promo-results { display: grid; gap: 6px; margin-top: 8px; }
+    .promo-result { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 10px; text-align: left;
+      border: 1px solid var(--border-soft); border-radius: var(--r); background: var(--surface); cursor: pointer; }
+    .promo-result:hover { border-color: var(--accent); }
+    .promo-result img, .promo-result-ph { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex: 0 0 auto; background: var(--surface-2); display: grid; place-items: center; }
+    .promo-result-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .promo-result-name strong { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .promo-result-name small { font-size: 12px; color: var(--muted); }
+    .promo-result-add { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+    .promo-pct { display: inline-flex; align-items: center; gap: 4px; }
+    .promo-pct input { width: 64px; padding: 7px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); text-align: right; font-size: 14px; }
+    .promo-pct input:focus { outline: none; border-color: var(--accent); }
+    .promo-note { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+    .promo-note.bad { color: var(--danger); }
+    .promo-admin-preview { margin-top: 22px; }
+    .promo-preview-label { display: block; margin-bottom: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .promo-preview-wrap { padding: 16px !important; border-radius: var(--r-lg); background: #0b0c0e; }
+    .promo-preview-wrap .promo-card { flex-basis: 320px; }
+    .promo-preview-wrap a { pointer-events: none; }  /* en la vista previa las tarjetas no navegan */
 
 
     /* ===== Requests ===== */

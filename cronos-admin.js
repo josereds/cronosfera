@@ -85,6 +85,16 @@
     });
   }
 
+  // Guarda el descuento propio del producto (en config) solo si cambio, asi
+  // editar un producto no reescribe la configuracion sin necesidad.
+  function saveOwnDiscount(saved, pd) {
+    var id = saved && saved.id;
+    if (!id) return Promise.resolve();
+    var cur = Store.getProductDiscount(id);
+    if (!!cur.active === !!pd.active && (Number(cur.pct) || 0) === (Number(pd.pct) || 0)) return Promise.resolve();
+    return Store.setProductDiscount(id, pd.active, pd.pct);
+  }
+
   function readDiscountField(fd, name) {
     return { active: !!fd.get(name + 'Active'), pct: Number(fd.get(name + 'Pct')) || 0 };
   }
@@ -870,7 +880,7 @@
       +     '</select></label>'
       +   '</div>'
       +   '<label class="block"><span>Descripción (opcional)</span><textarea name="description" rows="3">' + escapeHtml(p.description || '') + '</textarea></label>'
-      +   discountFieldHtml('discount', 'Descuento solo para este producto', { active: p.discountActive, pct: p.discountPct })
+      +   discountFieldHtml('discount', 'Descuento solo para este producto', Store.getProductDiscount(p.id))
       +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>'
       + '</form>';
     overlay.appendChild(modal);
@@ -924,10 +934,10 @@
         description: fd.get('description')
       });
       var pd = readDiscountField(fd, 'discount');
-      next.discountActive = pd.active;
-      next.discountPct = pd.pct;
       if (pendingImage !== undefined) next.image = pendingImage;
-      Store.saveProduct(next).then(function () {
+      Store.saveProduct(next).then(function (saved) {
+        return saveOwnDiscount(saved, pd);
+      }).then(function () {
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
         close();
         if (typeof onDone === 'function') onDone();
@@ -996,7 +1006,7 @@
       +     '<label><span>Etiqueta (opcional)</span><input name="tagLabel" value="' + escapeHtml(p.tag ? p.tag.label : '') + '" placeholder="ej. Más vendido"></label>'
       +     '<label><span>Variants (colores hex separados por coma)</span><input name="variants" value="' + escapeHtml((p.variants || []).join(',')) + '" placeholder="#1d2026,#c9a86a"></label>'
       +   '</div>'
-      +   discountFieldHtml('discount', 'Descuento solo para este producto', { active: p.discountActive, pct: p.discountPct })
+      +   discountFieldHtml('discount', 'Descuento solo para este producto', Store.getProductDiscount(p.id))
       +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>'
       + '</form>';
     overlay.appendChild(modal);
@@ -1063,9 +1073,9 @@
         variants: String(fd.get('variants') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean)
       };
       var pd = readDiscountField(fd, 'discount');
-      data.discountActive = pd.active;
-      data.discountPct = pd.pct;
-      Store.saveProduct(Object.assign({}, p, data)).then(function () {
+      Store.saveProduct(Object.assign({}, p, data)).then(function (saved) {
+        return saveOwnDiscount(saved, pd);
+      }).then(function () {
         toast(id ? 'Producto actualizado' : 'Producto creado', 'success');
         close();
         // Tras guardar, aterrizar en la carpeta de la marca del producto para ver el cambio.
@@ -1493,324 +1503,150 @@
     });
   }
 
-  // ============== PROMOCIONES (banner del home) ==============
-  // Bogota es UTC-5 todo el ano (sin horario de verano): las fechas del
-  // formulario se escriben en hora de Colombia y se guardan como timestamptz.
-  var BOGOTA_OFFSET_MS = -5 * 3600 * 1000;
-  function bogotaInputToIso(v) {
-    if (!v) return null;
-    var d = new Date(v + ':00-05:00');
-    return isNaN(d.getTime()) ? null : d.toISOString();
-  }
-  function isoToBogotaInput(iso) {
-    if (!iso) return '';
-    var d = new Date(new Date(iso).getTime() + BOGOTA_OFFSET_MS);
-    return d.toISOString().slice(0, 16);
-  }
-  function formatBogota(iso) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleString('es-CO', {
-      timeZone: 'America/Bogota', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'
-    });
-  }
-
-  function promoStatus(pr) {
-    var now = Date.now();
-    if (!pr.active) return { key: 'suspended', label: 'Inactiva' };
-    if (pr.endsAt && new Date(pr.endsAt).getTime() <= now) return { key: 'closed', label: 'Vencida' };
-    if (pr.startsAt && new Date(pr.startsAt).getTime() > now) return { key: 'scheduled', label: 'Programada' };
-    return { key: 'live', label: 'En el home' };
-  }
-
-  var PROMO_LINK_KINDS = [
-    { v: '', label: 'Sin botón' },
-    { v: 'tienda', label: 'La tienda (catálogo)', cta: 'Ver la tienda' },
-    { v: 'marca', label: 'Una marca', cta: 'Ver la marca' },
-    { v: 'producto', label: 'Un reloj', cta: 'Ver el reloj' },
-    { v: 'subasta', label: 'Una subasta', cta: 'Ver la subasta' },
-    { v: 'whatsapp', label: 'WhatsApp', cta: 'Escríbenos' },
-    { v: 'url', label: 'Otra dirección (URL)', cta: 'Ver más' }
-  ];
-  function promoKind(v) { return PROMO_LINK_KINDS.filter(function (k) { return k.v === v; })[0] || PROMO_LINK_KINDS[0]; }
-
-  // Convierte lo elegido en el formulario en el enlace final. Se guarda ya
-  // resuelto, asi el home no tiene que saber nada de productos ni subastas.
-  function resolvePromoLink(kind, ref) {
-    ref = String(ref || '').trim();
-    if (!kind) return '';
-    if (kind === 'tienda') return 'catalogo.html';
-    if (kind === 'marca') return ref ? 'catalogo.html?marca=' + encodeURIComponent(ref) : '';
-    if (kind === 'producto') return ref ? 'producto.html?id=' + encodeURIComponent(ref) : '';
-    if (kind === 'subasta') return ref ? 'subastas.html?id=' + encodeURIComponent(ref) : '';
-    if (kind === 'whatsapp') {
-      var num = String((Store.getConfig().payments || {}).whatsappNumber || '').replace(/\D/g, '');
-      if (!num) return '';
-      return 'https://wa.me/' + num + (ref ? '?text=' + encodeURIComponent(ref) : '');
-    }
-    if (kind === 'url') return /^https?:\/\//i.test(ref) ? ref : '';
-    return '';
+  // ============== PROMOCIONES (productos en oferta del home) ==============
+  // Cristian elige productos puntuales y les pone su descuento. Se guardan en
+  // config (Store.setPromoProductIds / Store.setProductDiscount), así el precio
+  // de oferta es el mismo en el home, el catálogo, la ficha y el carrito.
+  function promoProductName(p) {
+    return (p.brand ? p.brand + ' · ' : '') + (p.model || 'Producto');
   }
 
   function renderPromociones(pane) {
-    var list = Store.getPromotions();
+    var ids = Store.getPromoProductIds();
+    var items = ids.map(function (id) { return Store.getProduct(id); }).filter(Boolean);
+    var g = (Store.getDiscounts().global) || {};
+
+    var rows = items.length ? items.map(function (p, i) {
+      var own = Store.getProductDiscount(p.id);
+      var base = Store.baseDiscountPct(p);
+      var shown = Store.getPriceDisplay(p);
+      var notes = [];
+      if (p.stockStatus === 'out') notes.push('<span class="promo-note bad">Agotado: no sale en el home</span>');
+      if (own.active && own.pct > 0 && own.pct < base) {
+        notes.push('<span class="promo-note bad">Su ' + own.pct + '% es menor que el ' + base + '% que ya tenía: queda más caro</span>');
+      } else if (!(own.active && own.pct > 0) && base > 0) {
+        notes.push('<span class="promo-note">Sin descuento propio: usa el ' + base + '% general</span>');
+      } else if (!(own.active && own.pct > 0) && !(shown.off > 0)) {
+        notes.push('<span class="promo-note">Sin descuento: sale a precio normal</span>');
+      }
+      var thumb = p.image
+        ? '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(p.image) + '" alt="" loading="lazy"></td>'
+        : '<td class="thumb-cell"><span class="admin-thumb placeholder">◷</span></td>';
+      return '<tr data-id="' + escapeHtml(p.id) + '">'
+        + thumb
+        + '<td><strong>' + escapeHtml(promoProductName(p)) + '</strong>'
+        +   '<div class="row-meta">' + escapeHtml(p.ref || '') + '</div>' + notes.join('') + '</td>'
+        + '<td class="mono small">' + Store.formatCOP(p.price) + '</td>'
+        + '<td><label class="promo-pct"><input type="number" min="0" max="90" step="1" inputmode="numeric" value="' + (own.active && own.pct ? own.pct : '') + '" placeholder="0" aria-label="Descuento de ' + escapeHtml(promoProductName(p)) + '"><span>%</span></label></td>'
+        + '<td class="mono accent">' + Store.formatCOP(shown.price) + (shown.off > 0 ? '<div class="row-meta">-' + shown.off + '%</div>' : '') + '</td>'
+        + '<td class="actions">'
+        +   '<button class="icon-action move-up" title="Subir"' + (i === 0 ? ' disabled' : '') + '>↑</button>'
+        +   '<button class="icon-action move-down" title="Bajar"' + (i === items.length - 1 ? ' disabled' : '') + '>↓</button>'
+        +   '<button class="icon-action delete" title="Quitar de promociones">×</button>'
+        + '</td>'
+        + '</tr>';
+    }).join('') : '<tr><td colspan="6" class="empty-row">Aún no hay productos en promoción. Mientras la lista esté vacía, el home se ve como siempre.</td></tr>';
+
+    var visible = items.filter(function (p) { return p.stockStatus !== 'out'; });
+    var preview = (visible.length && window.CronosPromos)
+      ? '<div class="promo-admin-preview"><span class="promo-preview-label">Así se ve en el home</span>'
+        + '<div class="promos promo-preview-wrap"><div class="promo-track">'
+        + visible.map(function (p, i) { return CronosPromos.cardHtml(p, i); }).join('')
+        + '</div></div></div>'
+      : '';
 
     pane.innerHTML = ''
-      + '<div class="catalogo-head">'
-      +   '<p class="page-desc">Promociones y publicidad que salen en el home, debajo del video principal. '
-      +   'Se muestran solo si están activas y dentro de sus fechas (hora de Colombia). Si hay varias, rotan en un carrusel en el orden de esta lista.</p>'
-      +   '<button class="btn-primary" id="newPromo">+ Nueva promoción</button>'
+      + '<div class="catalogo-head"><p class="page-desc">Productos en oferta que salen en el home, en una franja pequeña debajo del video principal (aparte de "Productos destacados"). '
+      + 'Salen en el orden de esta lista; lo ideal es tener entre 2 y 8. El descuento que pongas aquí aplica en toda la tienda: catálogo, ficha del producto y carrito.</p></div>'
+      + (g.active && g.pct > 0
+          ? '<div class="promo-warn">Hay un <strong>descuento general del ' + g.pct + '%</strong> activo en toda la tienda. Si a un producto en promoción le pones un descuento menor, ese producto queda <strong>más caro</strong> que sin promoción.</div>'
+          : '')
+      + '<div class="promo-add">'
+      +   '<label class="block"><span>Agregar producto a promociones</span>'
+      +   '<input type="search" id="promoSearch" placeholder="Busca por marca, modelo o referencia (ej. Casio A100)" autocomplete="off"></label>'
+      +   '<div class="promo-results" id="promoResults"></div>'
       + '</div>'
-      + '<div class="admin-table-wrap">'
-      +   '<table class="admin-table" id="promoTable">'
-      +     '<thead><tr><th></th><th>Promoción</th><th>Estado</th><th>Fechas</th><th>Orden</th><th></th></tr></thead>'
-      +     '<tbody></tbody>'
-      +   '</table>'
-      + '</div>';
+      + '<div class="admin-table-wrap"><table class="admin-table" id="promoTable">'
+      +   '<thead><tr><th></th><th>Producto</th><th>Precio normal</th><th>Descuento</th><th>Precio en oferta</th><th></th></tr></thead>'
+      +   '<tbody>' + rows + '</tbody></table></div>'
+      + preview;
 
-    var tbody = pane.querySelector('#promoTable tbody');
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Aún no hay promociones. Mientras no haya ninguna activa, el home se ve como siempre.</td></tr>';
-    } else {
-      tbody.innerHTML = list.map(function (pr, i) {
-        var st = promoStatus(pr);
-        var dates = (pr.startsAt ? 'Desde ' + formatBogota(pr.startsAt) : 'Desde ya')
-          + '<div class="row-meta">' + (pr.endsAt ? 'Hasta ' + formatBogota(pr.endsAt) : 'Sin fecha de fin') + '</div>';
-        var thumb = pr.imageUrl
-          ? '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(pr.imageUrl) + '" alt="" loading="lazy"></td>'
-          : '<td class="thumb-cell"><span class="admin-thumb placeholder">▭</span></td>';
-        return '<tr data-id="' + pr.id + '">'
-          + thumb
-          + '<td><strong>' + escapeHtml(pr.title) + '</strong><div class="row-meta">'
-          +   escapeHtml(pr.linkUrl ? (pr.ctaLabel || 'Botón') + ' → ' + promoKind(pr.linkKind).label : 'Sin botón') + '</div></td>'
-          + '<td><span class="status-pill ' + st.key + '">' + st.label + '</span></td>'
-          + '<td class="small">' + dates + '</td>'
-          + '<td class="actions">'
-          +   '<button class="icon-action move-up" title="Subir"' + (i === 0 ? ' disabled' : '') + '>↑</button>'
-          +   '<button class="icon-action move-down" title="Bajar"' + (i === list.length - 1 ? ' disabled' : '') + '>↓</button>'
-          + '</td>'
-          + '<td class="actions">'
-          +   '<button class="icon-action toggle" title="' + (pr.active ? 'Desactivar' : 'Activar') + '">' + (pr.active ? '⏸' : '▶') + '</button>'
-          +   '<button class="icon-action edit-promo" title="Editar">✎</button>'
-          +   '<button class="icon-action delete" title="Eliminar">×</button>'
-          + '</td>'
-          + '</tr>';
-      }).join('');
+    function fail(err) { toast((err && err.message) || 'No se pudo guardar', 'danger'); }
+    function again(msg) { if (msg) toast(msg, 'success'); renderTab('promociones', pane); }
+
+    // ---- Buscador para agregar ----
+    var search = pane.querySelector('#promoSearch');
+    var results = pane.querySelector('#promoResults');
+    function norm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+    function paintResults() {
+      var q = norm(search.value).trim();
+      if (q.length < 2) { results.innerHTML = ''; return; }
+      var words = q.split(/\s+/);
+      var inList = {}; ids.forEach(function (id) { inList[id] = true; });
+      var found = Store.getProducts().filter(function (p) {
+        if (inList[p.id]) return false;
+        var hay = norm([p.brand, p.model, p.ref].join(' '));
+        return words.every(function (w) { return hay.indexOf(w) !== -1; });
+      }).slice(0, 8);
+      results.innerHTML = found.length
+        ? found.map(function (p) {
+            return '<button type="button" class="promo-result" data-id="' + escapeHtml(p.id) + '">'
+              + (p.image ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">' : '<span class="promo-result-ph">◷</span>')
+              + '<span class="promo-result-name"><strong>' + escapeHtml(promoProductName(p)) + '</strong>'
+              + '<small>' + escapeHtml(p.ref || '') + ' · ' + Store.formatCOP(p.price) + (p.stockStatus === 'out' ? ' · agotado' : '') + '</small></span>'
+              + '<span class="promo-result-add">+ Agregar</span></button>';
+          }).join('')
+        : '<p class="form-hint">Sin resultados para "' + escapeHtml(search.value) + '".</p>';
     }
+    search.addEventListener('input', paintResults);
+    results.addEventListener('click', function (e) {
+      var b = e.target.closest('.promo-result'); if (!b) return;
+      var id = b.getAttribute('data-id');
+      var p = Store.getProduct(id);
+      b.disabled = true;
+      Store.setPromoProductIds(ids.concat(id))
+        .then(function () { again((p ? promoProductName(p) : 'Producto') + ' agregado a promociones. Ponle su descuento en la tabla.'); })
+        .catch(fail);
+    });
 
-    pane.querySelector('#newPromo').addEventListener('click', function () { openPromotionModal(null, pane); });
-
+    // ---- Tabla: descuento, orden, quitar ----
+    var tbody = pane.querySelector('#promoTable tbody');
+    tbody.addEventListener('change', function (e) {
+      var input = e.target.closest('.promo-pct input'); if (!input) return;
+      var id = input.closest('tr').getAttribute('data-id');
+      var pct = Math.max(0, Math.min(90, Math.round(Number(input.value) || 0)));
+      input.disabled = true;
+      Store.setProductDiscount(id, pct > 0, pct)
+        .then(function () { again(pct > 0 ? 'Descuento del ' + pct + '% guardado' : 'Descuento quitado'); })
+        .catch(function (err) { input.disabled = false; fail(err); });
+    });
+    // Enter en el campo guarda sin tener que hacer clic afuera.
+    tbody.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.closest('.promo-pct input')) { e.preventDefault(); e.target.blur(); }
+    });
     tbody.addEventListener('click', function (e) {
-      var tr = e.target.closest('tr[data-id]'); if (!tr) return;
       var btn = e.target.closest('button'); if (!btn || btn.disabled) return;
-      var id = tr.getAttribute('data-id');
-      var pr = Store.getPromotions().filter(function (x) { return x.id === id; })[0];
-      if (!pr) return;
-      function done(msg) { toast(msg, 'success'); renderTab('promociones', pane); }
-      function fail(err) { toast(promoErrorMessage(err), 'danger'); }
-
-      if (btn.classList.contains('edit-promo')) { openPromotionModal(pr, pane); return; }
+      var id = btn.closest('tr').getAttribute('data-id');
+      var i = ids.indexOf(id);
       if (btn.classList.contains('move-up') || btn.classList.contains('move-down')) {
+        var j = i + (btn.classList.contains('move-up') ? -1 : 1);
+        if (i < 0 || j < 0 || j >= ids.length) return;
+        var next = ids.slice(); var tmp = next[i]; next[i] = next[j]; next[j] = tmp;
         btn.disabled = true;
-        Store.movePromotion(id, btn.classList.contains('move-up') ? -1 : 1).then(function () { done('Orden actualizado'); }).catch(fail);
-        return;
-      }
-      if (btn.classList.contains('toggle')) {
-        btn.disabled = true;
-        Store.savePromotion(Object.assign({}, pr, { active: !pr.active }))
-          .then(function () { done(pr.active ? 'Promoción desactivada: ya no sale en el home' : 'Promoción activada'); })
-          .catch(fail);
+        Store.setPromoProductIds(next).then(function () { again(); }).catch(fail);
         return;
       }
       if (btn.classList.contains('delete')) {
-        if (!confirmDialog('¿Eliminar la promoción "' + pr.title + '"? Esta acción no se puede deshacer.')) return;
-        Store.deletePromotion(id).then(function () { done('Promoción eliminada'); }).catch(fail);
+        var p = Store.getProduct(id);
+        var own = Store.getProductDiscount(id);
+        var msg = '¿Quitar "' + (p ? promoProductName(p) : 'este producto') + '" de promociones?'
+          + (own.active && own.pct > 0 ? '\n\nTambién se quita su descuento del ' + own.pct + '% (vuelve a su precio normal).' : '');
+        if (!confirmDialog(msg)) return;
+        Store.setPromoProductIds(ids.filter(function (x) { return x !== id; }))
+          .then(function () { return (own.active || own.pct) ? Store.setProductDiscount(id, false, 0) : null; })
+          .then(function () { again('Quitado de promociones'); })
+          .catch(fail);
       }
-    });
-  }
-
-  // Si la tabla aun no existe en Supabase el error es criptico; se traduce.
-  function promoErrorMessage(err) {
-    var m = String((err && err.message) || err || '');
-    if (/promotions|does not exist|schema cache|relation/i.test(m)) {
-      return 'Falta crear la tabla de promociones en Supabase (backend/09-promociones.sql).';
-    }
-    return m || 'No se pudo guardar la promoción';
-  }
-
-  function openPromotionModal(existing, pane) {
-    var pr = existing || { title: '', body: '', imageUrl: '', linkKind: '', linkRef: '', ctaLabel: '', active: true, startsAt: null, endsAt: null };
-    var draftImage = pr.imageUrl || '';   // data URL nueva o URL ya publicada
-
-    var brands = Store.getBrands().filter(function (b) { return b.count > 0; });
-    var products = Store.getWatchProducts().slice().sort(function (a, b) {
-      return (a.brand + a.model).localeCompare(b.brand + b.model, 'es');
-    });
-    var auctions = Store.getAuctions().filter(function (a) { return Store.getAuctionStatus(a) !== 'closed'; });
-    function productLabel(p) { return p.brand + ' · ' + p.model + (p.ref ? ' (' + p.ref + ')' : ''); }
-    var currentProduct = pr.linkKind === 'producto' ? Store.getProduct(pr.linkRef) : null;
-
-    var overlay = el('div', { class: 'modal-overlay' });
-    var modal = el('div', { class: 'modal promo-modal' });
-    modal.innerHTML = ''
-      + '<div class="modal-head"><h3>' + (existing ? 'Editar promoción' : 'Nueva promoción') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
-      + '<form id="promoForm" novalidate>'
-      +   '<label class="block"><span>Título *</span><input name="title" maxlength="80" required value="' + escapeHtml(pr.title) + '" placeholder="Ej. Este mes: 15% en relojes Casio"></label>'
-      +   '<label class="block"><span>Texto corto (opcional)</span><textarea name="body" rows="2" maxlength="160" placeholder="Una línea que explique la promoción">' + escapeHtml(pr.body) + '</textarea></label>'
-
-      +   '<label class="block"><span>Imagen</span><input type="file" name="image" accept="image/*"></label>'
-      +   '<p class="form-hint">Tamaño recomendado: <strong>1200 × 900 px</strong> (horizontal 4:3). Deja lo importante en el centro y no pongas texto dentro de la imagen: el título y el botón van aparte. Se comprime sola antes de subirse.</p>'
-
-      +   '<div class="form-grid">'
-      +     '<label><span>El botón lleva a…</span><select name="linkKind">'
-      +       PROMO_LINK_KINDS.map(function (k) { return '<option value="' + k.v + '"' + (k.v === (pr.linkKind || '') ? ' selected' : '') + '>' + k.label + '</option>'; }).join('')
-      +     '</select></label>'
-      +     '<label><span>Texto del botón</span><input name="ctaLabel" maxlength="28" value="' + escapeHtml(pr.ctaLabel) + '" placeholder="Ver promoción"></label>'
-      +   '</div>'
-      +   '<div class="promo-link-ref" data-kind="marca"><label class="block"><span>Marca</span><select name="ref_marca">'
-      +     brands.map(function (b) { return '<option value="' + escapeHtml(b.slug) + '"' + (pr.linkKind === 'marca' && pr.linkRef === b.slug ? ' selected' : '') + '>' + escapeHtml(b.name) + ' (' + b.count + ')</option>'; }).join('')
-      +   '</select></label></div>'
-      +   '<div class="promo-link-ref" data-kind="producto"><label class="block"><span>Reloj (escribe para buscar)</span>'
-      +     '<input name="ref_producto" list="promoProducts" autocomplete="off" value="' + escapeHtml(currentProduct ? productLabel(currentProduct) : '') + '" placeholder="Marca, modelo o referencia"></label>'
-      +     '<datalist id="promoProducts">' + products.map(function (p) { return '<option value="' + escapeHtml(productLabel(p)) + '"></option>'; }).join('') + '</datalist></div>'
-      +   '<div class="promo-link-ref" data-kind="subasta"><label class="block"><span>Subasta</span><select name="ref_subasta">'
-      +     (auctions.length ? auctions.map(function (a) {
-              var ap = Store.auctionProduct(a);
-              var name = ap ? (ap.model ? ap.brand + ' · ' + ap.model : ap.brand) : 'Subasta';
-              return '<option value="' + a.id + '"' + (pr.linkKind === 'subasta' && pr.linkRef === a.id ? ' selected' : '') + '>' + escapeHtml(name) + ' — ' + (Store.getAuctionStatus(a) === 'live' ? 'en vivo' : 'programada') + '</option>';
-            }).join('') : '<option value="">No hay subastas en vivo ni programadas</option>')
-      +   '</select></label></div>'
-      +   '<div class="promo-link-ref" data-kind="whatsapp"><label class="block"><span>Mensaje que llega por WhatsApp</span>'
-      +     '<textarea name="ref_whatsapp" rows="2" maxlength="300">' + escapeHtml(pr.linkKind === 'whatsapp' ? pr.linkRef : '') + '</textarea></label></div>'
-      +   '<div class="promo-link-ref" data-kind="url"><label class="block"><span>Dirección (empieza por https://)</span>'
-      +     '<input name="ref_url" maxlength="500" value="' + escapeHtml(pr.linkKind === 'url' ? pr.linkRef : '') + '" placeholder="https://"></label></div>'
-
-      +   '<div class="form-grid">'
-      +     '<label><span>Empieza (opcional)</span><input type="datetime-local" name="startsAt" value="' + isoToBogotaInput(pr.startsAt) + '"></label>'
-      +     '<label><span>Termina (opcional)</span><input type="datetime-local" name="endsAt" value="' + isoToBogotaInput(pr.endsAt) + '"></label>'
-      +   '</div>'
-      +   '<p class="form-hint">Fechas en <strong>hora de Colombia</strong>. Vacías = se muestra desde ya y no vence.</p>'
-      +   '<label class="promo-active"><input type="checkbox" name="active"' + (pr.active ? ' checked' : '') + '> <span>Activa (si está desmarcada no sale en el home, aunque esté dentro de sus fechas)</span></label>'
-
-      +   '<div class="promo-previews">'
-      +     '<div><span class="promo-preview-label">Vista previa · escritorio</span><div class="promo-preview" data-preview="desktop"><div class="promo-track"></div></div></div>'
-      +     '<div><span class="promo-preview-label">Vista previa · móvil</span><div class="promo-preview is-mobile" data-preview="mobile"><div class="promo-track"></div></div></div>'
-      +   '</div>'
-
-      +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">' + (existing ? 'Guardar cambios' : 'Publicar promoción') + '</button></div>'
-      + '</form>';
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-    setTimeout(function () { overlay.classList.add('in'); }, 10);
-    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
-    modal.querySelector('.modal-close').addEventListener('click', close);
-    modal.querySelector('.cancel').addEventListener('click', close);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
-
-    var form = modal.querySelector('#promoForm');
-
-    function productIdFromLabel(label) {
-      var p = products.filter(function (x) { return productLabel(x) === label; })[0];
-      return p ? p.id : '';
-    }
-    function currentRef(kind) {
-      var f = form.elements;
-      if (kind === 'marca') return f.ref_marca.value;
-      if (kind === 'producto') return productIdFromLabel(f.ref_producto.value);
-      if (kind === 'subasta') return f.ref_subasta.value;
-      if (kind === 'whatsapp') return f.ref_whatsapp.value.trim();
-      if (kind === 'url') return f.ref_url.value.trim();
-      return '';
-    }
-    function readDraft() {
-      var f = form.elements;
-      var kind = f.linkKind.value;
-      var ref = currentRef(kind);
-      return {
-        id: existing ? existing.id : null,
-        title: f.title.value.trim(),
-        body: f.body.value.trim(),
-        imageUrl: draftImage,
-        linkKind: kind,
-        linkRef: ref,
-        linkUrl: resolvePromoLink(kind, ref),
-        ctaLabel: f.ctaLabel.value.trim() || (kind ? promoKind(kind).cta : ''),
-        active: f.active.checked,
-        startsAt: bogotaInputToIso(f.startsAt.value),
-        endsAt: bogotaInputToIso(f.endsAt.value)
-      };
-    }
-
-    function syncLinkFields() {
-      var kind = form.elements.linkKind.value;
-      modal.querySelectorAll('.promo-link-ref').forEach(function (box) {
-        box.style.display = box.getAttribute('data-kind') === kind ? '' : 'none';
-      });
-      form.elements.ctaLabel.disabled = !kind;
-      form.elements.ctaLabel.placeholder = kind ? promoKind(kind).cta : 'Sin botón';
-      if (kind === 'whatsapp' && !form.elements.ref_whatsapp.value.trim()) {
-        form.elements.ref_whatsapp.value = 'Hola, vi la promoción "' + (form.elements.title.value.trim() || 'del mes') + '" en la página de Cronosfera y quiero más información.';
-      }
-    }
-
-    function paintPreview() {
-      if (!window.CronosPromos) return;
-      var d = readDraft();
-      var draft = Object.assign({}, d, { title: d.title || 'Título de la promoción' });
-      modal.querySelectorAll('.promo-preview .promo-track').forEach(function (t) {
-        t.innerHTML = CronosPromos.slideHtml(draft, 0);
-      });
-    }
-
-    form.addEventListener('input', paintPreview);
-    form.addEventListener('change', function (e) {
-      if (e.target.name === 'linkKind') syncLinkFields();
-      paintPreview();
-    });
-
-    form.elements.image.addEventListener('change', function () {
-      var file = this.files && this.files[0];
-      if (!file) return;
-      if (!/^image\//.test(file.type)) { toast('El archivo debe ser una imagen', 'danger'); return; }
-      resizeImageFile(file, 1600, 0.82).then(function (dataUrl) {
-        draftImage = dataUrl;
-        paintPreview();
-      }).catch(function (err) { toast(err.message, 'danger'); });
-    });
-
-    syncLinkFields();
-    paintPreview();
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var d = readDraft();
-      if (!d.title) { toast('Escribe un título', 'danger'); form.elements.title.focus(); return; }
-      if (d.linkKind && !d.linkUrl) {
-        var why = {
-          producto: 'Elige un reloj de la lista de sugerencias',
-          subasta: 'No hay una subasta seleccionada',
-          whatsapp: 'No hay número de WhatsApp configurado (Configuración → Pagos)',
-          url: 'La dirección debe empezar por https://',
-          marca: 'Elige una marca'
-        }[d.linkKind] || 'Completa el destino del botón';
-        toast(why, 'danger');
-        return;
-      }
-      if (d.startsAt && d.endsAt && new Date(d.endsAt) <= new Date(d.startsAt)) {
-        toast('La fecha de fin debe ser posterior a la de inicio', 'danger');
-        return;
-      }
-      var btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true; btn.textContent = 'Guardando…';
-      Store.savePromotion(d).then(function (saved) {
-        var st = promoStatus(saved);
-        toast(st.key === 'live' ? 'Promoción publicada en el home' : 'Promoción guardada (' + st.label.toLowerCase() + ')', 'success');
-        close();
-        renderTab('promociones', pane);
-      }).catch(function (err) {
-        toast(promoErrorMessage(err), 'danger');
-        btn.disabled = false; btn.textContent = existing ? 'Guardar cambios' : 'Publicar promoción';
-      });
     });
   }
 

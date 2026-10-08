@@ -1,0 +1,11 @@
+-- ============================================================
+--  Cronosfera · (OPCIONAL) quitar la tabla del banner de promociones
+--  ------------------------------------------------------------
+--  La primera version de "Promociones" era un banner de imagenes con su
+--  propia tabla (09-promociones.sql). Se reemplazo por una franja de
+--  PRODUCTOS en oferta, que guarda la lista y los descuentos en la
+--  configuracion del sitio (tabla config). La tabla promotions quedo sin
+--  uso y vacia. Borrarla es solo limpieza: el sitio funciona igual si se
+--  deja. Ejecutar en Supabase -> SQL Editor si se quiere eliminar.
+-- ============================================================
+drop table if exists public.promotions;
