@@ -1,185 +1,151 @@
 /* ============================================================
-   Cronosfera · Banner de promociones
+   Cronosfera · Productos en promoción (franja del home)
    ------------------------------------------------------------
-   Se carga en el home y en el panel (vista previa), por eso trae
-   sus propios tokens con los MISMOS valores del home: el panel
-   tiene paleta clara y no debe teñir la vista previa.
+   Más pequeña que "Productos destacados": tarjetas horizontales
+   de ~104px de alto en una sola fila deslizable.
    ============================================================ */
-.promos,
-.promo-preview {
+.promos {
   --pr-surface: #13161a;
   --pr-border: #2b2e32;
   --pr-fg: #f3f1ee;
   --pr-muted: #a8a49e;
+  --pr-muted-2: #83807b;
   --pr-accent: #ddae6c;
-  --pr-accent-deep: #c78a3b;
   --pr-ink: #07090c;
-  --pr-dot: rgba(243, 241, 238, 0.28);
   --pr-radius: 14px;
-  --pr-radius-btn: 8px;
-  --pr-h: 200px;
   --pr-font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --pr-font-body: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --pr-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
 }
-/* Mismos colores que el home cuando el navegador soporta oklch(). */
 @supports (color: oklch(0% 0 0)) {
-  .promos,
-  .promo-preview {
+  .promos {
     --pr-surface: oklch(20% 0.010 250);
     --pr-border: oklch(30% 0.008 250);
     --pr-fg: oklch(96% 0.005 80);
     --pr-accent: oklch(78% 0.10 75);
-    --pr-accent-deep: oklch(68% 0.12 70);
     --pr-ink: oklch(14% 0.008 250);
   }
 }
 
 .promos[hidden] { display: none !important; }
-.promos { padding: 28px 0 4px; }
+.promos { padding: 32px 0 0; font-family: var(--pr-font-body); }
+
+.promo-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 14px;
+}
+.promo-head .eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--pr-accent);
+}
+.promo-head .eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--pr-accent); display: inline-block; }
+
+.promo-navs { display: none; gap: 6px; }
+.promos.is-scrollable .promo-navs { display: flex; }
+.promo-nav {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--pr-border); background: none; color: var(--pr-fg);
+  cursor: pointer; transition: border-color .2s, opacity .2s;
+}
+.promo-nav svg { width: 14px; height: 14px; }
+.promo-nav:hover:not(:disabled) { border-color: var(--pr-accent); }
+.promo-nav:disabled { opacity: .3; cursor: default; }
 
 .promo-track {
-  display: flex;
+  display: flex; gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  border-radius: var(--pr-radius);
+  padding-bottom: 2px;
 }
 .promo-track::-webkit-scrollbar { display: none; }
 
-.promo-slide {
-  flex: 0 0 100%;
+/* 4 tarjetas visibles en escritorio. */
+.promo-card {
+  flex: 0 0 calc((100% - 3 * 14px) / 4);
+  min-width: 0;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
-  display: grid;
-  grid-template-columns: 360px minmax(0, 1fr);
-  height: var(--pr-h);           /* alto fijo: sin saltos al cargar la imagen */
+  display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center;
+  height: 104px;
   background: var(--pr-surface);
   border: 1px solid var(--pr-border);
   border-radius: var(--pr-radius);
   overflow: hidden;
-  font-family: var(--pr-font-body);
-}
-.promo-media { position: relative; background: #0c0e11; }
-.promo-media img,
-.promo-noimg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-.promo-body {
-  min-width: 0;
-  padding: 24px 32px;
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 8px;
   color: var(--pr-fg);
-}
-.promo-body .eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--pr-accent);
-}
-.promo-body .eyebrow::before {
-  content: ""; width: 18px; height: 1px; background: var(--pr-accent); display: inline-block;
-}
-.promo-title {
-  margin: 0;
-  font-family: var(--pr-font-display);
-  font-weight: 500;
-  font-size: 30px; line-height: 1.08;
-  letter-spacing: -0.005em;
-  max-width: 640px;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
-}
-.promo-text {
-  margin: 0;
-  color: var(--pr-muted);
-  font-size: 14px; line-height: 1.5;
-  max-width: 560px;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
-}
-/* Misma tipografia y radio que los botones del hero; el dorado es el unico acento. */
-.promo-cta {
-  align-self: flex-start;
-  margin-top: 4px;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 11px 18px;
-  font-family: var(--pr-font-body);
-  font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
-  border-radius: var(--pr-radius-btn);
-  border: 1px solid transparent;
-  background: var(--pr-accent);
-  color: var(--pr-ink);
   text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: border-color .2s, transform .2s;
 }
-.promo-cta:hover { background: var(--pr-accent-deep); transform: translateY(-1px); }
-.promo-cta:focus-visible { outline: 2px solid var(--pr-accent); outline-offset: 2px; }
+.promo-card:hover { border-color: var(--pr-accent); transform: translateY(-1px); }
+.promo-card:focus-visible { outline: 2px solid var(--pr-accent); outline-offset: 2px; }
 
-/* Indicadores: el punto es pequeno, pero el area tactil es de 24px. */
-.promo-dots {
-  display: flex; justify-content: center; align-items: center;
-  gap: 2px;
-  height: 24px; margin-top: 8px;
+.promo-thumb { position: relative; width: 104px; height: 104px; background: #fff; }
+.promo-thumb img, .promo-noimg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
 }
-.promo-dot {
-  width: 24px; height: 24px; padding: 0;
-  border: 0; background: none; cursor: pointer;
-  display: grid; place-items: center;
+.promo-noimg { background: #1b2025; }
+.promo-badge {
+  position: absolute; top: 6px; left: 6px;
+  padding: 3px 6px; border-radius: 5px;
+  background: var(--pr-accent); color: var(--pr-ink);
+  font: 600 11px/1 var(--pr-font-body); letter-spacing: .02em;
 }
-.promo-dot::before {
-  content: ""; width: 6px; height: 6px; border-radius: 3px;
-  background: var(--pr-dot);
-  transition: width 0.25s ease, background 0.25s ease;
+
+.promo-info { min-width: 0; padding: 0 14px; display: flex; flex-direction: column; gap: 3px; }
+.promo-brand {
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--pr-muted-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.promo-dot[aria-current="true"]::before { width: 18px; background: var(--pr-accent); }
-.promos.is-single .promo-dots { display: none; }
+.promo-name {
+  font-family: var(--pr-font-display); font-size: 18px; line-height: 1.15; font-weight: 500;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.promo-price { display: flex; align-items: baseline; gap: 8px; flex-wrap: nowrap; min-width: 0; overflow: hidden; margin-top: 2px; }
+.promo-price .now { font-size: 14px; font-weight: 600; color: var(--pr-fg); font-variant-numeric: tabular-nums; }
+.promo-price .now { white-space: nowrap; }
+.promo-price .was { font-size: 12px; color: var(--pr-muted-2); text-decoration: line-through; font-variant-numeric: tabular-nums;
+  white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.promo-price .tag { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--pr-accent); }
 
 /* ---------- Espacio entre el hero y "Compra por marca" ----------
-   Con promociones, el banner ocupa la franja oscura que habia entre el hero
-   y la seccion de marcas: se recortan esos dos paddings para que la pagina
-   crezca poco. Sin promociones nada de esto aplica y el hueco queda igual. */
+   La franja ocupa el hueco oscuro que había entre las dos secciones; con
+   promociones se recortan esos paddings para que la página crezca poco. */
 body.has-promos .hero-content { padding-bottom: 48px; }
-body.has-promos #marcas { padding-top: 56px; }
+body.has-promos #marcas { padding-top: 64px; }
 
+@media (max-width: 1300px) {
+  .promo-card { flex-basis: calc((100% - 2 * 14px) / 3); }
+}
 @media (max-width: 1100px) {
-  .promo-slide { grid-template-columns: 300px minmax(0, 1fr); }
   body.has-promos .hero-content { padding-bottom: 40px; }
 }
-
-@media (max-width: 700px) {
-  .promos,
-  .promo-preview { --pr-h: 176px; }
-  .promo-slide { grid-template-columns: 38% minmax(0, 1fr); }
-  .promo-body { padding: 14px 16px; gap: 5px; }
-  .promo-body .eyebrow { font-size: 10px; letter-spacing: 0.18em; }
-  .promo-body .eyebrow::before { width: 12px; }
-  .promo-title { font-size: 21px; }
-  .promo-text { font-size: 12.5px; line-height: 1.45; }
-  .promo-cta { padding: 9px 13px; font-size: 12px; margin-top: 2px; }
-  .promo-dots { margin-top: 6px; }
-  body.has-promos .hero-content { padding-bottom: 22px; }
-  .promos { padding-top: 18px; }
-  body.has-promos #marcas { padding-top: 28px; }
+@media (max-width: 1000px) {
+  .promo-card { flex-basis: calc((100% - 14px) / 2); }
 }
-
-/* Vista previa "Móvil" del panel: mismos valores que el bloque de 700px, pero
-   aplicados por clase, porque el panel se usa en pantalla grande. */
-.promo-preview.is-mobile { --pr-h: 176px; width: 360px; max-width: 100%; }
-.promo-preview.is-mobile .promo-slide { grid-template-columns: 38% minmax(0, 1fr); }
-.promo-preview.is-mobile .promo-body { padding: 14px 16px; gap: 5px; }
-.promo-preview.is-mobile .promo-body .eyebrow { font-size: 10px; letter-spacing: 0.18em; }
-.promo-preview.is-mobile .promo-body .eyebrow::before { width: 12px; }
-.promo-preview.is-mobile .promo-title { font-size: 21px; }
-.promo-preview.is-mobile .promo-text { font-size: 12.5px; line-height: 1.45; }
-.promo-preview.is-mobile .promo-cta { padding: 9px 13px; font-size: 12px; margin-top: 2px; }
-
+@media (max-width: 700px) {
+  .promos { padding-top: 18px; }
+  .promo-head { margin-bottom: 10px; }
+  .promo-head .eyebrow { font-size: 10px; letter-spacing: .18em; }
+  .promo-head .eyebrow::before { width: 12px; }
+  .promo-track { gap: 10px; }
+  /* Se asoma la siguiente tarjeta: deja claro que se desliza. */
+  .promo-card { flex-basis: 78%; height: 96px; grid-template-columns: 96px minmax(0, 1fr); }
+  .promo-thumb { width: 96px; height: 96px; }
+  /* Una sola linea: asi siempre queda espacio para el precio tachado. */
+  .promo-name { font-size: 17px; -webkit-line-clamp: 1; }
+  .promo-info { padding: 0 12px; }
+  .promo-price { flex-wrap: nowrap; gap: 6px; }
+  .promo-price .now { font-size: 13px; }
+  .promo-price .was { font-size: 11px; }
+  .promos.is-scrollable .promo-navs { display: none; }
+  body.has-promos .hero-content { padding-bottom: 22px; }
+  body.has-promos #marcas { padding-top: 36px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .promo-cta, .promo-dot::before { transition: none; }
+  .promo-card, .promo-nav { transition: none; }
+  .promo-card:hover { transform: none; }
 }

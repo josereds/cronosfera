@@ -1,179 +1,123 @@
 /* ============================================================
-   Cronosfera · Banner de promociones del home
+   Cronosfera · Productos en promoción (franja del home)
    ------------------------------------------------------------
-   Pinta las promociones vigentes (activas y dentro de su rango de
-   fechas) en <section id="promos">, entre el hero y "Compra por
-   marca". Cristian las gestiona desde el panel; los cambios se ven
-   sin redeploy porque los datos vienen de Supabase en cada visita.
+   Franja compacta entre el hero y "Compra por marca" con los
+   productos que Cristian marca como promoción en el panel
+   (pestaña Promociones). Es distinta de "Productos destacados":
+   aquí solo van ofertas puntuales, en tarjetas pequeñas.
 
-   - 0 promociones: la seccion queda oculta y el hueco es el de antes.
-   - 1 promocion: tarjeta sola, sin indicadores.
-   - 2 o mas: carrusel con scroll-snap (se desliza con el dedo),
-     auto-avance que se pausa al interactuar, e indicadores.
-   Se pinta primero desde la cache local, asi en visitas repetidas no
-   hay salto de layout.
+   - La lista y el descuento de cada producto viven en config
+     (Store.getPromoProducts / Store.getPriceDisplay), así que el
+     precio de oferta es el mismo aquí, en el catálogo, en la ficha
+     y en el carrito, y los cambios se ven sin redeploy.
+   - Sin productos en promoción la sección queda oculta y el home
+     se ve como antes.
+   - Se pinta primero desde la caché local: sin saltos de layout en
+     visitas repetidas.
    ============================================================ */
 (function (global) {
   'use strict';
 
-  var AUTO_MS = 6500;        // tiempo por promocion
-  var RESUME_MS = 9000;      // tras tocar, cuanto esperar para volver a avanzar
-  var RECHECK_MS = 60000;    // revisar vencimientos con la pagina abierta
-
-  var section, track, dots;
+  var section, track, prevBtn, nextBtn;
   var lastSig = '';
-  var current = 0;
-  var timer = null, resumeTimer = null;
-  var reduceMotion = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+  function cop(v) { return '$' + Math.round(Number(v) || 0).toLocaleString('es-CO'); }
 
-  // Solo enlaces seguros: rutas del sitio, http(s) y WhatsApp. Cualquier otra
-  // cosa (p. ej. "javascript:") se descarta.
-  function safeHref(url) {
-    var u = String(url || '').trim();
-    if (!u) return '';
-    if (/^https?:\/\//i.test(u)) return u;
-    if (/^[a-z][a-z0-9+.\-]*:/i.test(u) || /^\/\//.test(u)) return ''; // otro esquema
-    return u; // ruta relativa del sitio
+  function isWholesale() { return !!(global.Auth && Auth.isWholesale && Auth.isWholesale()); }
+
+  // Precio que ve ESTE visitante: el mayorista ve su tarifa (es la que paga en
+  // el carrito), el resto ve el precio con el descuento vigente.
+  function priceFor(p) {
+    if (isWholesale()) return { now: Store.wholesalePriceFor(p), was: 0, off: 0, wholesale: true };
+    var d = Store.getPriceDisplay(p);
+    return { now: d.price, was: d.wasPrice && d.wasPrice > d.price ? d.wasPrice : 0, off: d.off || 0, wholesale: false };
   }
-  function isExternal(href) { return /^https?:/i.test(href) && href.indexOf(location.host) === -1; }
 
-  function slideHtml(pr, i) {
-    var href = safeHref(pr.linkUrl);
-    var cta = href ? (pr.ctaLabel || 'Ver promoción') : '';
-    var ext = href && isExternal(href);
-    var img = pr.imageUrl
-      ? '<img src="' + esc(pr.imageUrl) + '" alt="" width="1200" height="900" decoding="async"'
-        + (i === 0 ? '' : ' loading="lazy"') + '>'
-      : '<div class="promo-noimg" aria-hidden="true"></div>';
+  function cardHtml(p, i) {
+    var pr = priceFor(p);
+    var name = p.model || p.brand || 'Reloj';
+    var img = p.image
+      ? '<img src="' + esc(p.image) + '" alt="" width="160" height="160" decoding="async"' + (i < 4 ? '' : ' loading="lazy"') + '>'
+      : '<span class="promo-noimg" aria-hidden="true"></span>';
     return ''
-      + '<article class="promo-slide" role="group" aria-roledescription="promoción" aria-label="' + (i + 1) + '">'
-      +   '<div class="promo-media">' + img + '</div>'
-      +   '<div class="promo-body">'
-      +     '<span class="eyebrow">Promoción</span>'
-      +     '<h3 class="promo-title">' + esc(pr.title) + '</h3>'
-      +     (pr.body ? '<p class="promo-text">' + esc(pr.body) + '</p>' : '')
-      +     (cta ? '<a class="btn btn-primary promo-cta" href="' + esc(href) + '"'
-            + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + esc(cta)
-            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/><polyline points="13,6 19,12 13,18" stroke-linecap="round" stroke-linejoin="round"/></svg></a>' : '')
-      +   '</div>'
-      + '</article>';
+      + '<a class="promo-card" href="producto.html?id=' + encodeURIComponent(p.id) + '">'
+      +   '<span class="promo-thumb">' + img
+      +     (pr.off ? '<span class="promo-badge">-' + pr.off + '%</span>' : '')
+      +   '</span>'
+      +   '<span class="promo-info">'
+      +     '<span class="promo-brand">' + esc(p.brand || '') + '</span>'
+      +     '<span class="promo-name">' + esc(name) + '</span>'
+      +     '<span class="promo-price">'
+      +       '<span class="now">' + cop(pr.now) + '</span>'
+      +       (pr.was ? '<span class="was">' + cop(pr.was) + '</span>' : '')
+      +       (pr.wholesale ? '<span class="tag">Mayorista</span>' : '')
+      +     '</span>'
+      +   '</span>'
+      + '</a>';
   }
 
-  function slideWidth() { return track ? track.clientWidth : 0; }
-
-  function goTo(i, smooth) {
-    var n = track ? track.children.length : 0;
-    if (!n) return;
-    current = (i + n) % n;
-    track.scrollTo({ left: current * slideWidth(), behavior: smooth === false || reduceMotion ? 'auto' : 'smooth' });
-    paintDots();
-  }
-
-  function paintDots() {
-    if (!dots) return;
-    Array.prototype.forEach.call(dots.children, function (d, k) {
-      d.setAttribute('aria-current', k === current ? 'true' : 'false');
-    });
-  }
-
-  function stopAuto() { if (timer) { clearInterval(timer); timer = null; } }
-  function startAuto() {
-    stopAuto();
-    if (reduceMotion || !track || track.children.length < 2) return;
-    timer = setInterval(function () {
-      if (document.hidden) return;
-      goTo(current + 1);
-    }, AUTO_MS);
-  }
-  // Cualquier interaccion pausa el avance y lo retoma un rato despues.
-  function pauseThenResume() {
-    stopAuto();
-    if (resumeTimer) clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(startAuto, RESUME_MS);
+  function syncArrows() {
+    if (!track || !prevBtn) return;
+    var max = track.scrollWidth - track.clientWidth;
+    var scrollable = max > 4;
+    section.classList.toggle('is-scrollable', scrollable);
+    prevBtn.disabled = !scrollable || track.scrollLeft <= 4;
+    nextBtn.disabled = !scrollable || track.scrollLeft >= max - 4;
   }
 
   function render() {
-    if (!section || !global.Store || !Store.getActivePromotions) return;
-    var list = Store.getActivePromotions();
-    // Firma de lo que se ve: si no cambio, no se re-pinta (el Store emite por
-    // cualquier cambio y no queremos reiniciar el carrusel cada vez).
-    var sig = JSON.stringify(list.map(function (p) {
-      return [p.id, p.title, p.body, p.imageUrl, p.linkUrl, p.ctaLabel, p.updatedAt];
+    if (!section || !global.Store || !Store.getPromoProducts) return;
+    var list = Store.getPromoProducts();
+    // Firma de lo que se ve (incluye precio): el Store emite por cualquier
+    // cambio y no queremos re-pintar ni mover el scroll si nada cambió.
+    var sig = (isWholesale() ? 'w|' : 'r|') + JSON.stringify(list.map(function (p) {
+      var pr = priceFor(p);
+      return [p.id, p.model, p.brand, p.image, pr.now, pr.was, pr.off];
     }));
     if (sig === lastSig) return;
     lastSig = sig;
 
     if (!list.length) {
-      stopAuto();
       section.hidden = true;
       document.body.classList.remove('has-promos');
       track.innerHTML = '';
-      dots.innerHTML = '';
       return;
     }
-
-    track.innerHTML = list.map(slideHtml).join('');
-    dots.innerHTML = list.length > 1
-      ? list.map(function (p, k) {
-          return '<button type="button" class="promo-dot" aria-label="Ver promoción ' + (k + 1) + '" data-i="' + k + '"></button>';
-        }).join('')
-      : '';
-    section.classList.toggle('is-single', list.length === 1);
+    track.innerHTML = list.map(cardHtml).join('');
     section.hidden = false;
     document.body.classList.add('has-promos');
-    current = Math.min(current, list.length - 1);
-    goTo(current, false);
-    startAuto();
+    requestAnimationFrame(syncArrows);
+  }
+
+  function step(dir) {
+    var card = track.querySelector('.promo-card');
+    var w = card ? card.getBoundingClientRect().width + 14 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * w * Math.max(1, Math.floor(track.clientWidth / w)), behavior: 'smooth' });
   }
 
   function init() {
     section = document.getElementById('promos');
     if (!section) return;
     track = section.querySelector('.promo-track');
-    dots = section.querySelector('.promo-dots');
+    prevBtn = section.querySelector('.promo-nav.prev');
+    nextBtn = section.querySelector('.promo-nav.next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { step(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { step(1); });
+    track.addEventListener('scroll', syncArrows, { passive: true });
+    global.addEventListener('resize', syncArrows);
 
-    // Indicador activo segun el desplazamiento (cuando se desliza con el dedo).
-    var raf = null;
-    track.addEventListener('scroll', function () {
-      if (raf) return;
-      raf = requestAnimationFrame(function () {
-        raf = null;
-        var w = slideWidth();
-        if (!w) return;
-        var i = Math.round(track.scrollLeft / w);
-        if (i !== current) { current = i; paintDots(); }
-      });
-    }, { passive: true });
-
-    ['pointerdown', 'touchstart', 'wheel', 'focusin', 'mouseenter'].forEach(function (ev) {
-      track.addEventListener(ev, pauseThenResume, { passive: true });
-    });
-    dots.addEventListener('click', function (e) {
-      var b = e.target.closest('.promo-dot');
-      if (!b) return;
-      pauseThenResume();
-      goTo(parseInt(b.getAttribute('data-i'), 10));
-    });
-    // Al girar el telefono o cambiar el ancho, recolocar en la promo actual.
-    global.addEventListener('resize', function () { goTo(current, false); });
-
-    render();                                   // primero desde la cache local
-    if (Store.subscribe) Store.subscribe(render); // y de nuevo cuando llegue Supabase
-    // Una promo puede vencer (o empezar) con la pagina abierta: como la lista
-    // vigente se calcula con la hora actual, su firma cambia sola y render()
-    // solo re-pinta en ese caso.
-    setInterval(render, RECHECK_MS);
+    render();                                       // primero desde la caché
+    if (Store.subscribe) Store.subscribe(render);   // y otra vez al llegar Supabase
   }
 
-  // El panel reutiliza el mismo marcado para la vista previa, asi lo que ve
-  // Cristian antes de publicar es exactamente lo que sale en el home.
-  global.CronosPromos = { slideHtml: slideHtml };
+  // El panel usa el mismo marcado para su vista previa, así lo que ve Cristian
+  // es exactamente lo que sale en el home.
+  global.CronosPromos = { cardHtml: cardHtml };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
