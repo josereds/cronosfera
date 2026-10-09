@@ -804,25 +804,50 @@
     return saveConfig({ discounts: d });
   }
 
-  // ---------- productos en promocion (franja del home) ----------
-  // Lista ordenada de ids en config.promoProducts. Para el publico se omiten
-  // los que ya no existen o estan agotados.
-  function getPromoProductIds() {
-    var ids = getConfig().promoProducts;
-    return Array.isArray(ids) ? ids.slice() : [];
+  // ---------- banner promocional del home ----------
+  // Lista ordenada en config.homeBanners. Cada banner:
+  //   { id, image, w, h, imageMobile, mw, mh, link, linkKind, linkRef, active }
+  // La imagen ya trae el texto ("Halloween", "Promocion"...). Las imagenes
+  // viven en Storage (product-images/banners/); en config solo va el enlace y
+  // sus medidas, que el home usa para reservar el alto exacto (sin saltos).
+  function getHomeBanners() {
+    var list = getConfig().homeBanners;
+    return Array.isArray(list) ? list.slice() : [];
   }
-  function getPromoProducts(opts) {
-    var all = !!(opts && opts.includeUnavailable);
-    return getPromoProductIds().map(getProduct).filter(function (p) {
-      return p && (all || p.stockStatus !== 'out');
+  function getActiveHomeBanners() {
+    return getHomeBanners().filter(function (b) { return b && b.active && b.image; });
+  }
+  // Sube las imagenes nuevas (data URL) y guarda la lista completa. Despues
+  // borra de Storage las imagenes de banners que ya nadie usa.
+  function saveHomeBanners(list) {
+    var before = getHomeBanners();
+    return Promise.all((list || []).map(function (b) {
+      return Promise.all([ensureImageStored(b.image, 'banners'), ensureImageStored(b.imageMobile, 'banners')])
+        .then(function (urls) { return Object.assign({}, b, { image: urls[0] || '', imageMobile: urls[1] || '' }); });
+    })).then(function (clean) {
+      return saveConfig({ homeBanners: clean }).then(function () {
+        var keep = {};
+        clean.forEach(function (b) { keep[b.image] = 1; keep[b.imageMobile] = 1; });
+        var orphans = [];
+        before.forEach(function (b) {
+          [b.image, b.imageMobile].forEach(function (u) { if (u && !keep[u]) orphans.push(u); });
+        });
+        return removeBannerImages(orphans).then(function () { return clean; });
+      });
     });
   }
-  function setPromoProductIds(ids) {
-    var seen = {};
-    var clean = (ids || []).filter(function (id) {
-      if (!id || seen[id]) return false; seen[id] = true; return true;
+  // Solo toca archivos de la carpeta banners/: nunca fotos de productos.
+  function removeBannerImages(urls) {
+    if (!sb) return Promise.resolve();
+    var marker = '/storage/v1/object/public/product-images/';
+    var paths = (urls || []).map(function (u) {
+      var i = String(u).indexOf(marker);
+      return i < 0 ? null : decodeURIComponent(String(u).slice(i + marker.length).split('?')[0]);
+    }).filter(function (x) { return x && x.indexOf('banners/') === 0; });
+    if (!paths.length) return Promise.resolve();
+    return sb.storage.from('product-images').remove(paths).then(function (res) {
+      if (res.error) console.warn('[Store] no se pudieron borrar imagenes viejas del banner', res.error.message);
     });
-    return saveConfig({ promoProducts: clean });
   }
 
   function getBrandDiscount(slug) { return (getDiscounts().brands || {})[slug] || { active: false, pct: 0 }; }
@@ -1438,9 +1463,9 @@
     baseDiscountPct: baseDiscountPct,
     getProductDiscount: getProductDiscount,
     setProductDiscount: setProductDiscount,
-    getPromoProductIds: getPromoProductIds,
-    getPromoProducts: getPromoProducts,
-    setPromoProductIds: setPromoProductIds,
+    getHomeBanners: getHomeBanners,
+    getActiveHomeBanners: getActiveHomeBanners,
+    saveHomeBanners: saveHomeBanners,
     getEffectivePrice: getEffectivePrice,
     // accesorios (gorras, correas, billeteras)
     ACCESSORY_CATEGORIES: ACCESSORY_CATEGORIES,

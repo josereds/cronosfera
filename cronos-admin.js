@@ -1503,150 +1503,210 @@
     });
   }
 
-  // ============== PROMOCIONES (productos en oferta del home) ==============
-  // Cristian elige productos puntuales y les pone su descuento. Se guardan en
-  // config (Store.setPromoProductIds / Store.setProductDiscount), así el precio
-  // de oferta es el mismo en el home, el catálogo, la ficha y el carrito.
-  function promoProductName(p) {
-    return (p.brand ? p.brand + ' · ' : '') + (p.model || 'Producto');
+  // ============== PROMOCIONES (banner publicitario del home) ==============
+  // Cristian sube una imagen ya disenada (con el texto incluido) que sale a
+  // todo el ancho debajo del video principal. Si hay varias, rotan solas.
+  var BANNER_LINKS = [
+    { v: '', label: 'Sin enlace (solo la imagen)' },
+    { v: 'tienda', label: 'La tienda (catálogo)' },
+    { v: 'subastas', label: 'Las subastas' },
+    { v: 'whatsapp', label: 'WhatsApp' },
+    { v: 'url', label: 'Otra dirección (URL)' }
+  ];
+  function bannerLinkLabel(v) {
+    var k = BANNER_LINKS.filter(function (x) { return x.v === (v || ''); })[0];
+    return k ? k.label : 'Sin enlace';
+  }
+  function resolveBannerLink(kind, ref) {
+    ref = String(ref || '').trim();
+    if (kind === 'tienda') return 'catalogo.html';
+    if (kind === 'subastas') return 'subastas.html';
+    if (kind === 'whatsapp') {
+      var num = String((Store.getConfig().payments || {}).whatsappNumber || '').replace(/\D/g, '');
+      return num ? 'https://wa.me/' + num + (ref ? '?text=' + encodeURIComponent(ref) : '') : '';
+    }
+    if (kind === 'url') return /^https?:\/\//i.test(ref) ? ref : '';
+    return '';
+  }
+  // Comprime la foto en el navegador y devuelve tambien sus medidas: el home
+  // las usa para reservar el alto exacto del banner antes de que cargue.
+  function readBannerImage(file, maxDim) {
+    return resizeImageFile(file, maxDim, 0.86).then(function (src) {
+      return new Promise(function (resolve, reject) {
+        var img = new Image();
+        img.onload = function () { resolve({ src: src, w: img.naturalWidth, h: img.naturalHeight }); };
+        img.onerror = function () { reject(new Error('No se pudo leer la imagen')); };
+        img.src = src;
+      });
+    });
   }
 
   function renderPromociones(pane) {
-    var ids = Store.getPromoProductIds();
-    var items = ids.map(function (id) { return Store.getProduct(id); }).filter(Boolean);
-    var g = (Store.getDiscounts().global) || {};
+    var list = Store.getHomeBanners();
 
-    var rows = items.length ? items.map(function (p, i) {
-      var own = Store.getProductDiscount(p.id);
-      var base = Store.baseDiscountPct(p);
-      var shown = Store.getPriceDisplay(p);
-      var notes = [];
-      if (p.stockStatus === 'out') notes.push('<span class="promo-note bad">Agotado: no sale en el home</span>');
-      if (own.active && own.pct > 0 && own.pct < base) {
-        notes.push('<span class="promo-note bad">Su ' + own.pct + '% es menor que el ' + base + '% que ya tenía: queda más caro</span>');
-      } else if (!(own.active && own.pct > 0) && base > 0) {
-        notes.push('<span class="promo-note">Sin descuento propio: usa el ' + base + '% general</span>');
-      } else if (!(own.active && own.pct > 0) && !(shown.off > 0)) {
-        notes.push('<span class="promo-note">Sin descuento: sale a precio normal</span>');
-      }
-      var thumb = p.image
-        ? '<td class="thumb-cell"><img class="admin-thumb" src="' + escapeHtml(p.image) + '" alt="" loading="lazy"></td>'
-        : '<td class="thumb-cell"><span class="admin-thumb placeholder">◷</span></td>';
-      return '<tr data-id="' + escapeHtml(p.id) + '">'
-        + thumb
-        + '<td><strong>' + escapeHtml(promoProductName(p)) + '</strong>'
-        +   '<div class="row-meta">' + escapeHtml(p.ref || '') + '</div>' + notes.join('') + '</td>'
-        + '<td class="mono small">' + Store.formatCOP(p.price) + '</td>'
-        + '<td><label class="promo-pct"><input type="number" min="0" max="90" step="1" inputmode="numeric" value="' + (own.active && own.pct ? own.pct : '') + '" placeholder="0" aria-label="Descuento de ' + escapeHtml(promoProductName(p)) + '"><span>%</span></label></td>'
-        + '<td class="mono accent">' + Store.formatCOP(shown.price) + (shown.off > 0 ? '<div class="row-meta">-' + shown.off + '%</div>' : '') + '</td>'
+    var rows = list.length ? list.map(function (b, i) {
+      return '<tr data-id="' + escapeHtml(b.id) + '">'
+        + '<td><img class="hb-admin-thumb" src="' + escapeHtml(b.image) + '" alt="" loading="lazy"></td>'
+        + '<td><strong>Banner ' + (i + 1) + '</strong>'
+        +   '<div class="row-meta">Computador ' + (b.w || '?') + ' × ' + (b.h || '?') + ' px · '
+        +   (b.imageMobile ? 'celular con versión propia' : 'celular usa la de computador') + '</div></td>'
+        + '<td class="small">' + escapeHtml(bannerLinkLabel(b.linkKind)) + '</td>'
+        + '<td><span class="status-pill ' + (b.active ? 'live' : 'suspended') + '">' + (b.active ? 'En el home' : 'Pausado') + '</span></td>'
         + '<td class="actions">'
         +   '<button class="icon-action move-up" title="Subir"' + (i === 0 ? ' disabled' : '') + '>↑</button>'
-        +   '<button class="icon-action move-down" title="Bajar"' + (i === items.length - 1 ? ' disabled' : '') + '>↓</button>'
-        +   '<button class="icon-action delete" title="Quitar de promociones">×</button>'
-        + '</td>'
-        + '</tr>';
-    }).join('') : '<tr><td colspan="6" class="empty-row">Aún no hay productos en promoción. Mientras la lista esté vacía, el home se ve como siempre.</td></tr>';
-
-    var visible = items.filter(function (p) { return p.stockStatus !== 'out'; });
-    var preview = (visible.length && window.CronosPromos)
-      ? '<div class="promo-admin-preview"><span class="promo-preview-label">Así se ve en el home</span>'
-        + '<div class="promos promo-preview-wrap"><div class="promo-track">'
-        + visible.map(function (p, i) { return CronosPromos.cardHtml(p, i); }).join('')
-        + '</div></div></div>'
-      : '';
+        +   '<button class="icon-action move-down" title="Bajar"' + (i === list.length - 1 ? ' disabled' : '') + '>↓</button>'
+        +   '<button class="icon-action toggle" title="' + (b.active ? 'Pausar' : 'Mostrar') + '">' + (b.active ? '⏸' : '▶') + '</button>'
+        +   '<button class="icon-action edit-banner" title="Cambiar imagen o enlace">✎</button>'
+        +   '<button class="icon-action delete" title="Eliminar">×</button>'
+        + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="empty-row">Aún no hay banners. Mientras no haya uno visible, el home se ve como siempre.</td></tr>';
 
     pane.innerHTML = ''
-      + '<div class="catalogo-head"><p class="page-desc">Productos en oferta que salen en el home, en una franja pequeña debajo del video principal (aparte de "Productos destacados"). '
-      + 'Salen en el orden de esta lista; lo ideal es tener entre 2 y 8. El descuento que pongas aquí aplica en toda la tienda: catálogo, ficha del producto y carrito.</p></div>'
-      + (g.active && g.pct > 0
-          ? '<div class="promo-warn">Hay un <strong>descuento general del ' + g.pct + '%</strong> activo en toda la tienda. Si a un producto en promoción le pones un descuento menor, ese producto queda <strong>más caro</strong> que sin promoción.</div>'
-          : '')
-      + '<div class="promo-add">'
-      +   '<label class="block"><span>Agregar producto a promociones</span>'
-      +   '<input type="search" id="promoSearch" placeholder="Busca por marca, modelo o referencia (ej. Casio A100)" autocomplete="off"></label>'
-      +   '<div class="promo-results" id="promoResults"></div>'
+      + '<div class="catalogo-head">'
+      +   '<p class="page-desc">Banner publicitario que sale en el home a todo el ancho, debajo del video principal. '
+      +   'Sube la imagen ya diseñada, con el texto incluido (por ejemplo "Promoción de Halloween"). Si hay varios visibles, rotan solos en el orden de esta lista.</p>'
+      +   '<button class="btn-primary" id="newBanner">+ Subir banner</button>'
       + '</div>'
-      + '<div class="admin-table-wrap"><table class="admin-table" id="promoTable">'
-      +   '<thead><tr><th></th><th>Producto</th><th>Precio normal</th><th>Descuento</th><th>Precio en oferta</th><th></th></tr></thead>'
-      +   '<tbody>' + rows + '</tbody></table></div>'
-      + preview;
+      + '<div class="admin-table-wrap"><table class="admin-table" id="bannerTable">'
+      +   '<thead><tr><th>Imagen</th><th>Banner</th><th>Al tocarlo</th><th>Estado</th><th></th></tr></thead>'
+      +   '<tbody>' + rows + '</tbody></table></div>';
 
     function fail(err) { toast((err && err.message) || 'No se pudo guardar', 'danger'); }
-    function again(msg) { if (msg) toast(msg, 'success'); renderTab('promociones', pane); }
-
-    // ---- Buscador para agregar ----
-    var search = pane.querySelector('#promoSearch');
-    var results = pane.querySelector('#promoResults');
-    function norm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
-    function paintResults() {
-      var q = norm(search.value).trim();
-      if (q.length < 2) { results.innerHTML = ''; return; }
-      var words = q.split(/\s+/);
-      var inList = {}; ids.forEach(function (id) { inList[id] = true; });
-      var found = Store.getProducts().filter(function (p) {
-        if (inList[p.id]) return false;
-        var hay = norm([p.brand, p.model, p.ref].join(' '));
-        return words.every(function (w) { return hay.indexOf(w) !== -1; });
-      }).slice(0, 8);
-      results.innerHTML = found.length
-        ? found.map(function (p) {
-            return '<button type="button" class="promo-result" data-id="' + escapeHtml(p.id) + '">'
-              + (p.image ? '<img src="' + escapeHtml(p.image) + '" alt="" loading="lazy">' : '<span class="promo-result-ph">◷</span>')
-              + '<span class="promo-result-name"><strong>' + escapeHtml(promoProductName(p)) + '</strong>'
-              + '<small>' + escapeHtml(p.ref || '') + ' · ' + Store.formatCOP(p.price) + (p.stockStatus === 'out' ? ' · agotado' : '') + '</small></span>'
-              + '<span class="promo-result-add">+ Agregar</span></button>';
-          }).join('')
-        : '<p class="form-hint">Sin resultados para "' + escapeHtml(search.value) + '".</p>';
+    function save(next, msg) {
+      return Store.saveHomeBanners(next).then(function () {
+        toast(msg, 'success');
+        renderTab('promociones', pane);
+      }).catch(fail);
     }
-    search.addEventListener('input', paintResults);
-    results.addEventListener('click', function (e) {
-      var b = e.target.closest('.promo-result'); if (!b) return;
-      var id = b.getAttribute('data-id');
-      var p = Store.getProduct(id);
-      b.disabled = true;
-      Store.setPromoProductIds(ids.concat(id))
-        .then(function () { again((p ? promoProductName(p) : 'Producto') + ' agregado a promociones. Ponle su descuento en la tabla.'); })
-        .catch(fail);
-    });
 
-    // ---- Tabla: descuento, orden, quitar ----
-    var tbody = pane.querySelector('#promoTable tbody');
-    tbody.addEventListener('change', function (e) {
-      var input = e.target.closest('.promo-pct input'); if (!input) return;
-      var id = input.closest('tr').getAttribute('data-id');
-      var pct = Math.max(0, Math.min(90, Math.round(Number(input.value) || 0)));
-      input.disabled = true;
-      Store.setProductDiscount(id, pct > 0, pct)
-        .then(function () { again(pct > 0 ? 'Descuento del ' + pct + '% guardado' : 'Descuento quitado'); })
-        .catch(function (err) { input.disabled = false; fail(err); });
-    });
-    // Enter en el campo guarda sin tener que hacer clic afuera.
-    tbody.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && e.target.closest('.promo-pct input')) { e.preventDefault(); e.target.blur(); }
-    });
-    tbody.addEventListener('click', function (e) {
+    pane.querySelector('#newBanner').addEventListener('click', function () { openBannerModal(null, pane); });
+    pane.querySelector('#bannerTable tbody').addEventListener('click', function (e) {
       var btn = e.target.closest('button'); if (!btn || btn.disabled) return;
       var id = btn.closest('tr').getAttribute('data-id');
-      var i = ids.indexOf(id);
+      var i = list.findIndex(function (b) { return b.id === id; });
+      if (i < 0) return;
+      if (btn.classList.contains('edit-banner')) { openBannerModal(list[i], pane); return; }
       if (btn.classList.contains('move-up') || btn.classList.contains('move-down')) {
         var j = i + (btn.classList.contains('move-up') ? -1 : 1);
-        if (i < 0 || j < 0 || j >= ids.length) return;
-        var next = ids.slice(); var tmp = next[i]; next[i] = next[j]; next[j] = tmp;
+        var next = list.slice(); var tmp = next[i]; next[i] = next[j]; next[j] = tmp;
         btn.disabled = true;
-        Store.setPromoProductIds(next).then(function () { again(); }).catch(fail);
+        save(next, 'Orden actualizado');
+        return;
+      }
+      if (btn.classList.contains('toggle')) {
+        btn.disabled = true;
+        save(list.map(function (b) { return b.id === id ? Object.assign({}, b, { active: !b.active }) : b; }),
+             list[i].active ? 'Banner pausado: ya no sale en el home' : 'Banner visible en el home');
         return;
       }
       if (btn.classList.contains('delete')) {
-        var p = Store.getProduct(id);
-        var own = Store.getProductDiscount(id);
-        var msg = '¿Quitar "' + (p ? promoProductName(p) : 'este producto') + '" de promociones?'
-          + (own.active && own.pct > 0 ? '\n\nTambién se quita su descuento del ' + own.pct + '% (vuelve a su precio normal).' : '');
-        if (!confirmDialog(msg)) return;
-        Store.setPromoProductIds(ids.filter(function (x) { return x !== id; }))
-          .then(function () { return (own.active || own.pct) ? Store.setProductDiscount(id, false, 0) : null; })
-          .then(function () { again('Quitado de promociones'); })
-          .catch(fail);
+        if (!confirmDialog('¿Eliminar este banner? Se borra también su imagen.')) return;
+        save(list.filter(function (b) { return b.id !== id; }), 'Banner eliminado');
       }
+    });
+  }
+
+  function openBannerModal(existing, pane) {
+    var b = existing || { image: '', w: 0, h: 0, imageMobile: '', mw: 0, mh: 0, linkKind: '', linkRef: '', active: true };
+    var desk = b.image ? { src: b.image, w: b.w, h: b.h } : null;
+    var mob = b.imageMobile ? { src: b.imageMobile, w: b.mw, h: b.mh } : null;
+
+    var overlay = el('div', { class: 'modal-overlay' });
+    var modal = el('div', { class: 'modal banner-modal' });
+    modal.innerHTML = ''
+      + '<div class="modal-head"><h3>' + (existing ? 'Editar banner' : 'Subir banner') + '</h3><button class="modal-close" aria-label="Cerrar">×</button></div>'
+      + '<form id="bannerForm" novalidate>'
+      +   '<label class="block"><span>Imagen para computador *</span><input type="file" name="imgDesk" accept="image/*"></label>'
+      +   '<p class="form-hint">Recomendado: <strong>1920 × 400 px</strong> (horizontal y alargada). El texto va dentro de la imagen; déjalo hacia el centro para que no se corte. <span class="hb-info" data-info="desk"></span></p>'
+      +   '<label class="block"><span>Imagen para celular (opcional)</span><input type="file" name="imgMob" accept="image/*"></label>'
+      +   '<p class="form-hint">Recomendado: <strong>1080 × 540 px</strong>. En celular una imagen muy alargada se ve pequeña y el texto cuesta leerlo; si no subes esta, se usa la de computador. <span class="hb-info" data-info="mob"></span> '
+      +   '<button type="button" class="btn-ghost hb-clear-mob"' + (mob ? '' : ' hidden') + '>Quitar versión de celular</button></p>'
+      +   '<div class="form-grid">'
+      +     '<label><span>Al tocar el banner, llevar a…</span><select name="linkKind">'
+      +       BANNER_LINKS.map(function (k) { return '<option value="' + k.v + '"' + (k.v === (b.linkKind || '') ? ' selected' : '') + '>' + k.label + '</option>'; }).join('')
+      +     '</select></label>'
+      +     '<label class="hb-ref" data-kind="whatsapp"><span>Mensaje que llega por WhatsApp</span><input name="refWhatsapp" maxlength="300" value="' + escapeHtml(b.linkKind === 'whatsapp' ? b.linkRef : 'Hola, vi la promoción en la página de Cronosfera y quiero más información.') + '"></label>'
+      +     '<label class="hb-ref" data-kind="url"><span>Dirección (empieza por https://)</span><input name="refUrl" maxlength="500" value="' + escapeHtml(b.linkKind === 'url' ? b.linkRef : '') + '" placeholder="https://"></label>'
+      +   '</div>'
+      +   '<label class="hb-active"><input type="checkbox" name="active"' + (b.active ? ' checked' : '') + '> <span>Visible en el home</span></label>'
+      +   '<div class="hb-previews">'
+      +     '<span class="hb-preview-label">Vista previa · computador</span><div class="hb-prev" data-prev="desk"></div>'
+      +     '<span class="hb-preview-label">Vista previa · celular</span><div class="hb-prev is-mobile" data-prev="mob"></div>'
+      +   '</div>'
+      +   '<div class="modal-actions"><button type="button" class="btn-ghost cancel">Cancelar</button><button type="submit" class="btn-primary">' + (existing ? 'Guardar cambios' : 'Publicar banner') + '</button></div>'
+      + '</form>';
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(function () { overlay.classList.add('in'); }, 10);
+    function close() { overlay.classList.remove('in'); setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 200); }
+    modal.querySelector('.modal-close').addEventListener('click', close);
+    modal.querySelector('.cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var form = modal.querySelector('#bannerForm');
+
+    function info(img) {
+      if (!img) return '';
+      return 'Subida: ' + img.w + ' × ' + img.h + ' px.' + (img.w < 1200 ? ' <strong class="hb-warn">Es angosta: puede verse borrosa en pantallas grandes.</strong>' : '');
+    }
+    function paint() {
+      modal.querySelector('[data-info="desk"]').innerHTML = info(desk);
+      modal.querySelector('[data-info="mob"]').innerHTML = info(mob);
+      modal.querySelector('.hb-clear-mob').hidden = !mob;
+      var pd = modal.querySelector('[data-prev="desk"]');
+      var pm = modal.querySelector('[data-prev="mob"]');
+      pd.style.aspectRatio = desk ? desk.w + ' / ' + desk.h : '1920 / 400';
+      pd.innerHTML = desk ? '<img src="' + desk.src + '" alt="">' : '<span>Sube la imagen para computador</span>';
+      var m = mob || desk;
+      pm.style.aspectRatio = m ? m.w + ' / ' + m.h : '1080 / 540';
+      pm.innerHTML = m ? '<img src="' + m.src + '" alt="">' : '<span>—</span>';
+      var kind = form.elements.linkKind.value;
+      modal.querySelectorAll('.hb-ref').forEach(function (x) { x.style.display = x.getAttribute('data-kind') === kind ? '' : 'none'; });
+    }
+    function onFile(input, maxDim, set) {
+      input.addEventListener('change', function () {
+        var f = input.files && input.files[0]; if (!f) return;
+        if (!/^image\//.test(f.type)) { toast('El archivo debe ser una imagen', 'danger'); return; }
+        readBannerImage(f, maxDim).then(function (img) { set(img); paint(); }).catch(function (err) { toast(err.message, 'danger'); });
+      });
+    }
+    onFile(form.elements.imgDesk, 2400, function (img) { desk = img; });
+    onFile(form.elements.imgMob, 1400, function (img) { mob = img; });
+    modal.querySelector('.hb-clear-mob').addEventListener('click', function () { mob = null; form.elements.imgMob.value = ''; paint(); });
+    form.elements.linkKind.addEventListener('change', paint);
+    paint();
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!desk) { toast('Sube la imagen para computador', 'danger'); return; }
+      var kind = form.elements.linkKind.value;
+      var ref = kind === 'whatsapp' ? form.elements.refWhatsapp.value.trim() : kind === 'url' ? form.elements.refUrl.value.trim() : '';
+      var link = resolveBannerLink(kind, ref);
+      if (kind && !link) {
+        toast(kind === 'whatsapp' ? 'No hay número de WhatsApp configurado (Configuración)' : 'La dirección debe empezar por https://', 'danger');
+        return;
+      }
+      var banner = {
+        id: existing ? existing.id : 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        image: desk.src, w: desk.w, h: desk.h,
+        imageMobile: mob ? mob.src : '', mw: mob ? mob.w : 0, mh: mob ? mob.h : 0,
+        link: link, linkKind: kind, linkRef: ref,
+        active: form.elements.active.checked
+      };
+      var list = Store.getHomeBanners();
+      var idx = list.findIndex(function (x) { return x.id === banner.id; });
+      if (idx >= 0) list[idx] = banner; else list.push(banner);
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true; btn.textContent = 'Subiendo…';
+      Store.saveHomeBanners(list).then(function () {
+        toast(banner.active ? 'Banner publicado en el home' : 'Banner guardado (pausado)', 'success');
+        close();
+        renderTab('promociones', pane);
+      }).catch(function (err) {
+        toast((err && err.message) || 'No se pudo guardar el banner', 'danger');
+        btn.disabled = false; btn.textContent = existing ? 'Guardar cambios' : 'Publicar banner';
+      });
     });
   }
 
